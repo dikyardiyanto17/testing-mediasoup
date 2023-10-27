@@ -5,8 +5,8 @@ const webRtcTransport_options = {
 			// ip: '192.168.206.123',
 			// ip: '192.168.205.229',
 			// ip: "192.168.18.68", // Laptop Jaringan 5G
-			// ip: "203.194.113.166", // VPS Mr. Indra IP
-			ip: '203.175.10.29' // My VPS
+			ip: "203.194.113.166", // VPS Mr. Indra IP
+			// ip: '203.175.10.29' // My VPS
 			// ip: '192.168.3.135' // IP Kost
 			// announcedIp: "88.12.10.41"
 		},
@@ -43,8 +43,8 @@ const listenInfo = {
 			// ip: '192.168.206.123',
 			// ip: '192.168.205.229',
 			// ip: "192.168.18.68", // Laptop Jaringan 5G
-			// ip: "203.194.113.166", // VPS Mr. Indra IP
-			ip: '203.175.10.29' // My VPS
+			ip: "203.194.113.166", // VPS Mr. Indra IP
+			// ip: '203.175.10.29' // My VPS
 			// ip: '192.168.3.135' // IP Kost
 			// announcedIp: "88.12.10.41"
 		},
@@ -56,8 +56,8 @@ const listenInfo = {
 			// ip: '192.168.206.123',
 			// ip: '192.168.205.229',
 			// ip: "192.168.18.68", // Laptop Jaringan 5G
-			// ip: "203.194.113.166", // VPS Mr. Indra IP
-			ip: '203.175.10.29' // My VPS
+			ip: "203.194.113.166", // VPS Mr. Indra IP
+			// ip: '203.175.10.29' // My VPS
 			// ip: '192.168.3.135' // IP Kost
 			// announcedIp: "88.12.10.41"
 		},
