@@ -1,8 +1,8 @@
 let localVideo = document.getElementById("local-video")
 let localStream
 
-let baseUrl = "https://modotz.net/"
-// let baseUrl = 'https://meet.dikyardiyanto.site/'
+// let baseUrl = "https://modotz.net/"
+let baseUrl = 'https://meet.dikyardiyanto.site/'
 // let baseUrl = "https://localhost:3001/"
 
 const joinRoom = document.getElementById("join-room")
@@ -38,7 +38,7 @@ const init = async () => {
 const micOptions = document.getElementById("mic-options")
 const getMyMic = async () => {
 	try {
-		localStorage.setItem("is_audio_active", true)
+		localStorage.setItem("is_mic_active", true)
 		let audioDevices = (await navigator.mediaDevices.enumerateDevices()).filter((device) => device.kind === "audioinput")
 
 		audioDevices.forEach((audio, index) => {

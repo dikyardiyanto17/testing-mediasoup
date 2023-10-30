@@ -483,6 +483,17 @@ optionalButtonTrigger.addEventListener("click", (e) => {
 	}
 })
 
+// Hang Up Button
+const hangUpButton = document.getElementById("user-hang-up-button")
+hangUpButton.addEventListener("click", () => {
+	try {
+		localStorage.clear()
+		window.location.href = window.location.origin
+	} catch (error) {
+		console.log("- Error At Hang Up Button : ", error)
+	}
+})
+
 const hideOptionalMenu = () => {
 	try {
 		let optionalButtonMenu = document.getElementById("optional-button-id")

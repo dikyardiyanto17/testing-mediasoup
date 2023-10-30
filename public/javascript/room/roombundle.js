@@ -22301,6 +22301,8 @@ const createSendTransport = async ({ socket, parameter }) => {
 const connectSendTransport = async (parameter) => {
 	try {
 		// Producing Audio And Video Transport
+		let myData = parameter.allUsers.find((data) => data.socketId == parameter.socketId)
+
 		parameter.audioProducer = await parameter.producerTransport.produce(parameter.audioParams)
 		if (parameter.initialVideo) {
 			parameter.videoProducer = await parameter.producerTransport.produce(parameter.videoParams)
@@ -22315,7 +22317,6 @@ const connectSendTransport = async (parameter) => {
 			})
 		}
 
-		let myData = parameter.allUsers.find((data) => data.socketId == parameter.socketId)
 
 		myData.audio.producerId = parameter.audioProducer.id
 		myData.audio.transportId = parameter.producerTransport.id
@@ -23688,6 +23689,17 @@ optionalButtonTrigger.addEventListener("click", (e) => {
 		}
 	} catch (error) {
 		console.log("- Error At Optional Button Trigger : ", error)
+	}
+})
+
+// Hang Up Button
+const hangUpButton = document.getElementById("user-hang-up-button")
+hangUpButton.addEventListener("click", () => {
+	try {
+		localStorage.clear()
+		window.location.href = window.location.origin
+	} catch (error) {
+		console.log("- Error At Hang Up Button : ", error)
 	}
 })
 
