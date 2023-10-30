@@ -2,8 +2,8 @@ let localVideo = document.getElementById("local-video")
 let localStream
 
 // let baseUrl = "https://modotz.net/"
-// let baseUrl = 'https://meet.dikyardiyanto.site/'
-let baseUrl = "https://localhost:3001/"
+let baseUrl = 'https://meet.dikyardiyanto.site/'
+// let baseUrl = "https://localhost:3001/"
 
 const joinRoom = document.getElementById("join-room")
 const url = window.location.pathname
