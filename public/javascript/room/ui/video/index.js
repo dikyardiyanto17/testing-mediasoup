@@ -1,12 +1,16 @@
 const createMyVideo = async (parameter) => {
 	try {
-		let picture = `<div class="video-on" id="user-picture-container-${parameter.socketId}"><img src="${parameter.picture}" class="image-turn-off" id="user-picture-${parameter.socketId}""/></div>`
+		let picture = `<div class="${parameter.initialVideo ? "video-on" : "video-off"}" id="user-picture-container-${parameter.socketId}"><img src="${
+			parameter.picture
+		}" class="image-turn-off" id="user-picture-${parameter.socketId}""/></div>`
 		let videoContainer = document.getElementById("video-container")
 		let userVideoContainer = document.createElement("div")
 		userVideoContainer.id = "vc-" + parameter.socketId
 		userVideoContainer.className = "user-video-container-1"
-		const micIcons = `<div class="icons-mic"><img src="/assets/pictures/micOn.png" class="mic-image" id="user-mic-${parameter.socketId}"></div>`
-		userVideoContainer.innerHTML = `${micIcons}<video id="v-${parameter.socketId}" muted autoplay class="user-video"></video>${picture}`
+		const micIcons = `<div class="icons-mic"><img src="/assets/pictures/mic${
+			parameter.initialAudio ? "On" : "Off"
+		}.png" class="mic-image" id="user-mic-${parameter.socketId}"></div>`
+		userVideoContainer.innerHTML = `${micIcons}<video id="v-${parameter.socketId}" muted autoplay class="user-video"></video>${picture}<div class="username">${parameter.username}</div>`
 		videoContainer.appendChild(userVideoContainer)
 		document.getElementById(`v-${parameter.socketId}`).srcObject = parameter.localStream
 		createAudioVisualizer({ id: parameter.socketId, track: parameter.localStream.getAudioTracks()[0] })
@@ -15,7 +19,7 @@ const createMyVideo = async (parameter) => {
 	}
 }
 
-const createVideo = ({ id, videoClassName, picture }) => {
+const createVideo = ({ id, videoClassName, picture, username, micTrigger }) => {
 	try {
 		let isVideoExist = document.getElementById("vc-" + id)
 		let addPicture = `<div class="video-on" id="user-picture-container-${id}"><img src="${picture}" class="image-turn-off" id="user-picture-${id}""/></div>`
@@ -24,8 +28,10 @@ const createVideo = ({ id, videoClassName, picture }) => {
 			let userVideoContainer = document.createElement("div")
 			userVideoContainer.id = "vc-" + id
 			userVideoContainer.className = videoClassName
-			const micIcons = `<div class="icons-mic"><img src="/assets/pictures/micOn.png" class="mic-image" id="user-mic-${id}"/></div>`
-			userVideoContainer.innerHTML = `${micIcons}<video id="v-${id}" class="user-video" poster="/assets/pictures/unknown.jpg" autoplay></video>${addPicture}`
+			const micIcons = `<div class="icons-mic"><img src="/assets/pictures/mic${
+				micTrigger ? "On" : "Off"
+			}.png" class="mic-image" id="user-mic-${id}"/></div>`
+			userVideoContainer.innerHTML = `${micIcons}<video id="v-${id}" class="user-video" poster="/assets/pictures/unknown.jpg" autoplay></video>${addPicture}<div class="username">${username}</div>`
 			videoContainer.appendChild(userVideoContainer)
 		}
 	} catch (error) {
@@ -73,6 +79,11 @@ const removeVideoAndAudio = ({ socketId }) => {
 	} catch (error) {
 		console.log("- Error Removing Video / Audio : ", error)
 	}
+}
+
+const removeUserList = ({ id }) => {
+	let removeList = document.getElementById(`user-${id}`)
+	removeList.remove()
 }
 
 const changeLayout = ({ parameter }) => {
@@ -194,12 +205,15 @@ const changeUserMic = ({ parameter, isMicActive, id }) => {
 	let user = parameter.allUsers.find((data) => data.socketId == id)
 	user.audio.track.enabled = isMicActive
 	user.audio.isActive = isMicActive
+	let userMicIconUserList = document.getElementById("ulim-" + id)
 	let iconMic = document.getElementById(`user-mic-${id}`)
 	if (iconMic) {
 		iconMic.src = `/assets/pictures/mic${isMicActive ? "On" : "Off"}.png`
 	}
+	if (userMicIconUserList) {
+		userMicIconUserList.src = `/assets/pictures/mic${isMicActive ? "On" : "Off"}.png`
+	}
 }
-
 
 module.exports = {
 	createMyVideo,
@@ -211,4 +225,5 @@ module.exports = {
 	updatingLayout,
 	createAudioVisualizer,
 	changeUserMic,
+	removeUserList,
 }

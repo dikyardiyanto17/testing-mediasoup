@@ -39,7 +39,11 @@ class Parameters {
 		audioContext: null,
 		audioDestination: null,
 		recordedStream: null,
-		recordedMedia: null
+		recordedMedia: null,
+	}
+	micCondition = {
+		isLocked: false,
+		socketId: undefined,
 	}
 }
 

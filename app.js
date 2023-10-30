@@ -2,15 +2,15 @@ const express = require("express")
 const cors = require("cors")
 const router = require("./routes/index.js")
 const app = express()
-const port = 3001
-// const port = 80
+// const port = 3001
+const port = 80
 const http = require("http")
 const path = require("path")
 const https = require("httpolyglot")
 const { Server } = require("socket.io")
 const mediasoup = require("mediasoup")
 const { options } = require("./certif")
-const { webRtcTransport_options, mediaCodecs, listenInfo } = require("./config/mediasoup/config")
+const { mediaCodecs, listenInfo } = require("./config/mediasoup/config")
 const { Server_Parameter } = require("./helpers/server_parameters.js")
 const { Room } = require("./helpers/rooms.js")
 const { Users } = require("./helpers/users.js")
@@ -51,9 +51,6 @@ const init = async () => {
 }
 
 init()
-
-
-
 
 io.on("connection", async (socket) => {
 	socket.emit("connection-success", {
@@ -160,7 +157,6 @@ io.on("connection", async (socket) => {
 				rtpParameters,
 				appData,
 			})
-			console.log("- App Data : ", appData)
 			let username
 			const editParticipants = serverParameter.allRooms[roomName].participants.map((data) => {
 				if (data.socketId == socket.id) {
@@ -304,6 +300,18 @@ io.on("connection", async (socket) => {
 		)
 		removeProducer.producers = removeProducer.producers.filter((data) => data != id)
 		mediasoupParameter.producers = mediasoupParameter.producers.filter((data) => data.producer.id != id)
+	})
+
+	socket.on("send-message", (data) => {
+		socket.to(data.sendTo).emit("receive-message", data)
+	})
+
+	socket.on("mute-all", ({ socketId }) => {
+		socket.to(socketId).emit("mute-all", { hostSocketId: socketId })
+	})
+
+	socket.on("unmute-all", ({ socketId }) => {
+		socket.to(socketId).emit("unmute-all", { message: "Hello World" })
 	})
 })
 

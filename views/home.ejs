@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- <link rel="stylesheet" href="assets/css/room.css" type="text/css" /> -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <title>Telepati</title>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+        }
+
+        .full-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-wrap: wrap ;
+        }
+
+        .left-bar {
+            width: 50%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .right-bar {
+            /* background-color: black; */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 50%;
+            height: 100%;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .enter-code {
+            font-weight: bold;
+        }
+
+        .join-image {
+            margin: 10px;
+            width: 75%;
+        }
+
+        .join-text {
+            font-weight: bold;
+            color: black;
+        }
+
+        @media (max-width: 1000px) {
+            .left-bar {
+                width: 100%;
+            }
+
+            .right-bar {
+                width: 100%;
+            }
+        }
+
+        .text-title {
+            font-size: 30px;
+            font-weight: bold;
+            font-family: 'Times New Roman', Times, serif;
+        }
+
+        .text-content {
+            font-size: 15px;
+            font-family: 'Times New Roman', Times, serif;
+            margin: 0 100px 20px 100px;
+        }
+
+        .icons-meet {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 50px;
+        }
+
+        .text-content-1 {
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .text-content-2 {
+            font-size: 15px;
+            margin: 0;
+        }
+        .carousel {
+            display: none;
+        }
+        .hide {
+            animation-name: slideleft;
+            animation-duration: 5s;
+        }
+        .active {
+            display: block;
+            animation-name: slideleft2;
+            animation-duration: 5s;
+        }
+        @keyframes slideleft {
+            0% {left: 0%;}
+            25% {left: -100%;}
+        }
+        @keyframes slideleft2 {
+            0% {left: 100%;}
+            25% {left: 0%;}
+        }
+        #left-button {
+            position: absolute;
+            left: 30px;
+            top: 50%;
+            padding: 0;
+            border: none;
+            background: none;
+        }
+        #right-button {
+            position: absolute;
+            right: 30px;
+            top: 50%;
+            padding: 0;
+            border: none;
+            background: none;
+        }
+        .carousel-image{
+            margin-left: auto;
+            margin-right: auto;
+            width: 50%;
+        }
+
+        .join-form-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .join-form {
+            width: 200px;
+        }
+
+        .button-custom-new-meeting {
+            height: 40px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="full-container">
+        <section class="left-bar text-center">
+            <img class="icons-meet" src="/assets/pictures/icons-meeting.png"/>
+            <div>
+                <p class="text-title">Free Video Meeting For Everyone!</p>
+                <p class="text-content">Welcome to the future of virtual collaboration! Our Conference Video Meeting platform is your gateway to seamless, face-to-face interactions no matter where you are in the world.</p>
+                <!-- <p class="text-content">Our mission is to redefine the way we connect, learn, and work by providing a user-friendly, secure, and dynamic virtual meeting experience.</p> -->
+                <form id="join-form" class="join-form-container">
+                    <button id="new-meeting" type="button" class="btn btn-primary">New Meeting</button>
+                    <input id="room-id" type='text' class='m-1 form-control join-form'/>
+                    <button disabled type='submit' class='btn btn-info m-1' id="button-submit-room-id">JOIN</button>
+                </form>
+            </div>
+        </section>
+        <section class="right-bar" id="right-bar-id">
+            <div class="carousel active">
+                <lottie-player class="carousel-image" src="https://lottie.host/09a64aad-0838-455d-9698-7da751338c41/Vqt0kRofgZ.json" background="transparent" speed="1" style="width: 300px; height: 300px;" loop autoplay></lottie-player>
+                <!-- <img class="join-image" src="/assets/pictures/Join.png" /> -->
+                <p class="text-content-1">Join Meeting Room For Free</p>
+                <p class="text-content-2">You can meet everyone for free!</p>
+                <p class="text-content-2">Enter your room id to meet your family, friends and colleagues</p>
+            </div>
+            <div class="carousel">
+                <lottie-player class="carousel-image" src="https://lottie.host/f27d41d1-223d-47e8-9dea-97bd1204accc/NHd7LZi2Hk.json" background="transparent" speed="1" style="width: 300px; height: 300px;" loop autoplay></lottie-player>
+                <p class="text-content-1">Reunite with your family, friends and colleagues</p>
+                <p class="text-content-2">Distance is no longer problem to continue your activities</p>
+            </div>
+            <!-- <button id="left-button"><i class="far fa-arrow-alt-circle-left"></i></button>
+            <button id="right-button"><i class="far fa-arrow-alt-circle-right"></i></button> -->
+        </section>
+    </div>
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+    <script src="/javascript/home/home.js"></script>
+</body>
+
+</html>

@@ -57,6 +57,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            position: relative;
         }
 
         #video-container {
@@ -78,6 +79,13 @@
 
         .show-side-bar {
             display: block;
+        }
+
+        .hide-username {
+            visibility: hidden;
+            height: 0;
+            padding: 0;
+            margin: 0;
         }
 
         #side-bar-container {
@@ -724,19 +732,349 @@
             font-size: 12px;
             padding: 10px;
         }
+
+        #user-list {
+            text-align: left;
+            padding-left: 10px;
+        }
+
+        #user-list>p {
+            margin-bottom: 0px;
+        }
+
+        .user-list-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 10px;
+        }
+
+        .mini-picture {
+            height: 100%;
+            border-radius: 50%;
+            margin-right: 3px;
+        }
+
+        .profile-list {
+            height: 25px;
+            display: flex;
+            align-items: center;
+        }
+
+        .user-list-icons-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .user-list-microphone {
+            border-radius: 50%;
+            background-color: #44474A;
+            padding: 5px;
+            margin: 5px;
+        }
+
+        .user-list-camera {
+            border-radius: 50%;
+            background-color: #44474A;
+            padding: 5px;
+            margin: 5px;
+        }
+
+        #chat-bar-box-id {
+            min-width: 100%;
+            height: 100%;
+            border-radius: 10px;
+            background-color: white;
+        }
+
+        #chat-bar-header {
+            text-align: center;
+            position: relative;
+            border-top-right-radius: 5px;
+            border-top-left-radius: 5px;
+            background-color: #2196f3;
+            color: #fff;
+            width: 100%;
+            height: 5%;
+            padding: 10px;
+            z-index: 6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .chat-container {
+            background-color: white;
+            font-size: 13px;
+            width: 100%;
+            height: 88%;
+            /* max-height: 200px;
+            max-width: 100%;
+            min-height: 200px; */
+            overflow-y: auto;
+            padding-bottom: 10px;
+            position: relative;
+        }
+
+        .chat-footer {
+            width: 100%;
+            background-color: white;
+            height: 7%;
+            border-bottom-left-radius: 10px;
+            border-bottom-right-radius: 10px;
+        }
+
+        .chat-send {
+            bottom: 0;
+            display: flex;
+            height: 100%;
+            justify-content: center;
+            padding: 5px;
+            position: -webkit-sticky;
+            position: sticky;
+            width: 100%;
+        }
+
+        #sending-message {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            width: 100%;
+        }
+
+        .send-button {
+            margin-left: 0;
+            width: 15% !important;
+            height: 90%;
+            background-color: #2196f3;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 0 !important;
+            border-top-right-radius: 5px !important;
+            border-bottom-right-radius: 5px !important;
+        }
+
+        .your-messages {
+            text-align: right;
+            width: 100%;
+        }
+
+        .sender {
+            margin: 0;
+        }
+
+        .your-messages>.sender {
+            display: none;
+        }
+
+        .your-message {
+            width: 100%;
+            margin: 0;
+            display: flex;
+            justify-content: right;
+        }
+
+        .received-message {
+            width: 100%;
+            margin: 0;
+            display: flex;
+            justify-content: left;
+        }
+
+        .received-message>.inside-message {
+            max-width: 50%;
+            background-color: #D2D6DE;
+            color: black;
+            border-radius: 10px;
+            border-top-left-radius: 5px !important;
+            padding: 5px;
+            overflow: hidden;
+            display: flex;
+            flex-wrap: wrap;
+            word-break: break-all;
+        }
+
+        .your-message>.inside-message {
+            max-width: 50%;
+            background-color: #D2D6DE;
+            color: black;
+            border-radius: 10px;
+            border-top-right-radius: 5px !important;
+            padding: 5px;
+            overflow: hidden;
+            display: flex;
+            flex-wrap: wrap;
+            word-break: break-all;
+        }
+
+        .received-messages {
+            text-align: left;
+            width: 100%;
+        }
+
+        .type-box {
+            height: 90%;
+            width: 70% !important;
+            color: black !important;
+            width: 75% !important;
+            background-color: white !important;
+            border-radius: 0 !important;
+            border-bottom-left-radius: 5px !important;
+            border-top-left-radius: 5px !important;
+            padding: 5px;
+            margin-right: 0;
+            font-size: 7px;
+        }
+
+        .button-v2 {
+            background-color: rgb(60, 64, 67);
+            border-radius: 20px;
+            width: 40px;
+        }
+
+        .message-container {
+            margin: 10px;
+        }
+
+        .message-time {
+            font-size: 10px;
+        }
+
+        .notification {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+        }
+
+        .new-message-text {
+            text-align: center;
+        }
+
+        .new-message-line {
+            height: 1px;
+            background-color: #ccc;
+            margin-top: 5px;
+            margin-bottom: 10px;
+        }
+
+        .send-text {
+            font-size: 13px;
+            color: white;
+            font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+        }
+
+        #option-button {
+            position: relative;
+        }
+
+        #option-button:hover>#option-button-tooltip {
+            visibility: visible;
+            z-index: 3;
+        }
+
+        #option-button-tooltip {
+            background-color: #bbbbbba1;
+            white-space: nowrap;
+            border-radius: 10px;
+            padding: 10px;
+            position: absolute;
+            visibility: hidden;
+            top: -100%;
+        }
+
+        #option-menu {
+            z-index: 5;
+            position: absolute;
+            background-color: rgba(68, 71, 74, 0.7);
+            padding: 10px;
+            bottom: 40px;
+            color: #fff;
+            border-radius: 10px;
+        }
+
+        #option-menu>ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        #option-menu>ul>li {
+            padding: 5px;
+            white-space: nowrap;
+            text-align: left;
+        }
+
+        #option-menu>ul>li:hover {
+            background-color: rgba(68, 71, 74, 1);
+        }
+
+        #alert-error {
+            visibility: hidden;
+            color: #fff;
+            background-color: #333;
+            margin-left: -125px;
+            border-radius: 10px;
+            padding: 10px;
+            text-align: center;
+            top: 30px;
+            left: 50%;
+            z-index: 4;
+            position: absolute;
+        }
+
+        #alert-error.show {
+            visibility: visible;
+            -webkit-animation: fadein-as 0.5s, fadeout-as 0.5s 2.5s;
+            animation: fadein-as 0.5s, fadeout-as 0.5s 2.5s;
+        }
+
+        .username {
+            border-radius: 4px;
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            color: white;
+            font-size: 11px;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 4px;
+            z-index: 4;
+        }
     </style>
 </head>
 
 <body>
     <div id="full-container">
+        <span id="alert-error"></span>
         <section id="upper-container">
             <div id="audio-collection"></div>
             <div id="video-container">
             </div>
             <div id="side-bar-container">
                 <div id="user-bar" class="hide-side-bar">
-                    <div id="user-bar-header"><i class="fas fa-users"></i> User</div>
+                    <div id="user-bar-header"><i class="fas fa-users"></i>User</div>
                     <div id="user-list">
+                    </div>
+                </div>
+                <div id="chat-bar-box-id" class="hide-side-bar">
+                    <div id="chat-bar-header">
+                        <span>In Call Message</span>
+                    </div>
+                    <div class="chat-container" id="chat-container-id">
+                        <div class="chat-messages" id="chat-messages-id">
+                        </div>
+                    </div>
+                    <div class="chat-footer">
+                        <div class="chat-send">
+                            <form id="sending-message" autocomplete="off">
+                                <input class="form-control type-box" id="message-input" placeholder="Type Message..." />
+                                <button class="btn send-button" id="send-message-button" type="submit">
+                                    <span class="send-text">Send</span>
+                                </button>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -786,6 +1124,15 @@
                     <span id="snackbar">Successfully Copied</span>
                 </button>
             </div>
+            <button class="btn button-small-custom" id="option-button">
+                <span id="option-button-tooltip">Settings</span>
+                <i class="fas fa-ellipsis-v" style="color: white;"></i>
+                <div id="option-menu" class="invisible">
+                    <ul id="all-option-menu">
+                        <li id="stay-tuned" style="font-size: 13px;">Stay Tuned For New Feature</li>
+                    </ul>
+                </div>
+            </button>
         </section>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.js"></script>

@@ -1,5 +1,5 @@
 const RecordRTC = require("recordrtc")
-const { timerLayout } = require("../../function")
+const { timerLayout, muteAllParticipants, unlockAllMic } = require("../../function")
 
 const changeMic = ({ parameter, socket, status }) => {
 	parameter.allUsers.forEach((data) => {
@@ -11,9 +11,11 @@ const changeMic = ({ parameter, socket, status }) => {
 
 const turnOffOnCamera = ({ id, status }) => {
 	let videoId = document.getElementById(`user-picture-container-${id}`)
-	if (!status) {
+	let cameraIconsUserList = document.getElementById("ulic-" + id)
+	if (!status && videoId) {
 		videoId.className = "video-off"
 	} else videoId.className = "video-on"
+	if (cameraIconsUserList) cameraIconsUserList.className = `${status ? "fas fa-video" : "fas fa-video-slash"}`
 }
 
 const switchCamera = async ({ parameter }) => {
@@ -38,6 +40,8 @@ const switchCamera = async ({ parameter }) => {
 		parameter.localStream.addTrack(newStream.getVideoTracks()[0])
 
 		if (!parameter.videoProducer) {
+			parameter.videoParams.appData.isActive = true
+			parameter.videoParams.appData.isVideoActive = true
 			parameter.videoParams.track = newStream.getVideoTracks()[0]
 			parameter.videoProducer = await parameter.producerTransport.produce(parameter.videoParams)
 			myData.video.producerId = parameter.videoProducer.id
@@ -131,7 +135,8 @@ const changeLayoutScreenSharingClient = ({ track, status, parameter, id }) => {
 		slideUserVideoButton({ status: true })
 		parameter.isScreenSharing.isScreenSharing = true
 		parameter.isScreenSharing.socketId = id
-		if (userListButton.classList[1] == "button-small-custom-clicked") {
+		let chatButton = document.getElementById("user-chat-button")
+		if (userListButton.classList[1] == "button-small-custom-clicked" || chatButton.classList[1] == "button-small-custom-clicked") {
 			screenSharingContainer.style.minWidth = "75%"
 			screenSharingContainer.style.maxWidth = "75%"
 		}
@@ -159,7 +164,8 @@ const changeLayoutScreenSharing = ({ parameter, status }) => {
 		videoContainer.className = "video-container-screen-sharing-mode"
 		document.getElementById("screen-sharing-video").srcObject = parameter.screensharing.stream
 		slideUserVideoButton({ status: true })
-		if (userListButton.classList[1] == "button-small-custom-clicked") {
+		let chatButton = document.getElementById("user-chat-button")
+		if (userListButton.classList[1] == "button-small-custom-clicked" || chatButton.classList[1] == "button-small-custom-clicked") {
 			screenSharingContainer.style.minWidth = "75%"
 			screenSharingContainer.style.maxWidth = "75%"
 		}
@@ -368,6 +374,43 @@ const recordVideo = async ({ parameter }) => {
 	}
 }
 
+const addMuteAllButton = ({ parameter, socket }) => {
+	try {
+		let allOptionMenu = document.getElementById("all-option-menu")
+		let isExist = document.getElementById("mute-all")
+		parameter.micCondition.socketId = parameter.socketId
+		if (!isExist) {
+			const newElement = document.createElement("li")
+			newElement.id = "mute-all"
+			newElement.style.fontSize = "13px"
+			newElement.innerHTML = "Mute All Participants"
+			allOptionMenu.appendChild(newElement)
+			newElement.addEventListener("click", () => {
+				if (newElement.innerHTML == "Mute All Participants") {
+					muteAllParticipants({ parameter, socket })
+					parameter.micCondition.isLocked = true
+					newElement.innerHTML = "Unmute All Participants"
+				} else if (newElement.innerHTML == "Unmute All Participants") {
+					parameter.micCondition.isLocked = false
+					unlockAllMic({ parameter, socket })
+					newElement.innerHTML = "Mute All Participants"
+				} else {
+					let ae = document.getElementById("alert-error")
+					ae.className = "show"
+					ae.innerHTML = `You're Not Host`
+					// Show Warning
+					setTimeout(() => {
+						ae.className = ae.className.replace("show", "")
+						ae.innerHTML = ``
+					}, 3000)
+				}
+			})
+		}
+	} catch (error) {
+		console.log("- Error Adding Mute All Button : ", error)
+	}
+}
+
 module.exports = {
 	changeMic,
 	turnOffOnCamera,
@@ -376,4 +419,5 @@ module.exports = {
 	changeLayoutScreenSharing,
 	changeLayoutScreenSharingClient,
 	recordVideo,
+	addMuteAllButton,
 }

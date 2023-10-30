@@ -1,46 +1,78 @@
+const { createUserList } = require(".")
+const { socket } = require("../../socket")
 const { createDevice } = require("./mediasoup")
 
 const getMyStream = async (parameter) => {
 	try {
 		let config = {
-			video: parameter.isVideo,
-			audio: parameter.isAudio,
+			video: localStorage.getItem("is_video_active") == "true" ? { deviceId: { exact: localStorage.getItem("selectedVideoDevices") } } : false,
+			audio: true,
 		}
 
-		const stream = await navigator.mediaDevices.getUserMedia(config)
-		let picture = "/assets/pictures/unknown.jpg"
+		let username = localStorage.getItem("username")
+		parameter.username = username
+
+		let stream = await navigator.mediaDevices.getUserMedia(config)
+		let picture = localStorage.getItem("picture") ? localStorage.getItem("picture") : "/assets/pictures/unknown.jpg"
+
+		let audioCondition
+		let videoCondition
+		parameter.initialVideo = true
+		parameter.initialAudio = true
+		if (localStorage.getItem("is_mic_active") == "false") {
+			document.getElementById("mic-image").src = "/assets/pictures/micOff.png"
+			parameter.initialAudio = false
+			audioCondition = false
+		} else audioCondition = true
+		if (localStorage.getItem("is_video_active") == "false") {
+			document.getElementById("turn-on-off-camera-icons").className = "fas fa-video-slash"
+			videoCondition = false
+			parameter.initialVideo = false
+		} else {
+			videoCondition = true
+			parameter.videoParams.track = stream.getVideoTracks()[0]
+		}
+		stream.getAudioTracks()[0].enabled = audioCondition
 		let user = {
-			username: "Diky",
+			username,
 			socketId: parameter.socketId,
 			picture,
 			audio: {
-				isActive: true || false,
+				isActive: audioCondition,
 				track: stream.getAudioTracks()[0],
 				producerId: undefined,
 				transportId: undefined,
 				consumerId: undefined,
 			},
-			video: {
-				isActive: true || false,
+		}
+
+		if (videoCondition) {
+			user.video = {
+				isActive: videoCondition,
 				track: stream.getVideoTracks()[0],
 				producerId: undefined,
 				transportId: undefined,
 				consumerId: undefined,
-			},
+			}
 		}
 
 		parameter.picture = picture
 
+		parameter.audioParams.appData.isMicActive = audioCondition
+		parameter.audioParams.appData.isVideoActive = videoCondition
+		parameter.videoParams.appData.isMicActive = audioCondition
+		parameter.videoParams.appData.isVideoActive = videoCondition
+
+		parameter.audioParams.appData.isActive = audioCondition
+		parameter.videoParams.appData.isActive = videoCondition
+
 		parameter.videoParams.appData.picture = picture
 		parameter.audioParams.appData.picture = picture
 
-		// paara
-		console.log(parameter)
-
 		parameter.allUsers = [...parameter.allUsers, user]
 		parameter.localStream = stream
-		parameter.videoParams.track = stream.getVideoTracks()[0]
 		parameter.audioParams.track = stream.getAudioTracks()[0]
+		createUserList({ username: "Diky", socketId: parameter.socketId, cameraTrigger: videoCondition, picture, micTrigger: audioCondition })
 	} catch (error) {
 		console.log("- Error Getting My Stream : ", error)
 	}

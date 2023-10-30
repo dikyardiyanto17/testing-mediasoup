@@ -90,10 +90,10 @@ const parameter = new Parameter()
 
 parameter = {
     localStream: MediaStream,
-    videoParams: { params, appData: { label: "Video" }, track: MediaStream },
-    audioParams: { appData: { label: "Audio" }, track: MediaStream },
-    screensharingVideoParams = { appData: { label: "screensharing", isActive: true || false } },
-	screensharingAudioParams = { appData: { label: "screensharingaudio", isActive: true || false } },
+    videoParams: { params, appData: { label: "video", isActive: true || false, isMicActive: true || false, isVideoActive: true || false }, track: MediaStream },
+    audioParams: { appData: { label: "audio", isActive: true || false, isMicActive: true || false, isVideoActive: true || false }, track: MediaStream },
+    screensharingVideoParams = { appData: { label: "screensharing" } },
+	screensharingAudioParams = { appData: { label: "screensharingaudio" } },
     consumingTransports = [remoteProducerId: "String", remoteProducerId: "String"],
     username: "String",
     socketId: "String",
@@ -148,6 +148,8 @@ parameter = {
     isScreenSharing = {
 		isScreenSharing: true || false,
 		socketId: "String",
-	}
+	},
+    initialVideo: true || false,
+    initialAudio: true || false,
 }
 ```

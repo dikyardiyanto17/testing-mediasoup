@@ -1,6 +1,7 @@
 const mediasoupClient = require("mediasoup-client")
 const { createVideo, createAudio, insertVideo, updatingLayout, changeLayout, createAudioVisualizer } = require("../ui/video")
-const { turnOffOnCamera, changeLayoutScreenSharingClient } = require("../ui/button")
+const { turnOffOnCamera, changeLayoutScreenSharingClient, addMuteAllButton } = require("../ui/button")
+const { createUserList, muteAllParticipants } = require(".")
 
 const createDevice = async ({ parameter, socket }) => {
 	try {
@@ -42,7 +43,9 @@ const createSendTransport = async ({ socket, parameter }) => {
 						},
 						({ id, producersExist, kind }) => {
 							callback({ id })
+							console.log("Is", producersExist)
 							if (producersExist && kind == "audio") getProducers({ parameter, socket })
+							if (!producersExist) addMuteAllButton({ parameter, socket })
 						}
 					)
 				} catch (error) {
@@ -68,14 +71,23 @@ const connectSendTransport = async (parameter) => {
 	try {
 		// Producing Audio And Video Transport
 		parameter.audioProducer = await parameter.producerTransport.produce(parameter.audioParams)
-		parameter.videoProducer = await parameter.producerTransport.produce(parameter.videoParams)
+		if (parameter.initialVideo) {
+			parameter.videoProducer = await parameter.producerTransport.produce(parameter.videoParams)
+			myData.video.producerId = parameter.videoProducer.id
+			myData.video.transportId = parameter.producerTransport.id
+			parameter.videoProducer.on("trackended", () => {
+				console.log("video track ended")
+			})
+
+			parameter.videoProducer.on("transportclose", () => {
+				console.log("video transport ended")
+			})
+		}
 
 		let myData = parameter.allUsers.find((data) => data.socketId == parameter.socketId)
 
 		myData.audio.producerId = parameter.audioProducer.id
-		myData.video.producerId = parameter.videoProducer.id
 		myData.audio.transportId = parameter.producerTransport.id
-		myData.video.transportId = parameter.producerTransport.id
 
 		parameter.audioProducer.on("trackended", () => {
 			console.log("audio track ended")
@@ -85,13 +97,6 @@ const connectSendTransport = async (parameter) => {
 			console.log("audio transport ended")
 		})
 
-		parameter.videoProducer.on("trackended", () => {
-			console.log("video track ended")
-		})
-
-		parameter.videoProducer.on("transportclose", () => {
-			console.log("video transport ended")
-		})
 	} catch (error) {
 		console.log("- Error Connecting Transport Producer : ", error)
 	}
@@ -154,6 +159,9 @@ const connectRecvTransport = async ({ parameter, consumerTransport, socket, remo
 			},
 			async ({ params }) => {
 				try {
+					if (parameter.micCondition.isLocked && parameter.micCondition.socketId == socket.id) {
+						muteAllParticipants({ parameter, socket })
+					}
 					const consumer = await consumerTransport.consume({
 						id: params.id,
 						producerId: params.producerId,
@@ -164,10 +172,16 @@ const connectRecvTransport = async ({ parameter, consumerTransport, socket, remo
 					let isUserExist = parameter.allUsers.find((data) => data.socketId == params.producerSocketOwner)
 					const { track } = consumer
 
+					console.log("- Kind : ", params.kind, " - Track : ", track)
+
+					if (!params?.appData?.isActive) {
+						track.enabled = false
+					}
+
 					if (isUserExist) {
 						isUserExist[params.appData.label] = {
 							track,
-							isActive: params.appData.isActive,
+							isActive: params?.appData?.isActive,
 							consumserId: consumer.id,
 							producerId: remoteProducerId,
 							transportId: consumerTransport.id,
@@ -189,8 +203,21 @@ const connectRecvTransport = async ({ parameter, consumerTransport, socket, remo
 						parameter.allUsers = [...parameter.allUsers, data]
 						updatingLayout({ parameter })
 						changeLayout({ parameter })
-						createVideo({ id: params.producerSocketOwner, videoClassName: parameter.videoLayout, picture: params.appData.picture })
+						createVideo({
+							id: params.producerSocketOwner,
+							videoClassName: parameter.videoLayout,
+							picture: params.appData.picture,
+							username: params.username,
+							micTrigger: params.appData.isMicActive
+						})
 						turnOffOnCamera({ id: params.producerSocketOwner, status: false })
+						createUserList({
+							username: params.username,
+							socketId: params.producerSocketOwner,
+							cameraTrigger: params.appData.isVideoActive,
+							picture: params.appData.picture,
+							micTrigger: params.appData.isMicActive,
+						})
 					}
 					if (params.kind == "audio" && params.appData.label == "audio") {
 						createAudio({ id: params.producerSocketOwner, track })
@@ -221,6 +248,8 @@ const connectRecvTransport = async ({ parameter, consumerTransport, socket, remo
 							producerId: remoteProducerId,
 						},
 					]
+
+					console.log("- All Users : ", parameter.allUsers)
 
 					socket.emit("consumer-resume", { serverConsumerId: params.serverConsumerId })
 				} catch (error) {
