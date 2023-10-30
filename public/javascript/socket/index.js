@@ -173,6 +173,7 @@ cameraButton.addEventListener("click", async () => {
 		let myData = parameter.allUsers.find((data) => data.socketId == parameter.socketId)
 
 		if (isActive[1] == "fa-video") {
+			cameraButton.classList.replace("button-small-custom", "button-small-custom-clicked")
 			isActive.add("fa-video-slash")
 			isActive.remove("fa-video")
 			turnOffOnCamera({ id: socket.id, status: false })
@@ -183,7 +184,10 @@ cameraButton.addEventListener("click", async () => {
 			myData.video.isActive = false
 		} else {
 			let newStream = await navigator.mediaDevices.getUserMedia({ video: true })
-			parameter.localStream.removeTrack(parameter.localStream.getVideoTracks()[0])
+			cameraButton.classList.replace("button-small-custom-clicked", "button-small-custom")
+			if (parameter.localStream.getVideoTracks()[0]) {
+				parameter.localStream.removeTrack(parameter.localStream.getVideoTracks()[0])
+			}
 			parameter.localStream.addTrack(newStream.getVideoTracks()[0])
 			parameter.videoParams.track = newStream.getVideoTracks()[0]
 			parameter.videoParams.appData.isActive = true

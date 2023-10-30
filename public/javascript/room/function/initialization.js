@@ -21,11 +21,13 @@ const getMyStream = async (parameter) => {
 		parameter.initialAudio = true
 		if (localStorage.getItem("is_mic_active") == "false") {
 			document.getElementById("mic-image").src = "/assets/pictures/micOff.png"
+			document.getElementById("user-mic-button").className = "button-small-custom-clicked"
 			parameter.initialAudio = false
 			audioCondition = false
 		} else audioCondition = true
 		if (localStorage.getItem("is_video_active") == "false") {
 			document.getElementById("turn-on-off-camera-icons").className = "fas fa-video-slash"
+			document.getElementById("user-turn-on-off-camera-button").className = "button-small-custom-clicked"
 			videoCondition = false
 			parameter.initialVideo = false
 		} else {

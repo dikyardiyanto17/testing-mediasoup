@@ -1,8 +1,8 @@
 let localVideo = document.getElementById("local-video")
 let localStream
 
-let baseUrl = "https://modotz.net/"
-// let baseUrl = 'https://meet.dikyardiyanto.site/'
+// let baseUrl = "https://modotz.net/"
+let baseUrl = 'https://meet.dikyardiyanto.site/'
 // let baseUrl = "https://localhost:3001/"
 
 const joinRoom = document.getElementById("join-room")
@@ -90,6 +90,7 @@ micOptions.addEventListener("click", (e) => {
 		audioIcon.className = "fas fa-microphone"
 		isAudioActive = true
 		audioButton.style.backgroundColor = ""
+		localStorage.setItem("is_mic_active", true)
 
 		const clickedValue = e.target.getAttribute("value")
 		const selectedVideoDevices = localStorage.getItem("selectedVideoDevices")
@@ -230,6 +231,7 @@ audioButton.addEventListener("click", (e) => {
 	if (isAudioActive) {
 		audioButton.style.backgroundColor = "red"
 		localStorage.setItem("is_audio_active", false)
+		localStorage.setItem("is_mic_active", false)
 		isAudioActive = false
 		audioIcon.className = "fas fa-microphone-slash"
 		if (isVideoActive) {
@@ -261,6 +263,7 @@ audioButton.addEventListener("click", (e) => {
 	} else {
 		audioButton.style.backgroundColor = ""
 		localStorage.setItem("is_audio_active", true)
+		localStorage.setItem("is_mic_active", true)
 		isAudioActive = true
 		audioIcon.className = "fas fa-microphone"
 		if (isVideoActive) {

@@ -22144,11 +22144,13 @@ const getMyStream = async (parameter) => {
 		parameter.initialAudio = true
 		if (localStorage.getItem("is_mic_active") == "false") {
 			document.getElementById("mic-image").src = "/assets/pictures/micOff.png"
+			document.getElementById("user-mic-button").className = "button-small-custom-clicked"
 			parameter.initialAudio = false
 			audioCondition = false
 		} else audioCondition = true
 		if (localStorage.getItem("is_video_active") == "false") {
 			document.getElementById("turn-on-off-camera-icons").className = "fas fa-video-slash"
+			document.getElementById("user-turn-on-off-camera-button").className = "button-small-custom-clicked"
 			videoCondition = false
 			parameter.initialVideo = false
 		} else {
@@ -23382,6 +23384,7 @@ cameraButton.addEventListener("click", async () => {
 		let myData = parameter.allUsers.find((data) => data.socketId == parameter.socketId)
 
 		if (isActive[1] == "fa-video") {
+			cameraButton.classList.replace("button-small-custom", "button-small-custom-clicked")
 			isActive.add("fa-video-slash")
 			isActive.remove("fa-video")
 			turnOffOnCamera({ id: socket.id, status: false })
@@ -23392,7 +23395,10 @@ cameraButton.addEventListener("click", async () => {
 			myData.video.isActive = false
 		} else {
 			let newStream = await navigator.mediaDevices.getUserMedia({ video: true })
-			parameter.localStream.removeTrack(parameter.localStream.getVideoTracks()[0])
+			cameraButton.classList.replace("button-small-custom-clicked", "button-small-custom")
+			if (parameter.localStream.getVideoTracks()[0]) {
+				parameter.localStream.removeTrack(parameter.localStream.getVideoTracks()[0])
+			}
 			parameter.localStream.addTrack(newStream.getVideoTracks()[0])
 			parameter.videoParams.track = newStream.getVideoTracks()[0]
 			parameter.videoParams.appData.isActive = true
