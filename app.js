@@ -2,8 +2,8 @@ const express = require("express")
 const cors = require("cors")
 const router = require("./routes/index.js")
 const app = express()
-const port = 3001
-// const port = 80
+// const port = 3001
+const port = 80
 const http = require("http")
 const path = require("path")
 const https = require("httpolyglot")
@@ -290,11 +290,17 @@ io.on("connection", async (socket) => {
 	})
 
 	socket.on("close-producer-from-client", ({ id }) => {
+		let socketId
 		mediasoupParameter.producers.forEach((data) => {
 			if (data.producer.id == id) {
 				data.producer.close()
+				socketId = data.socketId
 			}
 		})
+		let producerData = mediasoupParameter.producers.find(
+			(producer) => producer.socketId == socketId && producer.producer.kind == "audio"
+		)
+		producerData.producer.appData.isVideoActive = false
 		let removeProducer = serverParameter.allRooms[serverParameter.allUsers[socket.id].roomName].participants.find(
 			(data) => data.socketId == socket.id
 		)
@@ -312,6 +318,11 @@ io.on("connection", async (socket) => {
 
 	socket.on("unmute-all", ({ socketId }) => {
 		socket.to(socketId).emit("unmute-all", { message: "Hello World" })
+	})
+
+	socket.on("change-app-data", ({ data, remoteProducerId }) => {
+		let producerData = mediasoupParameter.producers.find((producer) => producer.producer.id == remoteProducerId)
+		producerData.producer.appData = { ...producerData.producer.appData, ...data }
 	})
 })
 

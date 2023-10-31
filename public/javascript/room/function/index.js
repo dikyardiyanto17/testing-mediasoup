@@ -267,6 +267,10 @@ const checkLocalStorage = ({parameter}) => {
 	}
 }
 
+const changeAppData = ({ socket, data, remoteProducerId }) => {
+	socket.emit("change-app-data", { data, remoteProducerId })
+}
+
 module.exports = {
 	startTimer,
 	timerLayout,
@@ -280,4 +284,5 @@ module.exports = {
 	muteAllParticipants,
 	unlockAllMic,
 	checkLocalStorage,
+	changeAppData
 }

@@ -22133,6 +22133,10 @@ const checkLocalStorage = ({parameter}) => {
 	}
 }
 
+const changeAppData = ({ socket, data, remoteProducerId }) => {
+	socket.emit("change-app-data", { data, remoteProducerId })
+}
+
 module.exports = {
 	startTimer,
 	timerLayout,
@@ -22146,6 +22150,7 @@ module.exports = {
 	muteAllParticipants,
 	unlockAllMic,
 	checkLocalStorage,
+	changeAppData
 }
 
 },{}],59:[function(require,module,exports){
@@ -23237,7 +23242,16 @@ module.exports = {
 }
 
 },{}],65:[function(require,module,exports){
-const { changeUserListMicIcon, sendMessage, receiveMessage, hideOptionMenu, showOptionMenu, scrollToBottom, checkLocalStorage } = require("../room/function")
+const {
+	changeUserListMicIcon,
+	sendMessage,
+	receiveMessage,
+	hideOptionMenu,
+	showOptionMenu,
+	scrollToBottom,
+	checkLocalStorage,
+	changeAppData,
+} = require("../room/function")
 const { getMyStream, getRoomId, joinRoom } = require("../room/function/initialization")
 const { signalNewConsumerTransport } = require("../room/function/mediasoup")
 const { Parameters } = require("../room/function/parameter")
@@ -23264,7 +23278,7 @@ socket.on("connection-success", async ({ socketId }) => {
 	parameter.isVideo = true
 	parameter.isAudio = true
 	await getRoomId(parameter)
-	await checkLocalStorage({parameter})
+	await checkLocalStorage({ parameter })
 	await getMyStream(parameter)
 	await createMyVideo(parameter)
 	await joinRoom({ socket, parameter })
@@ -23388,6 +23402,12 @@ micButton.addEventListener("click", () => {
 	let myIconMic = document.getElementById(`user-mic-${socket.id}`)
 	let user = parameter.allUsers.find((data) => data.socketId == socket.id)
 	if (isActive) {
+		parameter.isAudio = false
+		changeAppData({
+			socket,
+			data: { isActive: false, isMicActive: false, isVideoActive: parameter.videoProducer ? true : false },
+			remoteProducerId: parameter.audioProducer.id,
+		})
 		micButton.classList.replace("button-small-custom", "button-small-custom-clicked")
 		user.audio.track.enabled = false
 		user.audio.isActive = false
@@ -23396,6 +23416,12 @@ micButton.addEventListener("click", () => {
 		changeMic({ parameter, status: false, socket })
 		changeUserListMicIcon({ status: true, id: socket.id })
 	} else {
+		parameter.isAudio = false
+		changeAppData({
+			socket,
+			data: { isActive: false, isMicActive: false, isVideoActive: parameter.videoProducer ? true : false },
+			remoteProducerId: parameter.audioProducer.id,
+		})
 		micButton.classList.replace("button-small-custom-clicked", "button-small-custom")
 		user.audio.track.enabled = true
 		user.audio.isActive = true
@@ -23412,6 +23438,7 @@ cameraButton.addEventListener("click", async () => {
 		let isActive = document.getElementById("turn-on-off-camera-icons").classList
 		let myData = parameter.allUsers.find((data) => data.socketId == parameter.socketId)
 
+		parameter.videoParams.appData.isMicActive = parameter.isAudio
 		if (isActive[1] == "fa-video") {
 			cameraButton.classList.replace("button-small-custom", "button-small-custom-clicked")
 			isActive.add("fa-video-slash")
@@ -23455,6 +23482,7 @@ cameraButton.addEventListener("click", async () => {
 
 let switchCameraButton = document.getElementById("user-switch-camera-button")
 switchCameraButton.addEventListener("click", async () => {
+	parameter.videoParams.appData.isMicActive = parameter.isAudio
 	let isActive = document.getElementById("turn-on-off-camera-icons").classList
 	await switchCamera({ parameter })
 	if (isActive[1] == "fa-video-slash") {
