@@ -22106,6 +22106,33 @@ const unlockAllMic = ({ parameter, socket }) => {
 	})
 }
 
+// Check Initial Configuration
+const checkLocalStorage = () => {
+	try {
+		// Set Room Id
+		localStorage.setItem("room_id", roomName)
+		// Check Config For Audio Devices, Selected Audio Device, Video Devices, Selected Video Devices, Room Id, Username
+		if (
+			!localStorage.getItem("audioDevices") ||
+			!localStorage.getItem("room_id") ||
+			!localStorage.getItem("selectedVideoDevices") ||
+			!localStorage.getItem("videoDevices") ||
+			!localStorage.getItem("username") ||
+			!localStorage.getItem("selectedAudioDevices")
+		) {
+			const url = window.location.pathname
+			const parts = url.split("/")
+			const roomName = parts[2]
+			const goTo = "lobby/" + roomName
+			const newURL = window.location.origin + "/" + goTo
+			// If There Is Not, It Will Redirect To Lobby
+			window.location.href = newURL
+		}
+	} catch (error) {
+		console.log("- Error Checking Local Storage : ", error)
+	}
+}
+
 module.exports = {
 	startTimer,
 	timerLayout,
@@ -22118,6 +22145,7 @@ module.exports = {
 	scrollToBottom,
 	muteAllParticipants,
 	unlockAllMic,
+	checkLocalStorage,
 }
 
 },{}],59:[function(require,module,exports){
@@ -23209,7 +23237,7 @@ module.exports = {
 }
 
 },{}],65:[function(require,module,exports){
-const { changeUserListMicIcon, sendMessage, receiveMessage, hideOptionMenu, showOptionMenu, scrollToBottom } = require("../room/function")
+const { changeUserListMicIcon, sendMessage, receiveMessage, hideOptionMenu, showOptionMenu, scrollToBottom, checkLocalStorage } = require("../room/function")
 const { getMyStream, getRoomId, joinRoom } = require("../room/function/initialization")
 const { signalNewConsumerTransport } = require("../room/function/mediasoup")
 const { Parameters } = require("../room/function/parameter")
@@ -23230,6 +23258,7 @@ const socket = io("/")
 
 socket.on("connection-success", async ({ socketId }) => {
 	console.log("- Id : ", socketId)
+	checkLocalStorage()
 	parameter = new Parameters()
 	parameter.username = "Diky"
 	parameter.socketId = socketId
