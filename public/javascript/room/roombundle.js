@@ -22107,10 +22107,10 @@ const unlockAllMic = ({ parameter, socket }) => {
 }
 
 // Check Initial Configuration
-const checkLocalStorage = () => {
+const checkLocalStorage = ({parameter}) => {
 	try {
 		// Set Room Id
-		localStorage.setItem("room_id", roomName)
+		localStorage.setItem("room_id", parameter.roomName)
 		// Check Config For Audio Devices, Selected Audio Device, Video Devices, Selected Video Devices, Room Id, Username
 		if (
 			!localStorage.getItem("audioDevices") ||
@@ -23258,13 +23258,13 @@ const socket = io("/")
 
 socket.on("connection-success", async ({ socketId }) => {
 	console.log("- Id : ", socketId)
-	checkLocalStorage()
 	parameter = new Parameters()
 	parameter.username = "Diky"
 	parameter.socketId = socketId
 	parameter.isVideo = true
 	parameter.isAudio = true
 	await getRoomId(parameter)
+	await checkLocalStorage({parameter})
 	await getMyStream(parameter)
 	await createMyVideo(parameter)
 	await joinRoom({ socket, parameter })

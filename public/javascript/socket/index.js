@@ -19,13 +19,13 @@ const socket = io("/")
 
 socket.on("connection-success", async ({ socketId }) => {
 	console.log("- Id : ", socketId)
-	checkLocalStorage()
 	parameter = new Parameters()
 	parameter.username = "Diky"
 	parameter.socketId = socketId
 	parameter.isVideo = true
 	parameter.isAudio = true
 	await getRoomId(parameter)
+	await checkLocalStorage({parameter})
 	await getMyStream(parameter)
 	await createMyVideo(parameter)
 	await joinRoom({ socket, parameter })
