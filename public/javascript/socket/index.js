@@ -1,4 +1,4 @@
-const { changeUserListMicIcon, sendMessage, receiveMessage, hideOptionMenu, showOptionMenu, scrollToBottom } = require("../room/function")
+const { changeUserListMicIcon, sendMessage, receiveMessage, hideOptionMenu, showOptionMenu, scrollToBottom, checkLocalStorage } = require("../room/function")
 const { getMyStream, getRoomId, joinRoom } = require("../room/function/initialization")
 const { signalNewConsumerTransport } = require("../room/function/mediasoup")
 const { Parameters } = require("../room/function/parameter")
@@ -19,6 +19,7 @@ const socket = io("/")
 
 socket.on("connection-success", async ({ socketId }) => {
 	console.log("- Id : ", socketId)
+	checkLocalStorage()
 	parameter = new Parameters()
 	parameter.username = "Diky"
 	parameter.socketId = socketId
