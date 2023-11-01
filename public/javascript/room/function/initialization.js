@@ -6,7 +6,20 @@ const getMyStream = async (parameter) => {
 	try {
 		let config = {
 			video: localStorage.getItem("is_video_active") == "true" ? { deviceId: { exact: localStorage.getItem("selectedVideoDevices") } } : false,
-			audio: true,
+			audio: localStorage.getItem("selectedVideoDevices")
+				? {
+						deviceId: { exact: localStorage.getItem("selectedAudioDevices") },
+						autoGainControl: false,
+						noiseSuppression: true,
+						echoCancellation: false,
+						volume: 1.0,
+				  }
+				: {
+						autoGainControl: false,
+						noiseSuppression: true,
+						echoCancellation: false,
+						volume: 1.0,
+				  },
 		}
 
 		let username = localStorage.getItem("username")

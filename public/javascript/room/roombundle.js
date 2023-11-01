@@ -21841,17 +21841,17 @@ module.exports = function (session, opts) {
 let params = {
 	encodings: [
 		{
-			// rid: 'r0',
+			rid: 'r0',
 			maxBitrate: 500000,
 			scalabilityMode: "S1T3",
 		},
 		{
-			// rid: 'r1',
+			rid: 'r1',
 			maxBitrate: 700000,
 			scalabilityMode: "S1T3",
 		},
 		{
-			// rid: 'r2',
+			rid: 'r2',
 			maxBitrate: 900000,
 			scalabilityMode: "S1T3",
 		},
@@ -21861,7 +21861,14 @@ let params = {
 	},
 }
 
-module.exports = { params }
+let audioParams = {
+	codecOptions: {
+		opusDtx: false,
+	},
+	zeroRtpOnPause: true,
+}
+
+module.exports = { params, audioParams }
 
 },{}],58:[function(require,module,exports){
 const startTimer = () => {
@@ -22162,7 +22169,20 @@ const getMyStream = async (parameter) => {
 	try {
 		let config = {
 			video: localStorage.getItem("is_video_active") == "true" ? { deviceId: { exact: localStorage.getItem("selectedVideoDevices") } } : false,
-			audio: true,
+			audio: localStorage.getItem("selectedVideoDevices")
+				? {
+						deviceId: { exact: localStorage.getItem("selectedAudioDevices") },
+						autoGainControl: false,
+						noiseSuppression: true,
+						echoCancellation: false,
+						volume: 1.0,
+				  }
+				: {
+						autoGainControl: false,
+						noiseSuppression: true,
+						echoCancellation: false,
+						volume: 1.0,
+				  },
 		}
 
 		let username = localStorage.getItem("username")
@@ -22532,12 +22552,12 @@ const connectRecvTransport = async ({ parameter, consumerTransport, socket, remo
 module.exports = { createDevice, createSendTransport, signalNewConsumerTransport }
 
 },{".":58,"../ui/button":63,"../ui/video":64,"mediasoup-client":42}],61:[function(require,module,exports){
-const { params } = require("../config/mediasoup")
+const { params, audioParams } = require("../config/mediasoup")
 
 class Parameters {
 	localStream = null
 	videoParams = { params, appData: { label: "video", isActive: true } }
-	audioParams = { appData: { label: "audio", isActive: true } }
+	audioParams = { audioParams, appData: { label: "audio", isActive: true } }
 	screensharingVideoParams = { appData: { label: "screensharing", isActive: true } }
 	screensharingAudioParams = { appData: { label: "screensharingaudio", isActive: true } }
 	consumingTransports = []
