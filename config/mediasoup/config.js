@@ -1,9 +1,9 @@
 // let ip = '127.0.0.1'
 // let ip = "192.168.206.123"
 // let ip = '192.168.205.229'
+// let ip = "203.194.113.166" // VPS Mr. Indra IP
+let ip = '203.175.10.29' // My VPS
 // let ip = "192.168.18.68" // Laptop Jaringan 5G
-let ip = "203.194.113.166" // VPS Mr. Indra IP
-// let ip = '203.175.10.29' // My VPS
 // let ip = '192.168.3.135' // IP Kost
 
 const webRtcTransport_options = {
@@ -24,15 +24,24 @@ const mediaCodecs = [
 		clockRate: 48000,
 		channels: 2,
 	},
+	// {
+	// 	kind: "video",
+	// 	mimeType: "video/H264",
+	// 	clockRate: 90000,
+	// 	parameters: {
+	// 		"x-google-start-bitrate": 1000,
+	// 		"packetization-mode": 1,
+	// 		"profile-level-id": "42e01f",
+	// 		"level-asymmetry-allowed": 1,
+	// 	},
+	// },
 	{
 		kind: "video",
 		mimeType: "video/H264",
 		clockRate: 90000,
 		parameters: {
 			"x-google-start-bitrate": 1000,
-			"packetization-mode": 1,
-			"profile-level-id": "42e01f",
-			"level-asymmetry-allowed": 1,
+			"profile-id": 2,
 		},
 	},
 ]
