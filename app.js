@@ -2,8 +2,8 @@ const express = require("express")
 const cors = require("cors")
 const router = require("./routes/index.js")
 const app = express()
-const port = 3001
-// const port = 80
+// const port = 3001
+const port = 80
 const http = require("http")
 const path = require("path")
 const https = require("httpolyglot")
@@ -58,44 +58,51 @@ io.on("connection", async (socket) => {
 	})
 
 	socket.on("disconnect", () => {
-		console.log("- Disconnected : ", socket.id)
+		try {
+			console.log("- Disconnected : ", socket.id)
 
-		serverParameter.allUsers[socket.id].producers.forEach((producerId) => {
-			socket.emit("producer-closed", { remoteProducerId: producerId, socketId: socket.id })
-		})
-		mediasoupParameter.consumers.forEach((consumerData) => {
-			if (consumerData.socketId == socket.id) {
-				consumerData.consumer.close()
+			if (!serverParameter.allUsers[socket.id]) {
+				return
 			}
-		})
+			serverParameter.allUsers[socket.id].producers.forEach((producerId) => {
+				socket.emit("producer-closed", { remoteProducerId: producerId, socketId: socket.id })
+			})
+			mediasoupParameter.consumers.forEach((consumerData) => {
+				if (consumerData.socketId == socket.id) {
+					consumerData.consumer.close()
+				}
+			})
 
-		mediasoupParameter.consumers = mediasoupParameter.consumers.filter((data) => data.socketId !== socket.id)
+			mediasoupParameter.consumers = mediasoupParameter.consumers.filter((data) => data.socketId !== socket.id)
 
-		mediasoupParameter.producers.forEach((producerData) => {
-			if (producerData.socketId == socket.id) {
-				producerData.producer.close()
+			mediasoupParameter.producers.forEach((producerData) => {
+				if (producerData.socketId == socket.id) {
+					producerData.producer.close()
+				}
+			})
+
+			mediasoupParameter.producers = mediasoupParameter.producers.filter((data) => data.socketId !== socket.id)
+
+			mediasoupParameter.transports.forEach((transportData) => {
+				if (transportData.socketId == socket.id) {
+					transportData.transport.close()
+				}
+			})
+
+			mediasoupParameter.transports = mediasoupParameter.transports.filter((data) => data.socketId !== socket.id)
+
+			serverParameter.allRooms[serverParameter.allUsers[socket.id].roomName].participants = serverParameter.allRooms[
+				serverParameter.allUsers[socket.id].roomName
+			].participants.filter((user) => user.socketId !== socket.id)
+
+			if (serverParameter.allRooms[serverParameter.allUsers[socket.id].roomName].participants.length == 0) {
+				serverParameter.allRooms[serverParameter.allUsers[socket.id].roomName].router.close()
+				delete serverParameter.allRooms[serverParameter.allUsers[socket.id].roomName]
 			}
-		})
-
-		mediasoupParameter.producers = mediasoupParameter.producers.filter((data) => data.socketId !== socket.id)
-
-		mediasoupParameter.transports.forEach((transportData) => {
-			if (transportData.socketId == socket.id) {
-				transportData.transport.close()
-			}
-		})
-
-		mediasoupParameter.transports = mediasoupParameter.transports.filter((data) => data.socketId !== socket.id)
-
-		serverParameter.allRooms[serverParameter.allUsers[socket.id].roomName].participants = serverParameter.allRooms[
-			serverParameter.allUsers[socket.id].roomName
-		].participants.filter((user) => user.socketId !== socket.id)
-
-		if (serverParameter.allRooms[serverParameter.allUsers[socket.id].roomName].participants.length == 0) {
-			serverParameter.allRooms[serverParameter.allUsers[socket.id].roomName].router.close()
-			delete serverParameter.allRooms[serverParameter.allUsers[socket.id].roomName]
+			delete serverParameter.allUsers[socket.id]
+		} catch (error) {
+			console.log("- Error Disconnected : ", error)
 		}
-		delete serverParameter.allUsers[socket.id]
 	})
 
 	socket.on("joinRoom", async ({ roomName, username }, callback) => {
@@ -297,9 +304,7 @@ io.on("connection", async (socket) => {
 				socketId = data.socketId
 			}
 		})
-		let producerData = mediasoupParameter.producers.find(
-			(producer) => producer.socketId == socketId && producer.producer.kind == "audio"
-		)
+		let producerData = mediasoupParameter.producers.find((producer) => producer.socketId == socketId && producer.producer.kind == "audio")
 		producerData.producer.appData.isVideoActive = false
 		let removeProducer = serverParameter.allRooms[serverParameter.allUsers[socket.id].roomName].participants.find(
 			(data) => data.socketId == socket.id
