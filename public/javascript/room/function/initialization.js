@@ -5,7 +5,7 @@ const { createDevice } = require("./mediasoup")
 const getMyStream = async (parameter) => {
 	try {
 		let config = {
-			video: localStorage.getItem("is_video_active") == "true" ? { deviceId: { exact: localStorage.getItem("selectedVideoDevices") } } : false,
+			video: localStorage.getItem("is_video_active") == "true" ? { deviceId: { exact: localStorage.getItem("selectedVideoDevices") }, frameRate: { ideal: 25, max: 30 } } : false,
 			audio: localStorage.getItem("selectedVideoDevices")
 				? {
 						deviceId: { exact: localStorage.getItem("selectedAudioDevices") },

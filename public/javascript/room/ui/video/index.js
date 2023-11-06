@@ -188,13 +188,13 @@ const createAudioVisualizer = async ({ id, track }) => {
 				analyser.getByteFrequencyData(dataArray)
 
 				const barHeight = dataArray.reduce((sum, value) => sum + value, 0) / dataArray.length
-				if (document.getElementById(`a-${id}`)) {
-					if (barHeight < 10) {
-						document.getElementById(`a-${id}`).volume = 0
-					} else {
-						document.getElementById(`a-${id}`).volume = 1
-					}
-				}
+				// if (document.getElementById(`a-${id}`)) {
+				// 	if (barHeight < 10) {
+				// 		document.getElementById(`a-${id}`).volume = 0
+				// 	} else {
+				// 		document.getElementById(`a-${id}`).volume = 1
+				// 	}
+				// }
 				canvas.style.boxShadow = `inset 0 0 0 ${barHeight / 20}px green, 0 0 0 ${barHeight / 20}px green`
 
 				requestAnimationFrame(drawBar)

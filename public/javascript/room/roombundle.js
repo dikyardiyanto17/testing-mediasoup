@@ -22168,7 +22168,7 @@ const { createDevice } = require("./mediasoup")
 const getMyStream = async (parameter) => {
 	try {
 		let config = {
-			video: localStorage.getItem("is_video_active") == "true" ? { deviceId: { exact: localStorage.getItem("selectedVideoDevices") } } : false,
+			video: localStorage.getItem("is_video_active") == "true" ? { deviceId: { exact: localStorage.getItem("selectedVideoDevices") }, frameRate: { ideal: 25, max: 30 } } : false,
 			audio: localStorage.getItem("selectedVideoDevices")
 				? {
 						deviceId: { exact: localStorage.getItem("selectedAudioDevices") },
@@ -23213,13 +23213,13 @@ const createAudioVisualizer = async ({ id, track }) => {
 				analyser.getByteFrequencyData(dataArray)
 
 				const barHeight = dataArray.reduce((sum, value) => sum + value, 0) / dataArray.length
-				if (document.getElementById(`a-${id}`)) {
-					if (barHeight < 10) {
-						document.getElementById(`a-${id}`).volume = 0
-					} else {
-						document.getElementById(`a-${id}`).volume = 1
-					}
-				}
+				// if (document.getElementById(`a-${id}`)) {
+				// 	if (barHeight < 10) {
+				// 		document.getElementById(`a-${id}`).volume = 0
+				// 	} else {
+				// 		document.getElementById(`a-${id}`).volume = 1
+				// 	}
+				// }
 				canvas.style.boxShadow = `inset 0 0 0 ${barHeight / 20}px green, 0 0 0 ${barHeight / 20}px green`
 
 				requestAnimationFrame(drawBar)

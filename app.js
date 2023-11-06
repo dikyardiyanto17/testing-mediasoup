@@ -2,8 +2,8 @@ const express = require("express")
 const cors = require("cors")
 const router = require("./routes/index.js")
 const app = express()
-const port = 3001
-// const port = 80
+// const port = 3001
+const port = 80
 const http = require("http")
 const path = require("path")
 const https = require("httpolyglot")
@@ -35,7 +35,6 @@ const httpServer = http.createServer(app)
 httpServer.listen(port, () => {
 	console.log("App On : " + port)
 })
-
 const io = new Server(httpServer)
 
 let serverParameter = new Server_Parameter()
