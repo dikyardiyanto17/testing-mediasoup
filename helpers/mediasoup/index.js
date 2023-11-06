@@ -32,6 +32,10 @@ const createWebRtcTransport = async ({ router, serverParameter }) => {
 		// let transport = await router.createWebRtcTransport(webRtcTransport_options)
 		// console.log("- Server Parameter : ", serverParameter.webRtcServer)
 		let transport = await router.createWebRtcTransport(configuration)
+		// let transport = await router.createPlainTransport({
+		// 	listenIp: "fe80::8f12:b0cd:e3ae:a185",
+		// 	listenIp: "192.168.18.68",
+		// })
 
 		transport.on("dtlsstatechange", (dtlsState) => {
 			if (dtlsState === "closed") {

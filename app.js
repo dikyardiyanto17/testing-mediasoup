@@ -2,8 +2,8 @@ const express = require("express")
 const cors = require("cors")
 const router = require("./routes/index.js")
 const app = express()
-const port = 3001
-// const port = 80
+// const port = 3001
+const port = 80
 const http = require("http")
 const path = require("path")
 const https = require("httpolyglot")
@@ -44,6 +44,7 @@ let mediasoupParameter = new Mediasoup_Parameter()
 const init = async () => {
 	try {
 		serverParameter.worker = await createWorker()
+		// serverParameter.worker = await createWorker({ logLevel: "warn" })
 		serverParameter.webRtcServer = await serverParameter.worker.createWebRtcServer(listenInfo)
 	} catch (error) {
 		console.log("- Failed Initialization : ", error)
@@ -192,15 +193,19 @@ io.on("connection", async (socket) => {
 	})
 
 	socket.on("get-producers", ({ roomName }, callback) => {
-		let producerList = []
-		serverParameter.allRooms[roomName].participants.forEach((data) => {
-			if (socket.id != data.socketId) {
-				data.producers.forEach((producer) => {
-					producerList = [...producerList, producer]
-				})
-			}
-		})
-		callback(producerList)
+		try {
+			let producerList = []
+			serverParameter.allRooms[roomName].participants.forEach((data) => {
+				if (socket.id != data.socketId) {
+					data.producers.forEach((producer) => {
+						producerList = [...producerList, producer]
+					})
+				}
+			})
+			callback(producerList)
+		} catch (error) {
+			console.log("- Error Getting Producers : ", error)
+		}
 	})
 
 	socket.on("transport-recv-connect", async ({ dtlsParameters, serverConsumerTransportId }) => {
@@ -285,10 +290,14 @@ io.on("connection", async (socket) => {
 	})
 
 	socket.on("consumer-resume", async ({ serverConsumerId }) => {
-		const getConsumer = mediasoupParameter.consumers.find((consumerData) => consumerData.consumer.id === serverConsumerId)
-		if (getConsumer) {
-			const { consumer } = getConsumer
-			await consumer.resume()
+		try {
+			const getConsumer = mediasoupParameter.consumers.find((consumerData) => consumerData.consumer.id === serverConsumerId)
+			if (getConsumer) {
+				const { consumer } = getConsumer
+				await consumer.resume()
+			}
+		} catch (error) {
+			console.log("- Error Resuming Consumer : ", error)
 		}
 	})
 

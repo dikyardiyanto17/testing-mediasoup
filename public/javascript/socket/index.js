@@ -27,18 +27,22 @@ let parameter
 const socket = io("/")
 
 socket.on("connection-success", async ({ socketId }) => {
-	console.log("- Id : ", socketId)
-	parameter = new Parameters()
-	parameter.username = "Diky"
-	parameter.socketId = socketId
-	parameter.isVideo = true
-	parameter.isAudio = true
-	await getRoomId(parameter)
-	await checkLocalStorage({ parameter })
-	await getMyStream(parameter)
-	await createMyVideo(parameter)
-	await joinRoom({ socket, parameter })
-	console.log("- Parameter : ", parameter.allUsers)
+	try {
+		console.log("- Id : ", socketId)
+		parameter = new Parameters()
+		parameter.username = "Diky"
+		parameter.socketId = socketId
+		parameter.isVideo = true
+		parameter.isAudio = true
+		await getRoomId(parameter)
+		await checkLocalStorage({ parameter })
+		await getMyStream(parameter)
+		await createMyVideo(parameter)
+		await joinRoom({ socket, parameter })
+		// console.log("- Parameter : ", parameter)
+	} catch (error) {
+		console.log("- Error On Connecting : ", error)
+	}
 })
 
 socket.on("new-producer", ({ producerId, socketId }) => {
@@ -50,49 +54,53 @@ socket.on("new-producer", ({ producerId, socketId }) => {
 })
 
 socket.on("producer-closed", ({ remoteProducerId, socketId }) => {
-	const producerToClose = parameter.consumerTransports.find((transportData) => transportData.producerId === remoteProducerId)
-	producerToClose.consumerTransport.close()
-	producerToClose.consumer.close()
+	try {
+		const producerToClose = parameter.consumerTransports.find((transportData) => transportData.producerId === remoteProducerId)
+		producerToClose.consumerTransport.close()
+		producerToClose.consumer.close()
 
-	let checkData = parameter.allUsers.find((data) => data.socketId === socketId)
+		let checkData = parameter.allUsers.find((data) => data.socketId === socketId)
 
-	let kind
+		let kind
 
-	for (const key in checkData) {
-		if (typeof checkData[key] == "object" && checkData[key]) {
-			if (checkData[key].producerId == remoteProducerId) {
-				kind = key
+		for (const key in checkData) {
+			if (typeof checkData[key] == "object" && checkData[key]) {
+				if (checkData[key].producerId == remoteProducerId) {
+					kind = key
+				}
 			}
 		}
-	}
 
-	if (kind == "video") {
-		turnOffOnCamera({ id: socketId, status: false })
-	}
+		if (kind == "video") {
+			turnOffOnCamera({ id: socketId, status: false })
+		}
 
-	if (kind == "screensharing") {
-		changeLayoutScreenSharingClient({ track: null, id: checkData.socketId, parameter, status: false })
-	}
-
-	if (kind == "screensharingaudio") {
-		let screensharingAudio = document.getElementById(`${socketId}screensharingaudio`)
-		if (screensharingAudio) screensharingAudio.remove()
-	}
-
-	if (kind) {
-		delete checkData[kind]
-	}
-
-	if (checkData && !checkData.audio && !checkData.video) {
-		parameter.allUsers = parameter.allUsers.filter((data) => data.socketId !== socketId)
-		parameter.totalUsers--
-		updatingLayout({ parameter })
-		changeLayout({ parameter })
-		removeVideoAndAudio({ socketId })
-		removeUserList({ id: socketId })
-		if (checkData.screensharing) {
+		if (kind == "screensharing") {
 			changeLayoutScreenSharingClient({ track: null, id: checkData.socketId, parameter, status: false })
 		}
+
+		if (kind == "screensharingaudio") {
+			let screensharingAudio = document.getElementById(`${socketId}screensharingaudio`)
+			if (screensharingAudio) screensharingAudio.remove()
+		}
+
+		if (kind) {
+			delete checkData[kind]
+		}
+
+		if (checkData && !checkData.audio && !checkData.video) {
+			parameter.allUsers = parameter.allUsers.filter((data) => data.socketId !== socketId)
+			parameter.totalUsers--
+			updatingLayout({ parameter })
+			changeLayout({ parameter })
+			removeVideoAndAudio({ socketId })
+			removeUserList({ id: socketId })
+			if (checkData.screensharing) {
+				changeLayoutScreenSharingClient({ track: null, id: checkData.socketId, parameter, status: false })
+			}
+		}
+	} catch (error) {
+		console.log("- Error Closing Producer : ", error)
 	}
 })
 
@@ -463,7 +471,6 @@ sendMessageButton.addEventListener("submit", (e) => {
 
 		parameter.allUsers.forEach((data) => {
 			if (data.socketId != socket.id) {
-				console.log(data.socketId)
 				socket.emit("send-message", { message: inputMessage, sendTo: data.socketId, sender, messageDate })
 			}
 		})

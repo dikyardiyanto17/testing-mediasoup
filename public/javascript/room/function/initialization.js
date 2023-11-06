@@ -11,14 +11,12 @@ const getMyStream = async (parameter) => {
 						deviceId: { exact: localStorage.getItem("selectedAudioDevices") },
 						autoGainControl: false,
 						noiseSuppression: true,
-						echoCancellation: false,
-						volume: 1.0,
+						echoCancellation: true,
 				  }
 				: {
 						autoGainControl: false,
 						noiseSuppression: true,
-						echoCancellation: false,
-						volume: 1.0,
+						echoCancellation: true,
 				  },
 		}
 

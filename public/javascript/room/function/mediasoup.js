@@ -43,7 +43,6 @@ const createSendTransport = async ({ socket, parameter }) => {
 						},
 						({ id, producersExist, kind }) => {
 							callback({ id })
-							console.log("Is", producersExist)
 							if (producersExist && kind == "audio") getProducers({ parameter, socket })
 							if (!producersExist) addMuteAllButton({ parameter, socket })
 						}
@@ -57,7 +56,7 @@ const createSendTransport = async ({ socket, parameter }) => {
 				try {
 					console.log("- State Change Producer : ", e)
 				} catch (error) {
-					console.log("- Error Connecting State Change Producer")
+					console.log("- Error Connecting State Change Producer : ", error)
 				}
 			})
 			connectSendTransport(parameter)
@@ -77,6 +76,7 @@ const connectSendTransport = async (parameter) => {
 			parameter.videoProducer = await parameter.producerTransport.produce(parameter.videoParams)
 			myData.video.producerId = parameter.videoProducer.id
 			myData.video.transportId = parameter.producerTransport.id
+			// parameter.videoProducer.setMaxIncomingBitrate(900000)
 			parameter.videoProducer.on("trackended", () => {
 				console.log("video track ended")
 			})
@@ -85,7 +85,6 @@ const connectSendTransport = async (parameter) => {
 				console.log("video transport ended")
 			})
 		}
-
 
 		myData.audio.producerId = parameter.audioProducer.id
 		myData.audio.transportId = parameter.producerTransport.id
@@ -97,7 +96,6 @@ const connectSendTransport = async (parameter) => {
 		parameter.audioProducer.on("transportclose", () => {
 			console.log("audio transport ended")
 		})
-
 	} catch (error) {
 		console.log("- Error Connecting Transport Producer : ", error)
 	}
@@ -173,8 +171,6 @@ const connectRecvTransport = async ({ parameter, consumerTransport, socket, remo
 					let isUserExist = parameter.allUsers.find((data) => data.socketId == params.producerSocketOwner)
 					const { track } = consumer
 
-					console.log("- Kind : ", params.kind, " - Track : ", track)
-
 					if (!params?.appData?.isActive) {
 						track.enabled = false
 					}
@@ -209,7 +205,7 @@ const connectRecvTransport = async ({ parameter, consumerTransport, socket, remo
 							videoClassName: parameter.videoLayout,
 							picture: params.appData.picture,
 							username: params.username,
-							micTrigger: params.appData.isMicActive
+							micTrigger: params.appData.isMicActive,
 						})
 						turnOffOnCamera({ id: params.producerSocketOwner, status: false })
 						createUserList({
@@ -249,8 +245,6 @@ const connectRecvTransport = async ({ parameter, consumerTransport, socket, remo
 							producerId: remoteProducerId,
 						},
 					]
-
-					console.log("- All Users : ", parameter.allUsers)
 
 					socket.emit("consumer-resume", { serverConsumerId: params.serverConsumerId })
 				} catch (error) {

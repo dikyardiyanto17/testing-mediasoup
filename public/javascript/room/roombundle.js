@@ -22174,14 +22174,12 @@ const getMyStream = async (parameter) => {
 						deviceId: { exact: localStorage.getItem("selectedAudioDevices") },
 						autoGainControl: false,
 						noiseSuppression: true,
-						echoCancellation: false,
-						volume: 1.0,
+						echoCancellation: true,
 				  }
 				: {
 						autoGainControl: false,
 						noiseSuppression: true,
-						echoCancellation: false,
-						volume: 1.0,
+						echoCancellation: true,
 				  },
 		}
 
@@ -22329,7 +22327,6 @@ const createSendTransport = async ({ socket, parameter }) => {
 						},
 						({ id, producersExist, kind }) => {
 							callback({ id })
-							console.log("Is", producersExist)
 							if (producersExist && kind == "audio") getProducers({ parameter, socket })
 							if (!producersExist) addMuteAllButton({ parameter, socket })
 						}
@@ -22343,7 +22340,7 @@ const createSendTransport = async ({ socket, parameter }) => {
 				try {
 					console.log("- State Change Producer : ", e)
 				} catch (error) {
-					console.log("- Error Connecting State Change Producer")
+					console.log("- Error Connecting State Change Producer : ", error)
 				}
 			})
 			connectSendTransport(parameter)
@@ -22363,6 +22360,7 @@ const connectSendTransport = async (parameter) => {
 			parameter.videoProducer = await parameter.producerTransport.produce(parameter.videoParams)
 			myData.video.producerId = parameter.videoProducer.id
 			myData.video.transportId = parameter.producerTransport.id
+			// parameter.videoProducer.setMaxIncomingBitrate(900000)
 			parameter.videoProducer.on("trackended", () => {
 				console.log("video track ended")
 			})
@@ -22371,7 +22369,6 @@ const connectSendTransport = async (parameter) => {
 				console.log("video transport ended")
 			})
 		}
-
 
 		myData.audio.producerId = parameter.audioProducer.id
 		myData.audio.transportId = parameter.producerTransport.id
@@ -22383,7 +22380,6 @@ const connectSendTransport = async (parameter) => {
 		parameter.audioProducer.on("transportclose", () => {
 			console.log("audio transport ended")
 		})
-
 	} catch (error) {
 		console.log("- Error Connecting Transport Producer : ", error)
 	}
@@ -22459,8 +22455,6 @@ const connectRecvTransport = async ({ parameter, consumerTransport, socket, remo
 					let isUserExist = parameter.allUsers.find((data) => data.socketId == params.producerSocketOwner)
 					const { track } = consumer
 
-					console.log("- Kind : ", params.kind, " - Track : ", track)
-
 					if (!params?.appData?.isActive) {
 						track.enabled = false
 					}
@@ -22495,7 +22489,7 @@ const connectRecvTransport = async ({ parameter, consumerTransport, socket, remo
 							videoClassName: parameter.videoLayout,
 							picture: params.appData.picture,
 							username: params.username,
-							micTrigger: params.appData.isMicActive
+							micTrigger: params.appData.isMicActive,
 						})
 						turnOffOnCamera({ id: params.producerSocketOwner, status: false })
 						createUserList({
@@ -22535,8 +22529,6 @@ const connectRecvTransport = async ({ parameter, consumerTransport, socket, remo
 							producerId: remoteProducerId,
 						},
 					]
-
-					console.log("- All Users : ", parameter.allUsers)
 
 					socket.emit("consumer-resume", { serverConsumerId: params.serverConsumerId })
 				} catch (error) {
@@ -23221,6 +23213,13 @@ const createAudioVisualizer = async ({ id, track }) => {
 				analyser.getByteFrequencyData(dataArray)
 
 				const barHeight = dataArray.reduce((sum, value) => sum + value, 0) / dataArray.length
+				if (document.getElementById(`a-${id}`)) {
+					if (barHeight < 10) {
+						document.getElementById(`a-${id}`).volume = 0
+					} else {
+						document.getElementById(`a-${id}`).volume = 1
+					}
+				}
 				canvas.style.boxShadow = `inset 0 0 0 ${barHeight / 20}px green, 0 0 0 ${barHeight / 20}px green`
 
 				requestAnimationFrame(drawBar)
@@ -23291,18 +23290,22 @@ let parameter
 const socket = io("/")
 
 socket.on("connection-success", async ({ socketId }) => {
-	console.log("- Id : ", socketId)
-	parameter = new Parameters()
-	parameter.username = "Diky"
-	parameter.socketId = socketId
-	parameter.isVideo = true
-	parameter.isAudio = true
-	await getRoomId(parameter)
-	await checkLocalStorage({ parameter })
-	await getMyStream(parameter)
-	await createMyVideo(parameter)
-	await joinRoom({ socket, parameter })
-	console.log("- Parameter : ", parameter.allUsers)
+	try {
+		console.log("- Id : ", socketId)
+		parameter = new Parameters()
+		parameter.username = "Diky"
+		parameter.socketId = socketId
+		parameter.isVideo = true
+		parameter.isAudio = true
+		await getRoomId(parameter)
+		await checkLocalStorage({ parameter })
+		await getMyStream(parameter)
+		await createMyVideo(parameter)
+		await joinRoom({ socket, parameter })
+		// console.log("- Parameter : ", parameter)
+	} catch (error) {
+		console.log("- Error On Connecting : ", error)
+	}
 })
 
 socket.on("new-producer", ({ producerId, socketId }) => {
@@ -23314,49 +23317,53 @@ socket.on("new-producer", ({ producerId, socketId }) => {
 })
 
 socket.on("producer-closed", ({ remoteProducerId, socketId }) => {
-	const producerToClose = parameter.consumerTransports.find((transportData) => transportData.producerId === remoteProducerId)
-	producerToClose.consumerTransport.close()
-	producerToClose.consumer.close()
+	try {
+		const producerToClose = parameter.consumerTransports.find((transportData) => transportData.producerId === remoteProducerId)
+		producerToClose.consumerTransport.close()
+		producerToClose.consumer.close()
 
-	let checkData = parameter.allUsers.find((data) => data.socketId === socketId)
+		let checkData = parameter.allUsers.find((data) => data.socketId === socketId)
 
-	let kind
+		let kind
 
-	for (const key in checkData) {
-		if (typeof checkData[key] == "object" && checkData[key]) {
-			if (checkData[key].producerId == remoteProducerId) {
-				kind = key
+		for (const key in checkData) {
+			if (typeof checkData[key] == "object" && checkData[key]) {
+				if (checkData[key].producerId == remoteProducerId) {
+					kind = key
+				}
 			}
 		}
-	}
 
-	if (kind == "video") {
-		turnOffOnCamera({ id: socketId, status: false })
-	}
+		if (kind == "video") {
+			turnOffOnCamera({ id: socketId, status: false })
+		}
 
-	if (kind == "screensharing") {
-		changeLayoutScreenSharingClient({ track: null, id: checkData.socketId, parameter, status: false })
-	}
-
-	if (kind == "screensharingaudio") {
-		let screensharingAudio = document.getElementById(`${socketId}screensharingaudio`)
-		if (screensharingAudio) screensharingAudio.remove()
-	}
-
-	if (kind) {
-		delete checkData[kind]
-	}
-
-	if (checkData && !checkData.audio && !checkData.video) {
-		parameter.allUsers = parameter.allUsers.filter((data) => data.socketId !== socketId)
-		parameter.totalUsers--
-		updatingLayout({ parameter })
-		changeLayout({ parameter })
-		removeVideoAndAudio({ socketId })
-		removeUserList({ id: socketId })
-		if (checkData.screensharing) {
+		if (kind == "screensharing") {
 			changeLayoutScreenSharingClient({ track: null, id: checkData.socketId, parameter, status: false })
 		}
+
+		if (kind == "screensharingaudio") {
+			let screensharingAudio = document.getElementById(`${socketId}screensharingaudio`)
+			if (screensharingAudio) screensharingAudio.remove()
+		}
+
+		if (kind) {
+			delete checkData[kind]
+		}
+
+		if (checkData && !checkData.audio && !checkData.video) {
+			parameter.allUsers = parameter.allUsers.filter((data) => data.socketId !== socketId)
+			parameter.totalUsers--
+			updatingLayout({ parameter })
+			changeLayout({ parameter })
+			removeVideoAndAudio({ socketId })
+			removeUserList({ id: socketId })
+			if (checkData.screensharing) {
+				changeLayoutScreenSharingClient({ track: null, id: checkData.socketId, parameter, status: false })
+			}
+		}
+	} catch (error) {
+		console.log("- Error Closing Producer : ", error)
 	}
 })
 
@@ -23727,7 +23734,6 @@ sendMessageButton.addEventListener("submit", (e) => {
 
 		parameter.allUsers.forEach((data) => {
 			if (data.socketId != socket.id) {
-				console.log(data.socketId)
 				socket.emit("send-message", { message: inputMessage, sendTo: data.socketId, sender, messageDate })
 			}
 		})
