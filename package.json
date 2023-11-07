@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "watch": "watchify public/javascript//room/room.js -o public/javascript/room/roombundle.js -v"
+    "watch": "watchify public/javascript//room/room.js -o public/javascript/room/roombundle.js -v",
+    "debug_warn": "DEBUG='mediasoup:WARN:* mediasoup:ERROR:*' nodemon app.js",
+    "debug_mode": "DEBUG='mediasoup*' nodemon app.js"
   },
   "keywords": [],
   "author": "",

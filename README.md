@@ -153,3 +153,8 @@ parameter = {
     initialAudio: true || false,
 }
 ```
+
+
+## Question
+- Case 1 hari bisa berapa total user yang menggunakan aplikasi
+- Case 1 room paling banyak berapa orang

@@ -2,8 +2,8 @@ const express = require("express")
 const cors = require("cors")
 const router = require("./routes/index.js")
 const app = express()
-const port = 3001
-// const port = 80
+// const port = 3001
+const port = 80
 const http = require("http")
 const path = require("path")
 const https = require("httpolyglot")
@@ -42,8 +42,8 @@ let mediasoupParameter = new Mediasoup_Parameter()
 
 const init = async () => {
 	try {
-		serverParameter.worker = await createWorker()
-		// serverParameter.worker = await createWorker({ logLevel: "warn" })
+		// serverParameter.worker = await createWorker()
+		serverParameter.worker = await createWorker({ logLevel: "warn" })
 		serverParameter.webRtcServer = await serverParameter.worker.createWebRtcServer(listenInfo)
 	} catch (error) {
 		console.log("- Failed Initialization : ", error)
@@ -253,6 +253,8 @@ io.on("connection", async (socket) => {
 					producerSocketOwner: producerSocket,
 					username: producerData.username,
 				}
+
+				params.rtpParameters
 
 				consumer.on("transportclose", () => {
 					console.log("transport close from consumer")

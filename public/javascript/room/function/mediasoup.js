@@ -161,11 +161,15 @@ const connectRecvTransport = async ({ parameter, consumerTransport, socket, remo
 					if (parameter.micCondition.isLocked && parameter.micCondition.socketId == socket.id) {
 						muteAllParticipants({ parameter, socket })
 					}
+					let streamId
+					if (params?.appData?.label == "audio" || params?.appData?.label == "video") streamId = `${params.producerSocketOwner}-mic-webcam`
+					else streamId = `${params.producerSocketOwner}-screen-sharing`
 					const consumer = await consumerTransport.consume({
 						id: params.id,
 						producerId: params.producerId,
 						kind: params.kind,
 						rtpParameters: params.rtpParameters,
+						streamId
 					})
 
 					let isUserExist = parameter.allUsers.find((data) => data.socketId == params.producerSocketOwner)
