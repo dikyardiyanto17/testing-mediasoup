@@ -3,12 +3,22 @@ const { createVideo, createAudio, insertVideo, updatingLayout, changeLayout, cre
 const { turnOffOnCamera, changeLayoutScreenSharingClient, addMuteAllButton } = require("../ui/button")
 const { createUserList, muteAllParticipants } = require(".")
 
+const getEncoding = ({ parameter }) => {
+	try {
+		const firstVideoCodec = parameter.device.rtpCapabilities.codecs.find((c) => c.kind === "video")
+		console.log(firstVideoCodec)
+	} catch (error) {
+		console.log("- Error Getting Encoding : ", error)
+	}
+}
+
 const createDevice = async ({ parameter, socket }) => {
 	try {
 		parameter.device = new mediasoupClient.Device()
 		await parameter.device.load({
 			routerRtpCapabilities: parameter.rtpCapabilities,
 		})
+		await getEncoding({ parameter })
 		await createSendTransport({ socket, parameter })
 	} catch (error) {
 		console.log("- Error Creating Device : ", error)
@@ -169,7 +179,7 @@ const connectRecvTransport = async ({ parameter, consumerTransport, socket, remo
 						producerId: params.producerId,
 						kind: params.kind,
 						rtpParameters: params.rtpParameters,
-						streamId
+						streamId,
 					})
 
 					let isUserExist = parameter.allUsers.find((data) => data.socketId == params.producerSocketOwner)

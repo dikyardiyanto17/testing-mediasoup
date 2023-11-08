@@ -21838,23 +21838,57 @@ module.exports = function (session, opts) {
 })(typeof window === 'object' ? window : this);
 
 },{}],57:[function(require,module,exports){
+// Used for VP9 webcam video.
+const VIDEO_KSVC_ENCODINGS = [{ scalabilityMode: "S3T3_KEY" }]
+
+// Used for VP9 desktop sharing.
+const VIDEO_SVC_ENCODINGS = [{ scalabilityMode: "S3T3", dtx: true }]
+
+const VIDEO_SIMULCAST_PROFILES = {
+	3840: [
+		{ scaleResolutionDownBy: 12, maxBitRate: 150000 },
+		{ scaleResolutionDownBy: 6, maxBitRate: 500000 },
+		{ scaleResolutionDownBy: 1, maxBitRate: 10000000 },
+	],
+	1920: [
+		{ scaleResolutionDownBy: 6, maxBitRate: 150000 },
+		{ scaleResolutionDownBy: 3, maxBitRate: 500000 },
+		{ scaleResolutionDownBy: 1, maxBitRate: 3500000 },
+	],
+	1280: [
+		{ scaleResolutionDownBy: 4, maxBitRate: 150000 },
+		{ scaleResolutionDownBy: 2, maxBitRate: 500000 },
+		{ scaleResolutionDownBy: 1, maxBitRate: 1200000 },
+	],
+	640: [
+		{ scaleResolutionDownBy: 2, maxBitRate: 150000 },
+		{ scaleResolutionDownBy: 1, maxBitRate: 500000 },
+	],
+	320: [{ scaleResolutionDownBy: 1, maxBitRate: 150000 }],
+}
+
 let params = {
+	// encodings: [
+	// 	{
+	// 		maxBitrate: 300000,
+	// 		scalabilityMode: "S3T3",
+	// 		scaleResolutionDownBy: 4,
+	// 	},
+	// 	{
+	// 		maxBitrate: 500000,
+	// 		scalabilityMode: "S3T3",
+	// 		scaleResolutionDownBy: 2,
+	// 	},
+	// 	{
+	// 		maxBitrate: 700000,
+	// 		scalabilityMode: "S3T3",
+	// 		scaleResolutionDownBy: 1,
+	// 	},
+	// ],
 	encodings: [
-		{
-			maxBitrate: 300000,
-			scalabilityMode: "S3T3",
-			scaleResolutionDownBy: 4
-		},
-		{
-			maxBitrate: 500000,
-			scalabilityMode: "S3T3",
-			scaleResolutionDownBy: 2
-		},
-		{
-			maxBitrate: 700000,
-			scalabilityMode: "S3T3",
-			scaleResolutionDownBy: 1
-		},
+		{ scaleResolutionDownBy: 4, maxBitRate: 150000 },
+		{ scaleResolutionDownBy: 2, maxBitRate: 500000 },
+		{ scaleResolutionDownBy: 1, maxBitRate: 1200000 },
 	],
 	codecOptions: {
 		videoGoogleStartBitrate: 1000,
@@ -22272,6 +22306,7 @@ const joinRoom = async ({ parameter, socket }) => {
 		parameter.videoLayout = "user-video-container-1"
 		socket.emit("joinRoom", { roomName: parameter.roomName, username: parameter.username }, (data) => {
 			parameter.rtpCapabilities = data.rtpCapabilities
+			parameter.rtpCapabilities.headerExtensions = parameter.rtpCapabilities.headerExtensions.filter((ext) => ext.uri !== 'urn:3gpp:video-orientation');
 			createDevice({ parameter, socket })
 		})
 	} catch (error) {
@@ -22287,12 +22322,22 @@ const { createVideo, createAudio, insertVideo, updatingLayout, changeLayout, cre
 const { turnOffOnCamera, changeLayoutScreenSharingClient, addMuteAllButton } = require("../ui/button")
 const { createUserList, muteAllParticipants } = require(".")
 
+const getEncoding = ({ parameter }) => {
+	try {
+		const firstVideoCodec = parameter.device.rtpCapabilities.codecs.find((c) => c.kind === "video")
+		console.log(firstVideoCodec)
+	} catch (error) {
+		console.log("- Error Getting Encoding : ", error)
+	}
+}
+
 const createDevice = async ({ parameter, socket }) => {
 	try {
 		parameter.device = new mediasoupClient.Device()
 		await parameter.device.load({
 			routerRtpCapabilities: parameter.rtpCapabilities,
 		})
+		await getEncoding({ parameter })
 		await createSendTransport({ socket, parameter })
 	} catch (error) {
 		console.log("- Error Creating Device : ", error)
@@ -22453,7 +22498,7 @@ const connectRecvTransport = async ({ parameter, consumerTransport, socket, remo
 						producerId: params.producerId,
 						kind: params.kind,
 						rtpParameters: params.rtpParameters,
-						streamId
+						streamId,
 					})
 
 					let isUserExist = parameter.allUsers.find((data) => data.socketId == params.producerSocketOwner)
@@ -22548,12 +22593,12 @@ const connectRecvTransport = async ({ parameter, consumerTransport, socket, remo
 module.exports = { createDevice, createSendTransport, signalNewConsumerTransport }
 
 },{".":58,"../ui/button":63,"../ui/video":64,"mediasoup-client":42}],61:[function(require,module,exports){
-const { params, audioParams } = require("../config/mediasoup")
+const { params } = require("../config/mediasoup")
 
 class Parameters {
 	localStream = null
 	videoParams = { params, appData: { label: "video", isActive: true } }
-	audioParams = { audioParams, appData: { label: "audio", isActive: true } }
+	audioParams = { appData: { label: "audio", isActive: true } }
 	screensharingVideoParams = { appData: { label: "screensharing", isActive: true } }
 	screensharingAudioParams = { appData: { label: "screensharingaudio", isActive: true } }
 	consumingTransports = []
