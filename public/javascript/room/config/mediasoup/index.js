@@ -45,11 +45,11 @@ let params = {
 	// 		scaleResolutionDownBy: 1,
 	// 	},
 	// ],
-	// encodings: [
-	// 	{ scaleResolutionDownBy: 4, maxBitRate: 250000 },
-	// 	{ scaleResolutionDownBy: 2, maxBitRate: 500000 },
-	// 	{ scaleResolutionDownBy: 1, maxBitRate: 1000000 },
-	// ],
+	encodings: [
+		{ scaleResolutionDownBy: 4, maxBitRate: 250000 },
+		{ scaleResolutionDownBy: 2, maxBitRate: 500000 },
+		{ scaleResolutionDownBy: 1, maxBitRate: 1000000 },
+	],
 	codecOptions: {
 		videoGoogleStartBitrate: 1000,
 	},

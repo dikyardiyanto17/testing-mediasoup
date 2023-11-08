@@ -21885,11 +21885,11 @@ let params = {
 	// 		scaleResolutionDownBy: 1,
 	// 	},
 	// ],
-	// encodings: [
-	// 	{ scaleResolutionDownBy: 4, maxBitRate: 250000 },
-	// 	{ scaleResolutionDownBy: 2, maxBitRate: 500000 },
-	// 	{ scaleResolutionDownBy: 1, maxBitRate: 1000000 },
-	// ],
+	encodings: [
+		{ scaleResolutionDownBy: 4, maxBitRate: 250000 },
+		{ scaleResolutionDownBy: 2, maxBitRate: 500000 },
+		{ scaleResolutionDownBy: 1, maxBitRate: 1000000 },
+	],
 	codecOptions: {
 		videoGoogleStartBitrate: 1000,
 	},
@@ -22592,12 +22592,12 @@ const connectRecvTransport = async ({ parameter, consumerTransport, socket, remo
 module.exports = { createDevice, createSendTransport, signalNewConsumerTransport }
 
 },{".":58,"../ui/button":63,"../ui/video":64,"mediasoup-client":42}],61:[function(require,module,exports){
-const { params } = require("../config/mediasoup")
+const { params, audioParams } = require("../config/mediasoup")
 
 class Parameters {
 	localStream = null
 	videoParams = { params, appData: { label: "video", isActive: true } }
-	audioParams = { appData: { label: "audio", isActive: true } }
+	audioParams = { audioParams, appData: { label: "audio", isActive: true } }
 	screensharingVideoParams = { appData: { label: "screensharing", isActive: true } }
 	screensharingAudioParams = { appData: { label: "screensharingaudio", isActive: true } }
 	consumingTransports = []
