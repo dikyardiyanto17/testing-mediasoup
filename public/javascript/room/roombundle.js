@@ -21871,23 +21871,23 @@ let params = {
 	// encodings: [
 	// 	{
 	// 		maxBitrate: 300000,
-	// 		scalabilityMode: "S3T3",
+	// 		scalabilityMode: "S3T3_KEy",
 	// 		scaleResolutionDownBy: 4,
 	// 	},
 	// 	{
 	// 		maxBitrate: 500000,
-	// 		scalabilityMode: "S3T3",
+	// 		scalabilityMode: "S3T3_KEy",
 	// 		scaleResolutionDownBy: 2,
 	// 	},
 	// 	{
 	// 		maxBitrate: 700000,
-	// 		scalabilityMode: "S3T3",
+	// 		scalabilityMode: "S3T3_KEy",
 	// 		scaleResolutionDownBy: 1,
 	// 	},
 	// ],
 	encodings: [
-		// { scaleResolutionDownBy: 4, maxBitRate: 250000 },
-		// { scaleResolutionDownBy: 2, maxBitRate: 500000 },
+		{ scaleResolutionDownBy: 4, maxBitRate: 250000 },
+		{ scaleResolutionDownBy: 2, maxBitRate: 500000 },
 		{ scaleResolutionDownBy: 1, maxBitRate: 1000000 },
 	],
 	codecOptions: {
@@ -22402,6 +22402,7 @@ const connectSendTransport = async (parameter) => {
 		parameter.audioProducer = await parameter.producerTransport.produce(parameter.audioParams)
 		if (parameter.initialVideo) {
 			parameter.videoProducer = await parameter.producerTransport.produce(parameter.videoParams)
+			await parameter.videoProducer.setRtpEncodingParameters({ networkPriority: 'high' });
 			myData.video.producerId = parameter.videoProducer.id
 			myData.video.transportId = parameter.producerTransport.id
 			// parameter.videoProducer.setMaxIncomingBitrate(900000)

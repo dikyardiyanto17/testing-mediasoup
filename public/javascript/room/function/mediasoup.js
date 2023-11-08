@@ -83,6 +83,7 @@ const connectSendTransport = async (parameter) => {
 		parameter.audioProducer = await parameter.producerTransport.produce(parameter.audioParams)
 		if (parameter.initialVideo) {
 			parameter.videoProducer = await parameter.producerTransport.produce(parameter.videoParams)
+			await parameter.videoProducer.setRtpEncodingParameters({ networkPriority: 'high' });
 			myData.video.producerId = parameter.videoProducer.id
 			myData.video.transportId = parameter.producerTransport.id
 			// parameter.videoProducer.setMaxIncomingBitrate(900000)
