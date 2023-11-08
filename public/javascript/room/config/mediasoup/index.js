@@ -46,8 +46,8 @@ let params = {
 	// 	},
 	// ],
 	encodings: [
-		{ scaleResolutionDownBy: 4, maxBitRate: 250000 },
-		{ scaleResolutionDownBy: 2, maxBitRate: 500000 },
+		// { scaleResolutionDownBy: 4, maxBitRate: 250000 },
+		// { scaleResolutionDownBy: 2, maxBitRate: 500000 },
 		{ scaleResolutionDownBy: 1, maxBitRate: 1000000 },
 	],
 	codecOptions: {
