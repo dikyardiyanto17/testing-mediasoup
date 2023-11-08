@@ -21885,11 +21885,11 @@ let params = {
 	// 		scaleResolutionDownBy: 1,
 	// 	},
 	// ],
-	encodings: [
-		{ scaleResolutionDownBy: 4, maxBitRate: 150000 },
-		{ scaleResolutionDownBy: 2, maxBitRate: 500000 },
-		{ scaleResolutionDownBy: 1, maxBitRate: 1200000 },
-	],
+	// encodings: [
+	// 	{ scaleResolutionDownBy: 4, maxBitRate: 250000 },
+	// 	{ scaleResolutionDownBy: 2, maxBitRate: 500000 },
+	// 	{ scaleResolutionDownBy: 1, maxBitRate: 1000000 },
+	// ],
 	codecOptions: {
 		videoGoogleStartBitrate: 1000,
 	},
@@ -22325,7 +22325,7 @@ const { createUserList, muteAllParticipants } = require(".")
 const getEncoding = ({ parameter }) => {
 	try {
 		const firstVideoCodec = parameter.device.rtpCapabilities.codecs.find((c) => c.kind === "video")
-		console.log(firstVideoCodec)
+		// console.log(firstVideoCodec)
 	} catch (error) {
 		console.log("- Error Getting Encoding : ", error)
 	}
@@ -22337,7 +22337,6 @@ const createDevice = async ({ parameter, socket }) => {
 		await parameter.device.load({
 			routerRtpCapabilities: parameter.rtpCapabilities,
 		})
-		await getEncoding({ parameter })
 		await createSendTransport({ socket, parameter })
 	} catch (error) {
 		console.log("- Error Creating Device : ", error)

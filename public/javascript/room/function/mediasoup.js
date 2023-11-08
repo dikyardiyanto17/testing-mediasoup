@@ -6,7 +6,7 @@ const { createUserList, muteAllParticipants } = require(".")
 const getEncoding = ({ parameter }) => {
 	try {
 		const firstVideoCodec = parameter.device.rtpCapabilities.codecs.find((c) => c.kind === "video")
-		console.log(firstVideoCodec)
+		// console.log(firstVideoCodec)
 	} catch (error) {
 		console.log("- Error Getting Encoding : ", error)
 	}
@@ -18,7 +18,6 @@ const createDevice = async ({ parameter, socket }) => {
 		await parameter.device.load({
 			routerRtpCapabilities: parameter.rtpCapabilities,
 		})
-		await getEncoding({ parameter })
 		await createSendTransport({ socket, parameter })
 	} catch (error) {
 		console.log("- Error Creating Device : ", error)
