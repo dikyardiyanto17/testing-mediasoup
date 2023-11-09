@@ -22331,15 +22331,6 @@ const { createVideo, createAudio, insertVideo, updatingLayout, changeLayout, cre
 const { turnOffOnCamera, changeLayoutScreenSharingClient, addMuteAllButton } = require("../ui/button")
 const { createUserList, muteAllParticipants } = require(".")
 
-const getEncoding = ({ parameter }) => {
-	try {
-		const firstVideoCodec = parameter.device.rtpCapabilities.codecs.find((c) => c.kind === "video")
-		// console.log(firstVideoCodec)
-	} catch (error) {
-		console.log("- Error Getting Encoding : ", error)
-	}
-}
-
 const createDevice = async ({ parameter, socket }) => {
 	try {
 		parameter.device = new mediasoupClient.Device()
