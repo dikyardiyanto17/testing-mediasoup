@@ -1,7 +1,7 @@
 const mediasoupClient = require("mediasoup-client")
 const { createVideo, createAudio, insertVideo, updatingLayout, changeLayout, createAudioVisualizer } = require("../ui/video")
 const { turnOffOnCamera, changeLayoutScreenSharingClient, addMuteAllButton } = require("../ui/button")
-const { createUserList, muteAllParticipants } = require(".")
+const { createUserList, muteAllParticipants, goToLobby } = require(".")
 
 const createDevice = async ({ parameter, socket }) => {
 	try {
@@ -55,6 +55,7 @@ const createSendTransport = async ({ socket, parameter }) => {
 			parameter.producerTransport.on("connectionstatechange", async (e) => {
 				try {
 					console.log("- State Change Producer : ", e)
+					if (e == "failed") goToLobby()
 				} catch (error) {
 					console.log("- Error Connecting State Change Producer : ", error)
 				}

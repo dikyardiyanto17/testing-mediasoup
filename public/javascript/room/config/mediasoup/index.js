@@ -51,6 +51,11 @@ let params = {
 	// 	{ scaleResolutionDownBy: 1, maxBitRate: 750000, maxFramerate: 30 },
 	// ],
 	// encodings: [{ ssrc: 111110 }, { ssrc: 111111 }, { ssrc: 111112 }],
+	// 	encodings: [
+	// 		{ maxBitRate: 250000, rid: "0" },
+	// 		{ maxBitRate: 500000, rid: "1" },
+	// 		{ maxBitRate: 750000, rid: "2" },
+	// 	],
 	codecOptions: {
 		videoGoogleStartBitrate: 1000,
 	},
