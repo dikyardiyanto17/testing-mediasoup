@@ -21885,11 +21885,11 @@ let params = {
 	// 		scaleResolutionDownBy: 1,
 	// 	},
 	// ],
-	// encodings: [
-	// 	{ scaleResolutionDownBy: 4, maxBitRate: 250000, maxFramerate: 30 },
-	// 	{ scaleResolutionDownBy: 2, maxBitRate: 500000, maxFramerate: 30 },
-	// 	{ scaleResolutionDownBy: 1, maxBitRate: 750000, maxFramerate: 30 },
-	// ],
+	encodings: [
+		{ scaleResolutionDownBy: 4, maxBitRate: 250000, maxFramerate: 30 },
+		{ scaleResolutionDownBy: 2, maxBitRate: 500000, maxFramerate: 30 },
+		{ scaleResolutionDownBy: 1, maxBitRate: 750000, maxFramerate: 30 },
+	],
 	// encodings: [{ ssrc: 111110 }, { ssrc: 111111 }, { ssrc: 111112 }],
 	// 	encodings: [
 	// 		{ maxBitRate: 250000, rid: "0" },
@@ -22217,7 +22217,7 @@ const { createDevice } = require("./mediasoup")
 const getMyStream = async (parameter) => {
 	try {
 		let config = {
-			video: localStorage.getItem("is_video_active") == "true" ? { deviceId: { exact: localStorage.getItem("selectedVideoDevices") }, frameRate: { ideal: 25, max: 30 } } : false,
+			video: localStorage.getItem("is_video_active") == "true" ? { deviceId: { exact: localStorage.getItem("selectedVideoDevices") }, frameRate: { ideal: 30, max: 35 } } : false,
 			audio: localStorage.getItem("selectedVideoDevices")
 				? {
 						deviceId: { exact: localStorage.getItem("selectedAudioDevices") },
