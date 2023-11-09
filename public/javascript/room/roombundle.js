@@ -21891,6 +21891,11 @@ let params = {
 	// 	{ scaleResolutionDownBy: 1, maxBitRate: 750000, maxFramerate: 30 },
 	// ],
 	encodings: [{ ssrc: 111110 }, { ssrc: 111111 }, { ssrc: 111112 }],
+// 	encodings: [
+// 		{ maxBitRate: 250000, rid: "0" },
+// 		{ maxBitRate: 500000, rid: "1" },
+// 		{ maxBitRate: 750000, rid: "2" },
+// 	],
 	codecOptions: {
 		videoGoogleStartBitrate: 1000,
 	},
@@ -22330,7 +22335,7 @@ module.exports = { getMyStream, getRoomId, joinRoom }
 const mediasoupClient = require("mediasoup-client")
 const { createVideo, createAudio, insertVideo, updatingLayout, changeLayout, createAudioVisualizer } = require("../ui/video")
 const { turnOffOnCamera, changeLayoutScreenSharingClient, addMuteAllButton } = require("../ui/button")
-const { createUserList, muteAllParticipants } = require(".")
+const { createUserList, muteAllParticipants, goToLobby } = require(".")
 
 const createDevice = async ({ parameter, socket }) => {
 	try {
@@ -22384,6 +22389,7 @@ const createSendTransport = async ({ socket, parameter }) => {
 			parameter.producerTransport.on("connectionstatechange", async (e) => {
 				try {
 					console.log("- State Change Producer : ", e)
+					if (e == "failed") goToLobby()
 				} catch (error) {
 					console.log("- Error Connecting State Change Producer : ", error)
 				}
