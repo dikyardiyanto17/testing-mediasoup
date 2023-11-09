@@ -21885,7 +21885,6 @@ let params = {
 	// 		scaleResolutionDownBy: 1,
 	// 	},
 	// ],
-	mid    : "1",
 	encodings: [
 		{ active: true, scaleResolutionDownBy: 4, maxBitRate: 250000, rid: "0", scalabilityMode: "S3T3" },
 		{ active: true, scaleResolutionDownBy: 2, maxBitRate: 500000, rid: "1", scalabilityMode: "S3T3" },

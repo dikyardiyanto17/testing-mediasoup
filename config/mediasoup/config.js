@@ -13,7 +13,7 @@ const webRtcTransport_options = {
 		},
 	],
 	enableUdp: true,
-	enableTcp: true,
+	// enableTcp: true,
 	preferUdp: true,
 }
 
