@@ -21885,11 +21885,11 @@ let params = {
 	// 		scaleResolutionDownBy: 1,
 	// 	},
 	// ],
+	mid    : "1",
 	encodings: [
-		// { scaleResolutionDownBy: 4, maxBitRate: 250000 },
-		// { scaleResolutionDownBy: 2, maxBitRate: 400000 },
-		// { scaleResolutionDownBy: 1, maxBitRate: 800000 },
-		{ scaleResolutionDownBy: 1, maxBitRate: 400000 },
+		{ active: true, scaleResolutionDownBy: 4, maxBitRate: 250000, rid: "0", scalabilityMode: "S3T3" },
+		{ active: true, scaleResolutionDownBy: 2, maxBitRate: 500000, rid: "1", scalabilityMode: "S3T3" },
+		{ active: true, scaleResolutionDownBy: 1, maxBitRate: 750000, rid: "2", scalabilityMode: "S3T3" },
 	],
 	codecOptions: {
 		videoGoogleStartBitrate: 1000,
