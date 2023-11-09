@@ -47,8 +47,9 @@ let params = {
 	// ],
 	encodings: [
 		// { scaleResolutionDownBy: 4, maxBitRate: 250000 },
-		{ scaleResolutionDownBy: 2, maxBitRate: 400000 },
-		{ scaleResolutionDownBy: 1, maxBitRate: 800000 },
+		// { scaleResolutionDownBy: 2, maxBitRate: 400000 },
+		// { scaleResolutionDownBy: 1, maxBitRate: 800000 },
+		{ scaleResolutionDownBy: 1, maxBitRate: 400000 },
 	],
 	codecOptions: {
 		videoGoogleStartBitrate: 1000,
