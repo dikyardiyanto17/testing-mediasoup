@@ -45,11 +45,12 @@ let params = {
 	// 		scaleResolutionDownBy: 1,
 	// 	},
 	// ],
-	encodings: [
-		{ scaleResolutionDownBy: 4, maxBitRate: 250000, maxFramerate: 30 },
-		{ scaleResolutionDownBy: 2, maxBitRate: 500000, maxFramerate: 30 },
-		{ scaleResolutionDownBy: 1, maxBitRate: 750000, maxFramerate: 30 },
-	],
+	// encodings: [
+	// 	{ scaleResolutionDownBy: 4, maxBitRate: 250000, maxFramerate: 30 },
+	// 	{ scaleResolutionDownBy: 2, maxBitRate: 500000, maxFramerate: 30 },
+	// 	{ scaleResolutionDownBy: 1, maxBitRate: 750000, maxFramerate: 30 },
+	// ],
+	encodings: [{ ssrc: 111110 }, { ssrc: 111111 }, { ssrc: 111112 }],
 	codecOptions: {
 		videoGoogleStartBitrate: 1000,
 	},
