@@ -109,6 +109,7 @@ const joinRoom = async ({ parameter, socket }) => {
 		parameter.videoLayout = "user-video-container-1"
 		socket.emit("joinRoom", { roomName: parameter.roomName, username: parameter.username }, (data) => {
 			parameter.rtpCapabilities = data.rtpCapabilities
+			parameter.rtpCapabilities.headerExtensions = parameter.rtpCapabilities.headerExtensions.filter((ext) => ext.uri !== 'urn:3gpp:video-orientation');
 			createDevice({ parameter, socket })
 		})
 	} catch (error) {

@@ -21838,23 +21838,57 @@ module.exports = function (session, opts) {
 })(typeof window === 'object' ? window : this);
 
 },{}],57:[function(require,module,exports){
+// Used for VP9 webcam video.
+const VIDEO_KSVC_ENCODINGS = [{ scalabilityMode: "S3T3_KEY" }]
+
+// Used for VP9 desktop sharing.
+const VIDEO_SVC_ENCODINGS = [{ scalabilityMode: "S3T3", dtx: true }]
+
+const VIDEO_SIMULCAST_PROFILES = {
+	3840: [
+		{ scaleResolutionDownBy: 12, maxBitRate: 150000 },
+		{ scaleResolutionDownBy: 6, maxBitRate: 500000 },
+		{ scaleResolutionDownBy: 1, maxBitRate: 10000000 },
+	],
+	1920: [
+		{ scaleResolutionDownBy: 6, maxBitRate: 150000 },
+		{ scaleResolutionDownBy: 3, maxBitRate: 500000 },
+		{ scaleResolutionDownBy: 1, maxBitRate: 3500000 },
+	],
+	1280: [
+		{ scaleResolutionDownBy: 4, maxBitRate: 150000 },
+		{ scaleResolutionDownBy: 2, maxBitRate: 500000 },
+		{ scaleResolutionDownBy: 1, maxBitRate: 1200000 },
+	],
+	640: [
+		{ scaleResolutionDownBy: 2, maxBitRate: 150000 },
+		{ scaleResolutionDownBy: 1, maxBitRate: 500000 },
+	],
+	320: [{ scaleResolutionDownBy: 1, maxBitRate: 150000 }],
+}
+
 let params = {
+	// encodings: [
+	// 	{
+	// 		maxBitrate: 300000,
+	// 		scalabilityMode: "S3T3_KEY",
+	// 		scaleResolutionDownBy: 4,
+	// 	},
+	// 	{
+	// 		maxBitrate: 500000,
+	// 		scalabilityMode: "S3T3_KEY",
+	// 		scaleResolutionDownBy: 2,
+	// 	},
+	// 	{
+	// 		maxBitrate: 700000,
+	// 		scalabilityMode: "S3T3_KEY",
+	// 		scaleResolutionDownBy: 1,
+	// 	},
+	// ],
 	encodings: [
-		{
-			rid: 'r0',
-			maxBitrate: 300000,
-			scalabilityMode: "S1T3",
-		},
-		{
-			rid: 'r1',
-			maxBitrate: 500000,
-			scalabilityMode: "S1T3",
-		},
-		{
-			rid: 'r2',
-			maxBitrate: 700000,
-			scalabilityMode: "S1T3",
-		},
+		{ active: true, scaleResolutionDownBy: 4, maxBitRate: 250000, rid: "0", scalabilityMode: "S3T3" },
+		{ active: true, scaleResolutionDownBy: 2, maxBitRate: 500000, rid: "1", scalabilityMode: "S3T3" },
+		{ active: true, scaleResolutionDownBy: 1, maxBitRate: 750000, rid: "2", scalabilityMode: "S3T3" },
 	],
 	codecOptions: {
 		videoGoogleStartBitrate: 1000,
@@ -22114,7 +22148,7 @@ const unlockAllMic = ({ parameter, socket }) => {
 }
 
 // Check Initial Configuration
-const checkLocalStorage = ({parameter}) => {
+const checkLocalStorage = ({ parameter }) => {
 	try {
 		// Set Room Id
 		localStorage.setItem("room_id", parameter.roomName)
@@ -22127,16 +22161,24 @@ const checkLocalStorage = ({parameter}) => {
 			!localStorage.getItem("username") ||
 			!localStorage.getItem("selectedAudioDevices")
 		) {
-			const url = window.location.pathname
-			const parts = url.split("/")
-			const roomName = parts[2]
-			const goTo = "lobby/" + roomName
-			const newURL = window.location.origin + "/" + goTo
-			// If There Is Not, It Will Redirect To Lobby
-			window.location.href = newURL
+			goToLobby()
 		}
 	} catch (error) {
 		console.log("- Error Checking Local Storage : ", error)
+	}
+}
+
+const goToLobby = () => {
+	try {
+		const url = window.location.pathname
+		const parts = url.split("/")
+		const roomName = parts[2]
+		const goTo = "lobby/" + roomName
+		const newURL = window.location.origin + "/" + goTo
+		// If There Is Not, It Will Redirect To Lobby
+		window.location.href = newURL
+	} catch (error) {
+		console.log("- Error Go To Lobby : ", error)
 	}
 }
 
@@ -22157,7 +22199,8 @@ module.exports = {
 	muteAllParticipants,
 	unlockAllMic,
 	checkLocalStorage,
-	changeAppData
+	changeAppData,
+	goToLobby,
 }
 
 },{}],59:[function(require,module,exports){
@@ -22272,6 +22315,7 @@ const joinRoom = async ({ parameter, socket }) => {
 		parameter.videoLayout = "user-video-container-1"
 		socket.emit("joinRoom", { roomName: parameter.roomName, username: parameter.username }, (data) => {
 			parameter.rtpCapabilities = data.rtpCapabilities
+			parameter.rtpCapabilities.headerExtensions = parameter.rtpCapabilities.headerExtensions.filter((ext) => ext.uri !== 'urn:3gpp:video-orientation');
 			createDevice({ parameter, socket })
 		})
 	} catch (error) {
@@ -22358,6 +22402,8 @@ const connectSendTransport = async (parameter) => {
 		parameter.audioProducer = await parameter.producerTransport.produce(parameter.audioParams)
 		if (parameter.initialVideo) {
 			parameter.videoProducer = await parameter.producerTransport.produce(parameter.videoParams)
+			await parameter.videoProducer.setMaxSpatialLayer(1)
+			// console.log("- Producer : ", parameter.videoProducer)
 			myData.video.producerId = parameter.videoProducer.id
 			myData.video.transportId = parameter.producerTransport.id
 			// parameter.videoProducer.setMaxIncomingBitrate(900000)
@@ -22448,12 +22494,13 @@ const connectRecvTransport = async ({ parameter, consumerTransport, socket, remo
 					let streamId
 					if (params?.appData?.label == "audio" || params?.appData?.label == "video") streamId = `${params.producerSocketOwner}-mic-webcam`
 					else streamId = `${params.producerSocketOwner}-screen-sharing`
+
 					const consumer = await consumerTransport.consume({
 						id: params.id,
 						producerId: params.producerId,
 						kind: params.kind,
 						rtpParameters: params.rtpParameters,
-						streamId
+						streamId,
 					})
 
 					let isUserExist = parameter.allUsers.find((data) => data.socketId == params.producerSocketOwner)
@@ -22552,7 +22599,7 @@ const { params, audioParams } = require("../config/mediasoup")
 
 class Parameters {
 	localStream = null
-	videoParams = { params, appData: { label: "video", isActive: true } }
+	videoParams = { ...params, appData: { label: "video", isActive: true } }
 	audioParams = { audioParams, appData: { label: "audio", isActive: true } }
 	screensharingVideoParams = { appData: { label: "screensharing", isActive: true } }
 	screensharingAudioParams = { appData: { label: "screensharingaudio", isActive: true } }

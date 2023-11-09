@@ -4,6 +4,7 @@ const client = new OAuth2Client()
 class Controller {
 	static room(req, res) {
 		try {
+			// res.render("home")
 			res.render("room")
 		} catch (error) {
 			console.log(error)

@@ -74,6 +74,8 @@ const connectSendTransport = async (parameter) => {
 		parameter.audioProducer = await parameter.producerTransport.produce(parameter.audioParams)
 		if (parameter.initialVideo) {
 			parameter.videoProducer = await parameter.producerTransport.produce(parameter.videoParams)
+			await parameter.videoProducer.setMaxSpatialLayer(1)
+			// console.log("- Producer : ", parameter.videoProducer)
 			myData.video.producerId = parameter.videoProducer.id
 			myData.video.transportId = parameter.producerTransport.id
 			// parameter.videoProducer.setMaxIncomingBitrate(900000)
@@ -164,12 +166,13 @@ const connectRecvTransport = async ({ parameter, consumerTransport, socket, remo
 					let streamId
 					if (params?.appData?.label == "audio" || params?.appData?.label == "video") streamId = `${params.producerSocketOwner}-mic-webcam`
 					else streamId = `${params.producerSocketOwner}-screen-sharing`
+
 					const consumer = await consumerTransport.consume({
 						id: params.id,
 						producerId: params.producerId,
 						kind: params.kind,
 						rtpParameters: params.rtpParameters,
-						streamId
+						streamId,
 					})
 
 					let isUserExist = parameter.allUsers.find((data) => data.socketId == params.producerSocketOwner)

@@ -2,8 +2,8 @@ const express = require("express")
 const cors = require("cors")
 const router = require("./routes/index.js")
 const app = express()
-const port = 3001
-// const port = 80
+// const port = 3001
+const port = 80
 const http = require("http")
 const path = require("path")
 const https = require("httpolyglot")
@@ -128,6 +128,7 @@ io.on("connection", async (socket) => {
 		try {
 			let router = serverParameter.allRooms[roomName].router
 			const transport = await createWebRtcTransport({ router, serverParameter })
+			transport.setMaxIncomingBitrate(1500000)
 			let username
 			const editParticipants = serverParameter.allRooms[roomName].participants.map((data) => {
 				if (data.socketId == socket.id) {

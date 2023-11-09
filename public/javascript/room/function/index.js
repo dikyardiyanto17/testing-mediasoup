@@ -241,7 +241,7 @@ const unlockAllMic = ({ parameter, socket }) => {
 }
 
 // Check Initial Configuration
-const checkLocalStorage = ({parameter}) => {
+const checkLocalStorage = ({ parameter }) => {
 	try {
 		// Set Room Id
 		localStorage.setItem("room_id", parameter.roomName)
@@ -254,16 +254,24 @@ const checkLocalStorage = ({parameter}) => {
 			!localStorage.getItem("username") ||
 			!localStorage.getItem("selectedAudioDevices")
 		) {
-			const url = window.location.pathname
-			const parts = url.split("/")
-			const roomName = parts[2]
-			const goTo = "lobby/" + roomName
-			const newURL = window.location.origin + "/" + goTo
-			// If There Is Not, It Will Redirect To Lobby
-			window.location.href = newURL
+			goToLobby()
 		}
 	} catch (error) {
 		console.log("- Error Checking Local Storage : ", error)
+	}
+}
+
+const goToLobby = () => {
+	try {
+		const url = window.location.pathname
+		const parts = url.split("/")
+		const roomName = parts[2]
+		const goTo = "lobby/" + roomName
+		const newURL = window.location.origin + "/" + goTo
+		// If There Is Not, It Will Redirect To Lobby
+		window.location.href = newURL
+	} catch (error) {
+		console.log("- Error Go To Lobby : ", error)
 	}
 }
 
@@ -284,5 +292,6 @@ module.exports = {
 	muteAllParticipants,
 	unlockAllMic,
 	checkLocalStorage,
-	changeAppData
+	changeAppData,
+	goToLobby,
 }
