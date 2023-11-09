@@ -175,8 +175,6 @@ const connectRecvTransport = async ({ parameter, consumerTransport, socket, remo
 						streamId,
 					})
 
-					console.log("- Consumer : ", consumer)
-
 					let isUserExist = parameter.allUsers.find((data) => data.socketId == params.producerSocketOwner)
 					const { track } = consumer
 
