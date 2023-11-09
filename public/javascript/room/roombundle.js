@@ -21885,21 +21885,30 @@ let params = {
 	// 		scaleResolutionDownBy: 1,
 	// 	},
 	// ],
-	encodings: [
-		{ scaleResolutionDownBy: 4, maxBitRate: 250000, maxFramerate: 30 },
-		{ scaleResolutionDownBy: 2, maxBitRate: 500000, maxFramerate: 30 },
-		{ scaleResolutionDownBy: 1, maxBitRate: 750000, maxFramerate: 30 },
-	],
+	// encodings: [
+	// 	{ scaleResolutionDownBy: 4, maxBitRate: 250000, maxFramerate: 30 },
+	// 	{ scaleResolutionDownBy: 2, maxBitRate: 500000, maxFramerate: 30 },
+	// 	{ scaleResolutionDownBy: 1, maxBitRate: 750000, maxFramerate: 30 },
+	// ],
 	// encodings: [{ ssrc: 111110 }, { ssrc: 111111 }, { ssrc: 111112 }],
 	// 	encodings: [
 	// 		{ maxBitRate: 250000, rid: "0" },
 	// 		{ maxBitRate: 500000, rid: "1" },
 	// 		{ maxBitRate: 750000, rid: "2" },
 	// 	],
+	// encodings: [{ scalabilityMode: "S3T3_KEY" }],
 	codecOptions: {
 		videoGoogleStartBitrate: 1000,
 	},
 }
+
+let encodingsVP9 = [{ scalabilityMode: "S3T3" }]
+
+let encodingVP8 = [
+	{ scaleResolutionDownBy: 4, maxBitRate: 250000, maxFramerate: 30 },
+	{ scaleResolutionDownBy: 2, maxBitRate: 500000, maxFramerate: 30 },
+	{ scaleResolutionDownBy: 1, maxBitRate: 750000, maxFramerate: 30 },
+]
 
 let audioParams = {
 	codecOptions: {
@@ -21908,7 +21917,7 @@ let audioParams = {
 	zeroRtpOnPause: true,
 }
 
-module.exports = { params, audioParams }
+module.exports = { params, audioParams, encodingVP8, encodingsVP9 }
 
 },{}],58:[function(require,module,exports){
 const startTimer = () => {
@@ -22336,6 +22345,25 @@ const mediasoupClient = require("mediasoup-client")
 const { createVideo, createAudio, insertVideo, updatingLayout, changeLayout, createAudioVisualizer } = require("../ui/video")
 const { turnOffOnCamera, changeLayoutScreenSharingClient, addMuteAllButton } = require("../ui/button")
 const { createUserList, muteAllParticipants, goToLobby } = require(".")
+const { encodingVP8, encodingsVP9 } = require("../config/mediasoup")
+
+const getEncoding = ({ parameter }) => {
+	try {
+		const firstVideoCodec = parameter.device.rtpCapabilities.codecs.find((c) => c.kind === "video")
+		let mimeType = firstVideoCodec.mimeType.toLowerCase()
+		console.log(mimeType)
+		console.log('- VP : ', parameter.videoParams)
+		if (mimeType.includes("vp9")){
+			parameter.videoParams.encodings = encodingsVP9
+		} else {
+			parameter.videoParams.encodings = encodingVP8
+			console.log("not VP9")
+		}
+		return firstVideoCodec
+	} catch (error) {
+		console.log("- Error Get Encoding : ", error)
+	}
+}
 
 const createDevice = async ({ parameter, socket }) => {
 	try {
@@ -22343,6 +22371,7 @@ const createDevice = async ({ parameter, socket }) => {
 		await parameter.device.load({
 			routerRtpCapabilities: parameter.rtpCapabilities,
 		})
+		getEncoding({ parameter })
 		await createSendTransport({ socket, parameter })
 	} catch (error) {
 		console.log("- Error Creating Device : ", error)
@@ -22601,7 +22630,7 @@ const connectRecvTransport = async ({ parameter, consumerTransport, socket, remo
 
 module.exports = { createDevice, createSendTransport, signalNewConsumerTransport }
 
-},{".":58,"../ui/button":63,"../ui/video":64,"mediasoup-client":42}],61:[function(require,module,exports){
+},{".":58,"../config/mediasoup":57,"../ui/button":63,"../ui/video":64,"mediasoup-client":42}],61:[function(require,module,exports){
 const { params, audioParams } = require("../config/mediasoup")
 
 class Parameters {

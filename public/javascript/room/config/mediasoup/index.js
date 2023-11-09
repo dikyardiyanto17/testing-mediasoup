@@ -45,21 +45,30 @@ let params = {
 	// 		scaleResolutionDownBy: 1,
 	// 	},
 	// ],
-	encodings: [
-		{ scaleResolutionDownBy: 4, maxBitRate: 250000, maxFramerate: 30 },
-		{ scaleResolutionDownBy: 2, maxBitRate: 500000, maxFramerate: 30 },
-		{ scaleResolutionDownBy: 1, maxBitRate: 750000, maxFramerate: 30 },
-	],
+	// encodings: [
+	// 	{ scaleResolutionDownBy: 4, maxBitRate: 250000, maxFramerate: 30 },
+	// 	{ scaleResolutionDownBy: 2, maxBitRate: 500000, maxFramerate: 30 },
+	// 	{ scaleResolutionDownBy: 1, maxBitRate: 750000, maxFramerate: 30 },
+	// ],
 	// encodings: [{ ssrc: 111110 }, { ssrc: 111111 }, { ssrc: 111112 }],
 	// 	encodings: [
 	// 		{ maxBitRate: 250000, rid: "0" },
 	// 		{ maxBitRate: 500000, rid: "1" },
 	// 		{ maxBitRate: 750000, rid: "2" },
 	// 	],
+	// encodings: [{ scalabilityMode: "S3T3_KEY" }],
 	codecOptions: {
 		videoGoogleStartBitrate: 1000,
 	},
 }
+
+let encodingsVP9 = [{ scalabilityMode: "S3T3" }]
+
+let encodingVP8 = [
+	{ scaleResolutionDownBy: 4, maxBitRate: 250000, maxFramerate: 30 },
+	{ scaleResolutionDownBy: 2, maxBitRate: 500000, maxFramerate: 30 },
+	{ scaleResolutionDownBy: 1, maxBitRate: 750000, maxFramerate: 30 },
+]
 
 let audioParams = {
 	codecOptions: {
@@ -68,4 +77,4 @@ let audioParams = {
 	zeroRtpOnPause: true,
 }
 
-module.exports = { params, audioParams }
+module.exports = { params, audioParams, encodingVP8, encodingsVP9 }

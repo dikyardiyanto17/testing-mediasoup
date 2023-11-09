@@ -2,6 +2,25 @@ const mediasoupClient = require("mediasoup-client")
 const { createVideo, createAudio, insertVideo, updatingLayout, changeLayout, createAudioVisualizer } = require("../ui/video")
 const { turnOffOnCamera, changeLayoutScreenSharingClient, addMuteAllButton } = require("../ui/button")
 const { createUserList, muteAllParticipants, goToLobby } = require(".")
+const { encodingVP8, encodingsVP9 } = require("../config/mediasoup")
+
+const getEncoding = ({ parameter }) => {
+	try {
+		const firstVideoCodec = parameter.device.rtpCapabilities.codecs.find((c) => c.kind === "video")
+		let mimeType = firstVideoCodec.mimeType.toLowerCase()
+		console.log(mimeType)
+		console.log('- VP : ', parameter.videoParams)
+		if (mimeType.includes("vp9")){
+			parameter.videoParams.encodings = encodingsVP9
+		} else {
+			parameter.videoParams.encodings = encodingVP8
+			console.log("not VP9")
+		}
+		return firstVideoCodec
+	} catch (error) {
+		console.log("- Error Get Encoding : ", error)
+	}
+}
 
 const createDevice = async ({ parameter, socket }) => {
 	try {
@@ -9,6 +28,7 @@ const createDevice = async ({ parameter, socket }) => {
 		await parameter.device.load({
 			routerRtpCapabilities: parameter.rtpCapabilities,
 		})
+		getEncoding({ parameter })
 		await createSendTransport({ socket, parameter })
 	} catch (error) {
 		console.log("- Error Creating Device : ", error)

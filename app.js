@@ -164,6 +164,7 @@ io.on("connection", async (socket) => {
 				kind,
 				rtpParameters,
 				appData,
+				keyFrameRequestDelay: 1000
 			})
 			let username
 			const editParticipants = serverParameter.allRooms[roomName].participants.map((data) => {
