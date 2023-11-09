@@ -21886,9 +21886,9 @@ let params = {
 	// 	},
 	// ],
 	encodings: [
-		{ scaleResolutionDownBy: 4, maxBitRate: 250000 },
-		{ scaleResolutionDownBy: 2, maxBitRate: 500000 },
-		{ scaleResolutionDownBy: 1, maxBitRate: 1000000 },
+		// { scaleResolutionDownBy: 4, maxBitRate: 250000 },
+		{ scaleResolutionDownBy: 2, maxBitRate: 400000 },
+		{ scaleResolutionDownBy: 1, maxBitRate: 800000 },
 	],
 	codecOptions: {
 		videoGoogleStartBitrate: 1000,
@@ -22148,7 +22148,7 @@ const unlockAllMic = ({ parameter, socket }) => {
 }
 
 // Check Initial Configuration
-const checkLocalStorage = ({parameter}) => {
+const checkLocalStorage = ({ parameter }) => {
 	try {
 		// Set Room Id
 		localStorage.setItem("room_id", parameter.roomName)
@@ -22161,16 +22161,24 @@ const checkLocalStorage = ({parameter}) => {
 			!localStorage.getItem("username") ||
 			!localStorage.getItem("selectedAudioDevices")
 		) {
-			const url = window.location.pathname
-			const parts = url.split("/")
-			const roomName = parts[2]
-			const goTo = "lobby/" + roomName
-			const newURL = window.location.origin + "/" + goTo
-			// If There Is Not, It Will Redirect To Lobby
-			window.location.href = newURL
+			goToLobby()
 		}
 	} catch (error) {
 		console.log("- Error Checking Local Storage : ", error)
+	}
+}
+
+const goToLobby = () => {
+	try {
+		const url = window.location.pathname
+		const parts = url.split("/")
+		const roomName = parts[2]
+		const goTo = "lobby/" + roomName
+		const newURL = window.location.origin + "/" + goTo
+		// If There Is Not, It Will Redirect To Lobby
+		window.location.href = newURL
+	} catch (error) {
+		console.log("- Error Go To Lobby : ", error)
 	}
 }
 
@@ -22191,7 +22199,8 @@ module.exports = {
 	muteAllParticipants,
 	unlockAllMic,
 	checkLocalStorage,
-	changeAppData
+	changeAppData,
+	goToLobby,
 }
 
 },{}],59:[function(require,module,exports){
@@ -22401,10 +22410,9 @@ const connectSendTransport = async (parameter) => {
 
 		parameter.audioProducer = await parameter.producerTransport.produce(parameter.audioParams)
 		if (parameter.initialVideo) {
-			console.log(parameter.videoParams)
 			parameter.videoProducer = await parameter.producerTransport.produce(parameter.videoParams)
-			await parameter.videoProducer.setMaxSpatialLayer(1);
-			await parameter.videoProducer.setRtpEncodingParameters({ networkPriority: 'high' });
+			await parameter.videoProducer.setMaxSpatialLayer(1)
+			// console.log("- Producer : ", parameter.videoProducer)
 			myData.video.producerId = parameter.videoProducer.id
 			myData.video.transportId = parameter.producerTransport.id
 			// parameter.videoProducer.setMaxIncomingBitrate(900000)
@@ -22495,6 +22503,7 @@ const connectRecvTransport = async ({ parameter, consumerTransport, socket, remo
 					let streamId
 					if (params?.appData?.label == "audio" || params?.appData?.label == "video") streamId = `${params.producerSocketOwner}-mic-webcam`
 					else streamId = `${params.producerSocketOwner}-screen-sharing`
+
 					const consumer = await consumerTransport.consume({
 						id: params.id,
 						producerId: params.producerId,
