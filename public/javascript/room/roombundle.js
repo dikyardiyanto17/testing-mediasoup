@@ -21871,17 +21871,17 @@ let params = {
 	// encodings: [
 	// 	{
 	// 		maxBitrate: 300000,
-	// 		scalabilityMode: "S3T3_KEy",
+	// 		scalabilityMode: "S3T3_KEY",
 	// 		scaleResolutionDownBy: 4,
 	// 	},
 	// 	{
 	// 		maxBitrate: 500000,
-	// 		scalabilityMode: "S3T3_KEy",
+	// 		scalabilityMode: "S3T3_KEY",
 	// 		scaleResolutionDownBy: 2,
 	// 	},
 	// 	{
 	// 		maxBitrate: 700000,
-	// 		scalabilityMode: "S3T3_KEy",
+	// 		scalabilityMode: "S3T3_KEY",
 	// 		scaleResolutionDownBy: 1,
 	// 	},
 	// ],
@@ -22401,7 +22401,9 @@ const connectSendTransport = async (parameter) => {
 
 		parameter.audioProducer = await parameter.producerTransport.produce(parameter.audioParams)
 		if (parameter.initialVideo) {
+			console.log(parameter.videoParams)
 			parameter.videoProducer = await parameter.producerTransport.produce(parameter.videoParams)
+			await parameter.videoProducer.setMaxSpatialLayer(1);
 			await parameter.videoProducer.setRtpEncodingParameters({ networkPriority: 'high' });
 			myData.video.producerId = parameter.videoProducer.id
 			myData.video.transportId = parameter.producerTransport.id
@@ -22597,7 +22599,7 @@ const { params, audioParams } = require("../config/mediasoup")
 
 class Parameters {
 	localStream = null
-	videoParams = { params, appData: { label: "video", isActive: true } }
+	videoParams = { ...params, appData: { label: "video", isActive: true } }
 	audioParams = { audioParams, appData: { label: "audio", isActive: true } }
 	screensharingVideoParams = { appData: { label: "screensharing", isActive: true } }
 	screensharingAudioParams = { appData: { label: "screensharingaudio", isActive: true } }
