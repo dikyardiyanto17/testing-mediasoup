@@ -46,9 +46,9 @@ let params = {
 	// 	},
 	// ],
 	encodings: [
-		{ active: true, scaleResolutionDownBy: 4, maxBitRate: 250000, rid: "0", scalabilityMode: "S3T3" },
-		{ active: true, scaleResolutionDownBy: 2, maxBitRate: 500000, rid: "1", scalabilityMode: "S3T3" },
-		{ active: true, scaleResolutionDownBy: 1, maxBitRate: 750000, rid: "2", scalabilityMode: "S3T3" },
+		{ scaleResolutionDownBy: 4, maxBitRate: 250000, maxFramerate: 30 },
+		{ scaleResolutionDownBy: 2, maxBitRate: 500000, maxFramerate: 30 },
+		{ scaleResolutionDownBy: 1, maxBitRate: 750000, maxFramerate: 30 },
 	],
 	codecOptions: {
 		videoGoogleStartBitrate: 1000,
