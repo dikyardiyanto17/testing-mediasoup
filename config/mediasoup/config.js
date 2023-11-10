@@ -2,14 +2,15 @@
 // let ipServer = "192.168.206.123"
 // let ipServer = '192.168.205.229'
 // let ipServer = "203.194.113.166" // VPS Mr. Indra IP
-let ipServer = '203.175.10.29' // My VPS
+let ipServer = "203.175.10.29" // My VPS
 // let ipServer = "192.168.18.68" // Laptop Jaringan 5G
 // let ipServer = '192.168.3.135' // IP Kost
 
 const webRtcTransport_options = {
 	listenIps: [
 		{
-			ip: ipServer,
+			ip: "0.0.0.0",
+			announcedIp: ipServer,
 		},
 	],
 	enableUdp: true,
@@ -70,12 +71,12 @@ const listenInfo = {
 		{
 			protocol: "udp",
 			ip: "0.0.0.0",
-			announcedIp: ipServer
+			announcedIp: ipServer,
 		},
 		{
 			protocol: "tcp",
 			ip: "0.0.0.0",
-			announcedIp: ipServer
+			announcedIp: ipServer,
 		},
 	],
 }
