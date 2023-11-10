@@ -2,8 +2,9 @@ const { params, audioParams } = require("../config/mediasoup")
 
 class Parameters {
 	localStream = null
-	videoParams = { ...params, appData: { label: "video", isActive: true } }
-	audioParams = { audioParams, appData: { label: "audio", isActive: true } }
+	videoParams = { appData: { label: "video", isActive: true } }
+	// videoParams = { ...params, appData: { label: "video", isActive: true } }
+	audioParams = { ...audioParams, appData: { label: "audio", isActive: true } }
 	screensharingVideoParams = { appData: { label: "screensharing", isActive: true } }
 	screensharingAudioParams = { appData: { label: "screensharingaudio", isActive: true } }
 	consumingTransports = []
