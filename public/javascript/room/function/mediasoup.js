@@ -8,7 +8,7 @@ const getEncoding = ({ parameter }) => {
 	try {
 		const firstVideoCodec = parameter.device.rtpCapabilities.codecs.find((c) => c.kind === "video")
 		let mimeType = firstVideoCodec.mimeType.toLowerCase()
-		if (mimeType.includes("vp9")){
+		if (mimeType.includes("vp9")) {
 			parameter.videoParams.encodings = encodingsVP9
 		} else {
 			parameter.videoParams.encodings = encodingVP8
@@ -117,6 +117,27 @@ const connectSendTransport = async (parameter) => {
 		parameter.audioProducer.on("transportclose", () => {
 			console.log("audio transport ended")
 		})
+
+		let r1, r2, r3 = 0
+
+		// const stat = setInterval(async () => {
+		// 	const report = await parameter.producerTransport.getStats()
+		// 	// console.log("- PT : ", )
+		// 	for (const value of report.values()) {
+		// 		if (value.kind == "video" && value.type == "outbound-rtp" && value.rid == "r1") {
+		// 			console.log("- Rid : ", value.rid, " - Sent : ", value.bytesSent - r1)
+		// 			r1 = value.bytesSent
+		// 		}
+		// 		if (value.kind == "video" && value.type == "outbound-rtp" && value.rid == "r2") {
+		// 			console.log("- Rid : ", value.rid, " - Sent : ", value.bytesSent - r2)
+		// 			r2 = value.bytesSent
+		// 		}
+		// 		if (value.kind == "video" && value.type == "outbound-rtp" && value.rid == "r3") {
+		// 			console.log("- Rid : ", value.rid, " - Sent : ", value.bytesSent - r3)
+		// 			r3 = value.bytesSent
+		// 		}
+		// 	}
+		// }, 1000)
 	} catch (error) {
 		console.log("- Error Connecting Transport Producer : ", error)
 	}
@@ -169,6 +190,14 @@ const signalNewConsumerTransport = async ({ remoteProducerId, socket, parameter 
 
 const connectRecvTransport = async ({ parameter, consumerTransport, socket, remoteProducerId, serverConsumerTransportId }) => {
 	try {
+		// const stat = setInterval(async () => {
+		// 	const report = await parameter.consumerTransport.getStats()
+		// 	for (const value of report.values()) {
+		// 		if (value.kind == "video"){
+		// 			console.log("- PT : ", value)
+		// 		}
+		// 	}
+		// }, 1000)
 		await socket.emit(
 			"consume",
 			{

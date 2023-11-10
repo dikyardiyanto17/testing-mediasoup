@@ -66,8 +66,8 @@ let encodingsVP9 = [{ scalabilityMode: "S3T3" }]
 
 let encodingVP8 = [
 	{ scaleResolutionDownBy: 4, maxBitRate: 250000, maxFramerate: 30 },
-	{ scaleResolutionDownBy: 2, maxBitRate: 500000, maxFramerate: 30 },
-	{ scaleResolutionDownBy: 1, maxBitRate: 750000, maxFramerate: 30 },
+	{ scaleResolutionDownBy: 2, maxBitRate: 400000, maxFramerate: 30 },
+	{ scaleResolutionDownBy: 1, maxBitRate: 550000, maxFramerate: 30 },
 ]
 
 let audioParams = {
