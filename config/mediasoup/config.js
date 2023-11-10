@@ -72,13 +72,13 @@ const listenInfo = {
 			protocol: "udp",
 			ip: "0.0.0.0",
 			announcedIp: ipServer,
-			port: 20333
+			// port: 20333
 		},
 		{
 			protocol: "tcp",
 			ip: "0.0.0.0",
 			announcedIp: ipServer,
-			port: 80
+			// port: 80
 		},
 	],
 }
