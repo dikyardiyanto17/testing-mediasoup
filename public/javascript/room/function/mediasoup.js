@@ -8,14 +8,12 @@ const getEncoding = ({ parameter }) => {
 	try {
 		const firstVideoCodec = parameter.device.rtpCapabilities.codecs.find((c) => c.kind === "video")
 		let mimeType = firstVideoCodec.mimeType.toLowerCase()
-		console.log(mimeType)
-		// console.log('- VP : ', parameter.videoParams)
-		// if (mimeType.includes("vp9")){
-		// 	parameter.videoParams.encodings = encodingsVP9
-		// } else {
-		// 	parameter.videoParams.encodings = encodingVP8
-		// 	console.log("not VP9")
-		// }
+		if (mimeType.includes("vp9")){
+			parameter.videoParams.encodings = encodingsVP9
+		} else {
+			parameter.videoParams.encodings = encodingVP8
+			console.log("not VP9")
+		}
 		return firstVideoCodec
 	} catch (error) {
 		console.log("- Error Get Encoding : ", error)

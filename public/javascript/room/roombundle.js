@@ -22366,14 +22366,12 @@ const getEncoding = ({ parameter }) => {
 	try {
 		const firstVideoCodec = parameter.device.rtpCapabilities.codecs.find((c) => c.kind === "video")
 		let mimeType = firstVideoCodec.mimeType.toLowerCase()
-		console.log(mimeType)
-		// console.log('- VP : ', parameter.videoParams)
-		// if (mimeType.includes("vp9")){
-		// 	parameter.videoParams.encodings = encodingsVP9
-		// } else {
-		// 	parameter.videoParams.encodings = encodingVP8
-		// 	console.log("not VP9")
-		// }
+		if (mimeType.includes("vp9")){
+			parameter.videoParams.encodings = encodingsVP9
+		} else {
+			parameter.videoParams.encodings = encodingVP8
+			console.log("not VP9")
+		}
 		return firstVideoCodec
 	} catch (error) {
 		console.log("- Error Get Encoding : ", error)
@@ -22651,7 +22649,7 @@ const { params, audioParams } = require("../config/mediasoup")
 class Parameters {
 	localStream = null
 	videoParams = { appData: { label: "video", isActive: true } }
-	// videoParams = { ...params, appData: { label: "video", isActive: true } }
+	videoParams = { ...params, appData: { label: "video", isActive: true } }
 	audioParams = { ...audioParams, appData: { label: "audio", isActive: true } }
 	screensharingVideoParams = { appData: { label: "screensharing", isActive: true } }
 	screensharingAudioParams = { appData: { label: "screensharingaudio", isActive: true } }
