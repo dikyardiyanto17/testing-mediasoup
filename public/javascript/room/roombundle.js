@@ -685,12 +685,9 @@ process.umask = function() { return 0; };
 
 },{}],3:[function(require,module,exports){
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Logger = void 0;
-const debug_1 = __importDefault(require("debug"));
+const debug_1 = require("debug");
 const LIB_NAME = 'awaitqueue';
 class Logger {
     constructor(prefix) {
@@ -734,7 +731,7 @@ const logger = new Logger_1.Logger();
  */
 class AwaitQueueStoppedError extends Error {
     constructor(message) {
-        super(message !== null && message !== void 0 ? message : 'AwaitQueue stopped');
+        super(message ?? 'AwaitQueue stopped');
         this.name = 'AwaitQueueStoppedError';
         // @ts-ignore
         if (typeof Error.captureStackTrace === 'function') {
@@ -750,7 +747,7 @@ exports.AwaitQueueStoppedError = AwaitQueueStoppedError;
  */
 class AwaitQueueRemovedTaskError extends Error {
     constructor(message) {
-        super(message !== null && message !== void 0 ? message : 'AwaitQueue task removed');
+        super(message ?? 'AwaitQueue task removed');
         this.name = 'AwaitQueueRemovedTaskError';
         // @ts-ignore
         if (typeof Error.captureStackTrace === 'function') {
@@ -773,7 +770,7 @@ class AwaitQueue {
         return this.pendingTasks.size;
     }
     async push(task, name) {
-        name = name !== null && name !== void 0 ? name : task.name;
+        name = name ?? task.name;
         logger.debug(`push() [name:${name}]`);
         if (typeof task !== 'function') {
             throw new TypeError('given task is not a function');
@@ -2689,31 +2686,36 @@ function detectDevice() {
         const uaParser = new ua_parser_js_1.UAParser(ua);
         logger.debug('detectDevice() | browser detected [ua:%s, parsed:%o]', ua, uaParser.getResult());
         const browser = uaParser.getBrowser();
-        const browserName = browser.name?.toLowerCase() ?? '';
+        const browserName = browser.name?.toLowerCase();
         const browserVersion = parseInt(browser.major ?? '0');
         const engine = uaParser.getEngine();
-        const engineName = engine.name?.toLowerCase() ?? '';
+        const engineName = engine.name?.toLowerCase();
         const os = uaParser.getOS();
-        const osName = os.name?.toLowerCase() ?? '';
+        const osName = os.name?.toLowerCase();
         const osVersion = parseFloat(os.version ?? '0');
-        const isIOS = osName === 'ios';
-        const isChrome = [
-            'chrome',
-            'chromium',
-            'mobile chrome',
-            'chrome webview',
-            'chrome headless'
-        ].includes(browserName);
-        const isFirefox = [
-            'firefox',
-            'mobile firefox',
-            'mobile focus'
-        ].includes(browserName);
-        const isSafari = [
-            'safari',
-            'mobile safari'
-        ].includes(browserName);
-        const isEdge = ['edge'].includes(browserName);
+        const device = uaParser.getDevice();
+        const deviceModel = device.model?.toLowerCase();
+        const isIOS = osName === 'ios' || deviceModel === 'ipad';
+        const isChrome = browserName &&
+            [
+                'chrome',
+                'chromium',
+                'mobile chrome',
+                'chrome webview',
+                'chrome headless'
+            ].includes(browserName);
+        const isFirefox = browserName &&
+            [
+                'firefox',
+                'mobile firefox',
+                'mobile focus'
+            ].includes(browserName);
+        const isSafari = browserName &&
+            [
+                'safari',
+                'mobile safari'
+            ].includes(browserName);
+        const isEdge = browserName && ['edge'].includes(browserName);
         // Chrome, Chromium, and Edge.
         if ((isChrome || isEdge) && !isIOS && browserVersion >= 111) {
             return 'Chrome111';
@@ -2757,7 +2759,6 @@ function detectDevice() {
         // Best effort for WebKit based browsers in iOS.
         else if (engineName === 'webkit' &&
             isIOS &&
-            osVersion >= 14.3 &&
             typeof RTCRtpTransceiver !== 'undefined' &&
             RTCRtpTransceiver.prototype.hasOwnProperty('currentDirection')) {
             return 'Safari12';
@@ -12885,7 +12886,7 @@ exports.types = types;
 /**
  * Expose mediasoup-client version.
  */
-exports.version = '3.6.101';
+exports.version = '3.7.0';
 /**
  * Expose parseScalabilityMode() function.
  */
@@ -20905,7 +20906,7 @@ module.exports = function (session, opts) {
 
 },{"./grammar":52}],56:[function(require,module,exports){
 /////////////////////////////////////////////////////////////////////////////////
-/* UAParser.js v1.0.36
+/* UAParser.js v1.0.37
    Copyright © 2012-2021 Faisal Salman <f@faisalman.com>
    MIT License *//*
    Detect Browser, Engine, OS, CPU, and Device type/model from User-Agent data.
@@ -20923,7 +20924,7 @@ module.exports = function (session, opts) {
     /////////////
 
 
-    var LIBVERSION  = '1.0.36',
+    var LIBVERSION  = '1.0.37',
         EMPTY       = '',
         UNKNOWN     = '?',
         FUNC_TYPE   = 'function',
@@ -20943,7 +20944,7 @@ module.exports = function (session, opts) {
         SMARTTV     = 'smarttv',
         WEARABLE    = 'wearable',
         EMBEDDED    = 'embedded',
-        UA_MAX_LENGTH = 350;
+        UA_MAX_LENGTH = 500;
 
     var AMAZON  = 'Amazon',
         APPLE   = 'Apple',
@@ -20962,7 +20963,6 @@ module.exports = function (session, opts) {
         SAMSUNG = 'Samsung',
         SHARP   = 'Sharp',
         SONY    = 'Sony',
-        VIERA   = 'Viera',
         XIAOMI  = 'Xiaomi',
         ZEBRA   = 'Zebra',
         FACEBOOK    = 'Facebook',
@@ -21134,11 +21134,12 @@ module.exports = function (session, opts) {
             ], [VERSION, [NAME, OPERA]], [
 
             // Mixed
+            /\bb[ai]*d(?:uhd|[ub]*[aekoprswx]{5,6})[\/ ]?([\w\.]+)/i            // Baidu
+            ], [VERSION, [NAME, 'Baidu']], [
             /(kindle)\/([\w\.]+)/i,                                             // Kindle
             /(lunascape|maxthon|netfront|jasmine|blazer)[\/ ]?([\w\.]*)/i,      // Lunascape/Maxthon/Netfront/Jasmine/Blazer
             // Trident based
-            /(avant |iemobile|slim)(?:browser)?[\/ ]?([\w\.]*)/i,               // Avant/IEMobile/SlimBrowser
-            /(ba?idubrowser)[\/ ]?([\w\.]+)/i,                                  // Baidu Browser
+            /(avant|iemobile|slim)\s?(?:browser)?[\/ ]?([\w\.]*)/i,             // Avant/IEMobile/SlimBrowser
             /(?:ms|\()(ie) ([\w\.]+)/i,                                         // Internet Explorer
 
             // Webkit/KHTML based                                               // Flock/RockMelt/Midori/Epiphany/Silk/Skyfire/Bolt/Iron/Iridium/PhantomJS/Bowser/QupZilla/Falkon
@@ -21150,8 +21151,7 @@ module.exports = function (session, opts) {
             /(?:\buc? ?browser|(?:juc.+)ucweb)[\/ ]?([\w\.]+)/i                 // UCBrowser
             ], [VERSION, [NAME, 'UC'+BROWSER]], [
             /microm.+\bqbcore\/([\w\.]+)/i,                                     // WeChat Desktop for Windows Built-in Browser
-            /\bqbcore\/([\w\.]+).+microm/i
-            ], [VERSION, [NAME, 'WeChat(Win) Desktop']], [
+            /\bqbcore\/([\w\.]+).+microm/i,
             /micromessenger\/([\w\.]+)/i                                        // WeChat
             ], [VERSION, [NAME, 'WeChat']], [
             /konqueror\/([\w\.]+)/i                                             // Konqueror
@@ -21160,6 +21160,8 @@ module.exports = function (session, opts) {
             ], [VERSION, [NAME, 'IE']], [
             /ya(?:search)?browser\/([\w\.]+)/i                                  // Yandex
             ], [VERSION, [NAME, 'Yandex']], [
+            /slbrowser\/([\w\.]+)/i                                             // Smart Lenovo Browser
+            ], [VERSION, [NAME, 'Smart Lenovo '+BROWSER]], [
             /(avast|avg)\/([\w\.]+)/i                                           // Avast/AVG Secure Browser
             ], [[NAME, /(.+)/, '$1 Secure '+BROWSER], VERSION], [
             /\bfocus\/([\w\.]+)/i                                               // Firefox Focus
@@ -21177,16 +21179,21 @@ module.exports = function (session, opts) {
             /fxios\/([-\w\.]+)/i                                                // Firefox for iOS
             ], [VERSION, [NAME, FIREFOX]], [
             /\bqihu|(qi?ho?o?|360)browser/i                                     // 360
-            ], [[NAME, '360 '+BROWSER]], [
-            /(oculus|samsung|sailfish|huawei)browser\/([\w\.]+)/i
-            ], [[NAME, /(.+)/, '$1 '+BROWSER], VERSION], [                      // Oculus/Samsung/Sailfish/Huawei Browser
+            ], [[NAME, '360 ' + BROWSER]], [
+            /(oculus|sailfish|huawei|vivo)browser\/([\w\.]+)/i
+            ], [[NAME, /(.+)/, '$1 ' + BROWSER], VERSION], [                    // Oculus/Sailfish/HuaweiBrowser/VivoBrowser
+            /samsungbrowser\/([\w\.]+)/i                                        // Samsung Internet
+            ], [VERSION, [NAME, SAMSUNG + ' Internet']], [
             /(comodo_dragon)\/([\w\.]+)/i                                       // Comodo Dragon
             ], [[NAME, /_/g, ' '], VERSION], [
+            /metasr[\/ ]?([\d\.]+)/i                                            // Sogou Explorer
+            ], [VERSION, [NAME, 'Sogou Explorer']], [
+            /(sogou)mo\w+\/([\d\.]+)/i                                          // Sogou Mobile
+            ], [[NAME, 'Sogou Mobile'], VERSION], [
             /(electron)\/([\w\.]+) safari/i,                                    // Electron-based App
             /(tesla)(?: qtcarbrowser|\/(20\d\d\.[-\w\.]+))/i,                   // Tesla
-            /m?(qqbrowser|baiduboxapp|2345Explorer)[\/ ]?([\w\.]+)/i            // QQBrowser/Baidu App/2345 Browser
+            /m?(qqbrowser|2345Explorer)[\/ ]?([\w\.]+)/i                        // QQBrowser/2345 Browser
             ], [NAME, VERSION], [
-            /(metasr)[\/ ]?([\w\.]+)/i,                                         // SouGouBrowser
             /(lbbrowser)/i,                                                     // LieBao Browser
             /\[(linkedin)app\]/i                                                // LinkedIn App for iOS & Android
             ], [NAME], [
@@ -21194,10 +21201,12 @@ module.exports = function (session, opts) {
             // WebView
             /((?:fban\/fbios|fb_iab\/fb4a)(?!.+fbav)|;fbav\/([\w\.]+);)/i       // Facebook App for iOS & Android
             ], [[NAME, FACEBOOK], VERSION], [
+            /(Klarna)\/([\w\.]+)/i,                                             // Klarna Shopping Browser for iOS & Android
             /(kakao(?:talk|story))[\/ ]([\w\.]+)/i,                             // Kakao App
             /(naver)\(.*?(\d+\.[\w\.]+).*\)/i,                                  // Naver InApp
             /safari (line)\/([\w\.]+)/i,                                        // Line App for iOS
             /\b(line)\/([\w\.]+)\/iab/i,                                        // Line App for Android
+            /(alipay)client\/([\w\.]+)/i,                                       // Alipay
             /(chromium|instagram|snapchat)[\/ ]([-\w\.]+)/i                     // Chromium/Instagram/Snapchat
             ], [NAME, VERSION], [
             /\bgsa\/([\w\.]+) .*safari\//i                                      // Google Search Appliance on iOS
@@ -21324,8 +21333,10 @@ module.exports = function (session, opts) {
             /\b; (\w+) build\/hm\1/i,                                           // Xiaomi Hongmi 'numeric' models
             /\b(hm[-_ ]?note?[_ ]?(?:\d\w)?) bui/i,                             // Xiaomi Hongmi
             /\b(redmi[\-_ ]?(?:note|k)?[\w_ ]+)(?: bui|\))/i,                   // Xiaomi Redmi
+            /oid[^\)]+; (m?[12][0-389][01]\w{3,6}[c-y])( bui|; wv|\))/i,        // Xiaomi Redmi 'numeric' models
             /\b(mi[-_ ]?(?:a\d|one|one[_ ]plus|note lte|max|cc)?[_ ]?(?:\d?\w?)[_ ]?(?:plus|se|lite)?)(?: bui|\))/i // Xiaomi Mi
             ], [[MODEL, /_/g, ' '], [VENDOR, XIAOMI], [TYPE, MOBILE]], [
+            /oid[^\)]+; (2\d{4}(283|rpbf)[cgl])( bui|\))/i,                     // Redmi Pad
             /\b(mi[-_ ]?(?:pad)(?:[\w_ ]+))(?: bui|\))/i                        // Mi Pad tablets
             ],[[MODEL, /_/g, ' '], [VENDOR, XIAOMI], [TYPE, TABLET]], [
 
@@ -21340,7 +21351,7 @@ module.exports = function (session, opts) {
             ], [MODEL, [VENDOR, 'Vivo'], [TYPE, MOBILE]], [
 
             // Realme
-            /\b(rmx[12]\d{3})(?: bui|;|\))/i
+            /\b(rmx[1-3]\d{3})(?: bui|;|\))/i
             ], [MODEL, [VENDOR, 'Realme'], [TYPE, MOBILE]], [
 
             // Motorola
@@ -21426,6 +21437,10 @@ module.exports = function (session, opts) {
             /droid.+; (m[1-5] note) bui/i,
             /\bmz-([-\w]{2,})/i
             ], [MODEL, [VENDOR, 'Meizu'], [TYPE, MOBILE]], [
+                
+            // Ulefone
+            /; ((?:power )?armor(?:[\w ]{0,8}))(?: bui|\))/i
+            ], [MODEL, [VENDOR, 'Ulefone'], [TYPE, MOBILE]], [
 
             // MIXED
             /(blackberry|benq|palm(?=\-)|sonyericsson|acer|asus|dell|meizu|motorola|polytron|infinix|tecno)[-_ ]?([-\w]*)/i,
@@ -21581,7 +21596,7 @@ module.exports = function (session, opts) {
             // MIXED (GENERIC)
             ///////////////////
 
-            /droid .+?; ([^;]+?)(?: bui|\) applew).+? mobile safari/i           // Android Phones from Unidentified Vendors
+            /droid .+?; ([^;]+?)(?: bui|; wv\)|\) applew).+? mobile safari/i    // Android Phones from Unidentified Vendors
             ], [MODEL, [TYPE, MOBILE]], [
             /droid .+?; ([^;]+?)(?: bui|\) applew).+?(?! mobile) safari/i       // Android Tablets from Unidentified Vendors
             ], [MODEL, [TYPE, TABLET]], [
@@ -21618,12 +21633,12 @@ module.exports = function (session, opts) {
             // Windows
             /microsoft (windows) (vista|xp)/i                                   // Windows (iTunes)
             ], [NAME, VERSION], [
-            /(windows) nt 6\.2; (arm)/i,                                        // Windows RT
-            /(windows (?:phone(?: os)?|mobile))[\/ ]?([\d\.\w ]*)/i,            // Windows Phone
-            /(windows)[\/ ]?([ntce\d\. ]+\w)(?!.+xbox)/i
+            /(windows (?:phone(?: os)?|mobile))[\/ ]?([\d\.\w ]*)/i             // Windows Phone
             ], [NAME, [VERSION, strMapper, windowsVersionMap]], [
-            /(win(?=3|9|n)|win 9x )([nt\d\.]+)/i
-            ], [[NAME, 'Windows'], [VERSION, strMapper, windowsVersionMap]], [
+            /windows nt 6\.2; (arm)/i,                                        // Windows RT
+            /windows[\/ ]?([ntce\d\. ]+\w)(?!.+xbox)/i,
+            /(?:win(?=3|9|n)|win 9x )([nt\d\.]+)/i
+            ], [[VERSION, strMapper, windowsVersionMap], [NAME, 'Windows']], [
 
             // iOS/macOS
             /ip[honead]{2,4}\b(?:.*os ([\w]+) like mac|; opera)/i,              // iOS
@@ -22352,13 +22367,13 @@ const getEncoding = ({ parameter }) => {
 		const firstVideoCodec = parameter.device.rtpCapabilities.codecs.find((c) => c.kind === "video")
 		let mimeType = firstVideoCodec.mimeType.toLowerCase()
 		console.log(mimeType)
-		console.log('- VP : ', parameter.videoParams)
-		if (mimeType.includes("vp9")){
-			parameter.videoParams.encodings = encodingsVP9
-		} else {
-			parameter.videoParams.encodings = encodingVP8
-			console.log("not VP9")
-		}
+		// console.log('- VP : ', parameter.videoParams)
+		// if (mimeType.includes("vp9")){
+		// 	parameter.videoParams.encodings = encodingsVP9
+		// } else {
+		// 	parameter.videoParams.encodings = encodingVP8
+		// 	console.log("not VP9")
+		// }
 		return firstVideoCodec
 	} catch (error) {
 		console.log("- Error Get Encoding : ", error)
@@ -22635,8 +22650,9 @@ const { params, audioParams } = require("../config/mediasoup")
 
 class Parameters {
 	localStream = null
-	videoParams = { ...params, appData: { label: "video", isActive: true } }
-	audioParams = { audioParams, appData: { label: "audio", isActive: true } }
+	videoParams = { appData: { label: "video", isActive: true } }
+	// videoParams = { ...params, appData: { label: "video", isActive: true } }
+	audioParams = { ...audioParams, appData: { label: "audio", isActive: true } }
 	screensharingVideoParams = { appData: { label: "screensharing", isActive: true } }
 	screensharingAudioParams = { appData: { label: "screensharingaudio", isActive: true } }
 	consumingTransports = []
