@@ -5,7 +5,7 @@
 // let ipServer = "203.175.10.29" // My VPS
 // let ipServer = "192.168.18.68" // Laptop Jaringan 5G
 // let ipServer = '192.168.3.135' // IP Kost
-let ipServer = "100.101.248.10"
+let ipServer = "192.168.3.208"
 
 const webRtcTransport_options = {
 	listenIps: [
