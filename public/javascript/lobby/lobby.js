@@ -1,9 +1,10 @@
 let localVideo = document.getElementById("local-video")
 let localStream
 
-let baseUrl = "https://modotz.net/"
+// let baseUrl = "https://modotz.net/"
 // let baseUrl = 'https://meet.dikyardiyanto.site/'
 // let baseUrl = "https://localhost:3001/"
+const baseUrl = `${window.location.origin}/`
 
 const joinRoom = document.getElementById("join-room")
 const url = window.location.pathname
@@ -42,7 +43,6 @@ const getMyMic = async () => {
 		let audioDevices = (await navigator.mediaDevices.enumerateDevices()).filter((device) => device.kind === "audioinput")
 
 		audioDevices.forEach((audio, index) => {
-			// console.log('- Audio : ', index, ' - Total : ', audioDevices.length)
 			let newElement = document.createElement("p")
 			newElement.className = "dropdown-item dropdown-select-options"
 			newElement.textContent = audio.label
