@@ -9,8 +9,10 @@ class Mediasoup_Parameter {
 
 const createWorker = async () => {
 	let worker = await mediasoup.createWorker({
-		// rtcMinPort: 2000,
-		// rtcMaxPort: 2020,
+		// rtcMinPort: 9500,
+		// rtcMaxPort: 10000,
+		// logLevel: "debug",
+		// logTags: ['ice', 'dtls']
 	})
 
 	worker.on("died", (error) => {

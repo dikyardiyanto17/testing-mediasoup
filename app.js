@@ -2,7 +2,8 @@ const express = require("express")
 const cors = require("cors")
 const router = require("./routes/index.js")
 const app = express()
-const port = 3001
+// const port = 3001
+const port = 9188
 // const port = 80
 const http = require("http")
 const path = require("path")
@@ -42,8 +43,7 @@ let mediasoupParameter = new Mediasoup_Parameter()
 
 const init = async () => {
 	try {
-		// serverParameter.worker = await createWorker()
-		serverParameter.worker = await createWorker({ logLevel: "warn" })
+		serverParameter.worker = await createWorker()
 		serverParameter.webRtcServer = await serverParameter.worker.createWebRtcServer(listenInfo)
 	} catch (error) {
 		console.log("- Failed Initialization : ", error)
@@ -128,8 +128,8 @@ io.on("connection", async (socket) => {
 		try {
 			let router = serverParameter.allRooms[roomName].router
 			const transport = await createWebRtcTransport({ router, serverParameter })
-			transport.setMaxIncomingBitrate(1500000)
-			transport.setMaxOutgoingBitrate(1500000)
+			transport.setMaxIncomingBitrate(1000000)
+			transport.setMaxOutgoingBitrate(1000000)
 			let username
 			const editParticipants = serverParameter.allRooms[roomName].participants.map((data) => {
 				if (data.socketId == socket.id) {

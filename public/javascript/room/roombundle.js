@@ -22437,7 +22437,7 @@ const createSendTransport = async ({ socket, parameter }) => {
 			parameter.producerTransport.on("connectionstatechange", async (e) => {
 				try {
 					console.log("- State Change Producer : ", e)
-					if (e == "failed") goToLobby()
+					// if (e == "failed") goToLobby()
 				} catch (error) {
 					console.log("- Error Connecting State Change Producer : ", error)
 				}
@@ -23433,6 +23433,7 @@ const { createMyVideo, removeVideoAndAudio, updatingLayout, changeLayout, change
 let parameter
 
 const socket = io("/")
+// const socket = io("https://192.168.205.229:9188/")
 
 socket.on("connection-success", async ({ socketId }) => {
 	try {

@@ -1,11 +1,19 @@
 // let ipServer = '127.0.0.1'
 // let ipServer = "192.168.206.123"
 // let ipServer = '192.168.205.229'
-let ipServer = "203.194.113.166" // VPS Mr. Indra IP
+// let ipServer = "203.194.113.166" // VPS Mr. Indra IP
 // let ipServer = "203.175.10.29" // My VPS
 // let ipServer = "192.168.18.68" // Laptop Jaringan 5G
 // let ipServer = '192.168.3.135' // IP Kost
 // let ipServer = "192.168.3.208"
+// let ipServer = "117.54.234.54" // RDS POC PKT CO ID
+// let ipServer = "192.168.205.198" // Server Local
+let ipServer = "192.168.205.229" // RDS co.id
+// let ipServer = "192.168.202.41" // RDS DEV
+// let ipServer = "117.54.234.54" // Server Public
+// let ipServer = "test-meet.dikyardiyanto.site"
+// let ipServer = "172.67.159.191" // test-meet ip dns cloudflare
+// let ipServer = "104.21.9.106" // test-meet ip dns cloudflare
 
 const webRtcTransport_options = {
 	listenIps: [
@@ -71,14 +79,24 @@ const listenInfo = {
 	listenInfos: [
 		{
 			protocol: "udp",
-			ip: "0.0.0.0",
+			// ip: "0.0.0.0",
+			ip: "192.168.205.229",
+			// ip: "192.168.18.68",
+			// ip: "127.0.0.1",
 			announcedIp: ipServer,
+			// announcedIp: "192.168.205.229",
+			// announcedIp: "telepati.poc-pkt.rds.co.id",
 			// port: 20333
 		},
 		{
 			protocol: "tcp",
-			ip: "0.0.0.0",
+			// ip: "0.0.0.0",
+			ip: "192.168.205.229",
+			// ip: "192.168.18.68",
+			// ip: "127.0.0.1",
 			announcedIp: ipServer,
+			// announcedIp: "192.168.205.229",
+			// announcedIp: "telepati.poc-pkt.rds.co.id",
 			// port: 80
 		},
 	],

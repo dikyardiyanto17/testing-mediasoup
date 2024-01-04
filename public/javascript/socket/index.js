@@ -25,6 +25,7 @@ const { createMyVideo, removeVideoAndAudio, updatingLayout, changeLayout, change
 let parameter
 
 const socket = io("/")
+// const socket = io("https://192.168.205.229:9188/")
 
 socket.on("connection-success", async ({ socketId }) => {
 	try {
