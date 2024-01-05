@@ -24,8 +24,25 @@ const { createMyVideo, removeVideoAndAudio, updatingLayout, changeLayout, change
 
 let parameter
 
+// const socket = require("socket.io-client")("/")
+
+// socket.on("connect_error", (err) => {
+// 	console.log(`connect_error due to ${err.message}`)
+// })
+
+// socket.on("connect_failed", (err) => {
+// 	console.log(`connect_error due to ${err.message}`)
+// })
+
 const socket = io("/")
-// const socket = io("https://192.168.205.229:9188/")
+console.log(socket)
+
+// socket.io.on("error", (error) => {
+// 	console.log("-Socket Error : ", error)
+// })
+// socket.io.on("ping", () => {
+// 	console.log("- Ping Socket")
+// })
 
 socket.on("connection-success", async ({ socketId }) => {
 	try {
@@ -40,7 +57,6 @@ socket.on("connection-success", async ({ socketId }) => {
 		await getMyStream(parameter)
 		await createMyVideo(parameter)
 		await joinRoom({ socket, parameter })
-		// console.log("- Parameter : ", parameter)
 	} catch (error) {
 		console.log("- Error On Connecting : ", error)
 	}
@@ -523,11 +539,29 @@ optionalButtonTrigger.addEventListener("click", (e) => {
 const hangUpButton = document.getElementById("user-hang-up-button")
 hangUpButton.addEventListener("click", () => {
 	try {
+		socket.close()
 		localStorage.clear()
 		window.location.href = window.location.origin
 	} catch (error) {
 		console.log("- Error At Hang Up Button : ", error)
 	}
+})
+
+window.addEventListener("beforeunload", function (event) {
+	socket.close()
+	localStorage.clear()
+	window.location.href = window.location.origin
+})
+
+window.addEventListener("online", function () {
+	console.log("Network is online")
+	// Your custom action when the network becomes available
+})
+
+window.addEventListener("offline", function () {
+	console.log("Network is offline")
+	socket.close()
+	// Your custom action when the network becomes unavailable
 })
 
 const hideOptionalMenu = () => {

@@ -73,7 +73,10 @@ const createSendTransport = async ({ socket, parameter }) => {
 			parameter.producerTransport.on("connectionstatechange", async (e) => {
 				try {
 					console.log("- State Change Producer : ", e)
-					// if (e == "failed") goToLobby()
+					if (e == "failed") {
+						socket.close()
+						window.location.reload()
+					}
 				} catch (error) {
 					console.log("- Error Connecting State Change Producer : ", error)
 				}
@@ -141,6 +144,10 @@ const connectSendTransport = async (parameter) => {
 		// 	}
 		// }, 1000)
 	} catch (error) {
+		window.alert(`Error getting your stream\nPlease make sure your camera is working\nThis page will refresh in a few seconds\n`)
+		setTimeout(() => {
+			window.location.reload()
+		}, 7000)
 		console.log("- Error Connecting Transport Producer : ", error)
 	}
 }
@@ -227,7 +234,7 @@ const connectRecvTransport = async ({ parameter, consumerTransport, socket, remo
 					// 				console.log("- With Codec : ", value.bytesReceived - withCodec)
 					// 				withCodec = value.bytesReceived
 					// 				// break
-					// 			} 
+					// 			}
 					// 		}
 					// 	}, 1000)
 					// }

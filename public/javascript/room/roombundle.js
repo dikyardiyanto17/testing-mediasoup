@@ -21920,9 +21920,9 @@ let params = {
 let encodingsVP9 = [{ scalabilityMode: "S3T3" }]
 
 let encodingVP8 = [
-	{ scaleResolutionDownBy: 4, maxBitRate: 250000, maxFramerate: 30 },
-	{ scaleResolutionDownBy: 2, maxBitRate: 400000, maxFramerate: 30 },
-	{ scaleResolutionDownBy: 1, maxBitRate: 550000, maxFramerate: 30 },
+	{ scaleResolutionDownBy: 4, maxBitRate: 1250000, maxFramerate: 60 },
+	{ scaleResolutionDownBy: 2, maxBitRate: 1500000, maxFramerate: 60 },
+	{ scaleResolutionDownBy: 1, maxBitRate: 2000000, maxFramerate: 60 },
 ]
 
 // let encodingVP8 = [
@@ -22437,7 +22437,10 @@ const createSendTransport = async ({ socket, parameter }) => {
 			parameter.producerTransport.on("connectionstatechange", async (e) => {
 				try {
 					console.log("- State Change Producer : ", e)
-					// if (e == "failed") goToLobby()
+					if (e == "failed") {
+						socket.close()
+						window.location.reload()
+					}
 				} catch (error) {
 					console.log("- Error Connecting State Change Producer : ", error)
 				}
@@ -22505,6 +22508,10 @@ const connectSendTransport = async (parameter) => {
 		// 	}
 		// }, 1000)
 	} catch (error) {
+		window.alert(`Error getting your stream\nPlease make sure your camera is working\nThis page will refresh in a few seconds\n`)
+		setTimeout(() => {
+			window.location.reload()
+		}, 7000)
 		console.log("- Error Connecting Transport Producer : ", error)
 	}
 }
@@ -22591,7 +22598,7 @@ const connectRecvTransport = async ({ parameter, consumerTransport, socket, remo
 					// 				console.log("- With Codec : ", value.bytesReceived - withCodec)
 					// 				withCodec = value.bytesReceived
 					// 				// break
-					// 			} 
+					// 			}
 					// 		}
 					// 	}, 1000)
 					// }
@@ -23432,8 +23439,25 @@ const { createMyVideo, removeVideoAndAudio, updatingLayout, changeLayout, change
 
 let parameter
 
+// const socket = require("socket.io-client")("/")
+
+// socket.on("connect_error", (err) => {
+// 	console.log(`connect_error due to ${err.message}`)
+// })
+
+// socket.on("connect_failed", (err) => {
+// 	console.log(`connect_error due to ${err.message}`)
+// })
+
 const socket = io("/")
-// const socket = io("https://192.168.205.229:9188/")
+console.log(socket)
+
+// socket.io.on("error", (error) => {
+// 	console.log("-Socket Error : ", error)
+// })
+// socket.io.on("ping", () => {
+// 	console.log("- Ping Socket")
+// })
 
 socket.on("connection-success", async ({ socketId }) => {
 	try {
@@ -23448,7 +23472,6 @@ socket.on("connection-success", async ({ socketId }) => {
 		await getMyStream(parameter)
 		await createMyVideo(parameter)
 		await joinRoom({ socket, parameter })
-		// console.log("- Parameter : ", parameter)
 	} catch (error) {
 		console.log("- Error On Connecting : ", error)
 	}
@@ -23931,11 +23954,29 @@ optionalButtonTrigger.addEventListener("click", (e) => {
 const hangUpButton = document.getElementById("user-hang-up-button")
 hangUpButton.addEventListener("click", () => {
 	try {
+		socket.close()
 		localStorage.clear()
 		window.location.href = window.location.origin
 	} catch (error) {
 		console.log("- Error At Hang Up Button : ", error)
 	}
+})
+
+window.addEventListener("beforeunload", function (event) {
+	socket.close()
+	localStorage.clear()
+	window.location.href = window.location.origin
+})
+
+window.addEventListener("online", function () {
+	console.log("Network is online")
+	// Your custom action when the network becomes available
+})
+
+window.addEventListener("offline", function () {
+	console.log("Network is offline")
+	socket.close()
+	// Your custom action when the network becomes unavailable
 })
 
 const hideOptionalMenu = () => {
