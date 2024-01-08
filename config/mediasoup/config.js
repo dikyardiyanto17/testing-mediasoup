@@ -14,6 +14,15 @@ let ipServer = "192.168.205.229" // RDS co.id
 // let ipServer = "test-meet.dikyardiyanto.site"
 // let ipServer = "172.67.159.191" // test-meet ip dns cloudflare
 // let ipServer = "104.21.9.106" // test-meet ip dns cloudflare
+// let ipServer = "192.168.100.14" // Gemoy
+// let ipServer = "192.168.3.237" // Indonesia Merdeka
+// let ipServer = "147.139.136.209" // Wire Guard
+// let ipServer = "103.119.141.42"
+
+// let privateIp = "103.119.141.42"
+// let privateIp = "192.168.100.14"
+// let privateIp = "10.10.28.2"
+let privateIp = "0.0.0.0"
 
 const webRtcTransport_options = {
 	listenIps: [
@@ -79,25 +88,33 @@ const listenInfo = {
 	listenInfos: [
 		{
 			protocol: "udp",
+			ip: privateIp,
 			// ip: "0.0.0.0",
-			ip: "192.168.205.229",
+			// ip: "192.168.100.14",
+			// ip: "192.168.205.229",
 			// ip: "192.168.18.68",
 			// ip: "127.0.0.1",
 			announcedIp: ipServer,
 			// announcedIp: "192.168.205.229",
 			// announcedIp: "telepati.poc-pkt.rds.co.id",
+			// port: 9188
 			// port: 20333
+			port: 1028
 		},
 		{
 			protocol: "tcp",
+			ip: privateIp,
 			// ip: "0.0.0.0",
-			ip: "192.168.205.229",
+			// ip: "192.168.100.14",
+			// ip: "192.168.205.229",
 			// ip: "192.168.18.68",
 			// ip: "127.0.0.1",
 			announcedIp: ipServer,
 			// announcedIp: "192.168.205.229",
 			// announcedIp: "telepati.poc-pkt.rds.co.id",
+			// port: 9188
 			// port: 80
+			port: 1028
 		},
 	],
 }
