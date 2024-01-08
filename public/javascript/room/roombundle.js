@@ -23964,7 +23964,6 @@ hangUpButton.addEventListener("click", () => {
 
 window.addEventListener("beforeunload", function (event) {
 	socket.close()
-	localStorage.clear()
 	window.location.href = window.location.origin
 })
 
