@@ -23984,7 +23984,7 @@ hangUpButton.addEventListener("click", () => {
 })
 
 window.addEventListener("beforeunload", function (event) {
-	socket.close()
+	window.location.href = window.location.origin
 })
 
 window.addEventListener("online", function () {
