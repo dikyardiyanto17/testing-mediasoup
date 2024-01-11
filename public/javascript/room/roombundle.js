@@ -23703,6 +23703,7 @@ switchCameraButton.addEventListener("click", async () => {
 	let isActive = document.getElementById("turn-on-off-camera-icons").classList
 	await switchCamera({ parameter })
 	if (isActive[1] == "fa-video-slash") {
+		cameraButton.classList.replace("button-small-custom-clicked", "button-small-custom")
 		isActive.add("fa-video")
 		isActive.remove("fa-video-slash")
 		turnOffOnCamera({ id: socket.id, status: true })
@@ -23762,66 +23763,130 @@ userListButton.addEventListener("click", () => {
 	let videoContainer = document.getElementById("video-container")
 	let userListContainer = document.getElementById("user-bar")
 	let chatContainer = document.getElementById("chat-bar-box-id")
-	if (!isInScreenSharingMode && userListButton.classList[1] == "button-small-custom") {
-		chatButton.className = "btn button-small-custom"
-		chatContainer.className = "hide-side-bar"
-		userListButton.classList.remove("button-small-custom")
-		userListButton.classList.add("button-small-custom-clicked")
-		videoContainer.style.minWidth = "75%"
-		videoContainer.style.maxWidth = "75%"
-		userListContainer.className = "show-side-bar"
-		userListButton.setAttribute("disabled", true)
-		chatButton.setAttribute("disabled", true)
-		scrollToBottom()
-		setTimeout(() => {
-			chatButton.removeAttribute("disabled")
-			userListButton.removeAttribute("disabled")
-		}, 1000)
-	} else if (!isInScreenSharingMode && userListButton.classList[1] == "button-small-custom-clicked") {
-		userListButton.classList.remove("button-small-custom-clicked")
-		userListButton.classList.add("button-small-custom")
-		videoContainer.style.minWidth = "100%"
-		videoContainer.style.maxWidth = "100%"
-		userListButton.setAttribute("disabled", true)
-		chatButton.setAttribute("disabled", true)
-		setTimeout(() => {
-			chatButton.removeAttribute("disabled")
-			userListButton.removeAttribute("disabled")
-			userListContainer.className = "hide-side-bar"
-		}, 1000)
-	} else if (isInScreenSharingMode && userListButton.classList[1] == "button-small-custom") {
-		let screenSharingContainer = document.getElementById("screen-sharing-container")
-		chatButton.className = "btn button-small-custom"
-		chatContainer.className = "hide-side-bar"
-		userListButton.classList.remove("button-small-custom")
-		userListButton.classList.add("button-small-custom-clicked")
-		screenSharingContainer.style.minWidth = "75%"
-		screenSharingContainer.style.maxWidth = "75%"
-		videoContainer.style.minWidth = "75%"
-		videoContainer.style.maxWidth = "75%"
-		userListContainer.className = "show-side-bar"
-		userListButton.setAttribute("disabled", true)
-		chatButton.setAttribute("disabled", true)
-		scrollToBottom()
-		setTimeout(() => {
-			chatButton.removeAttribute("disabled")
-			userListButton.removeAttribute("disabled")
-		}, 1000)
-	} else if (isInScreenSharingMode && userListButton.classList[1] == "button-small-custom-clicked") {
-		let screenSharingContainer = document.getElementById("screen-sharing-container")
-		userListButton.classList.remove("button-small-custom-clicked")
-		userListButton.classList.add("button-small-custom")
-		screenSharingContainer.style.minWidth = "100%"
-		screenSharingContainer.style.maxWidth = "100%"
-		videoContainer.style.minWidth = "100%"
-		videoContainer.style.maxWidth = "100%"
-		userListButton.setAttribute("disabled", true)
-		chatButton.setAttribute("disabled", true)
-		setTimeout(() => {
-			chatButton.removeAttribute("disabled")
-			userListButton.removeAttribute("disabled")
-			userListContainer.className = "hide-side-bar"
-		}, 1000)
+	let sideBarContainer = document.getElementById("side-bar-container")
+	if (window.innerWidth <= 950) {
+		if (!isInScreenSharingMode && userListButton.classList[1] == "button-small-custom") {
+			sideBarContainer.style.right = "0%"
+			chatButton.className = "btn button-small-custom"
+			chatContainer.className = "hide-side-bar"
+			userListButton.classList.remove("button-small-custom")
+			userListButton.classList.add("button-small-custom-clicked")
+			userListContainer.className = "show-side-bar"
+			userListButton.setAttribute("disabled", true)
+			chatButton.setAttribute("disabled", true)
+			scrollToBottom()
+			setTimeout(() => {
+				// sideBarContainer.removeAttribute("style")
+				chatButton.removeAttribute("disabled")
+				userListButton.removeAttribute("disabled")
+			}, 1000)
+		} else if (!isInScreenSharingMode && userListButton.classList[1] == "button-small-custom-clicked") {
+			sideBarContainer.style.right = "-100%"
+			userListButton.classList.remove("button-small-custom-clicked")
+			userListButton.classList.add("button-small-custom")
+			userListButton.setAttribute("disabled", true)
+			chatButton.setAttribute("disabled", true)
+			setTimeout(() => {
+				sideBarContainer.removeAttribute("style")
+				chatButton.removeAttribute("disabled")
+				userListButton.removeAttribute("disabled")
+				userListContainer.className = "hide-side-bar"
+			}, 1000)
+		} else if (isInScreenSharingMode && userListButton.classList[1] == "button-small-custom") {
+			sideBarContainer.style.right = "0%"
+			chatButton.className = "btn button-small-custom"
+			chatContainer.className = "hide-side-bar"
+			userListButton.classList.remove("button-small-custom")
+			userListButton.classList.add("button-small-custom-clicked")
+			userListContainer.className = "show-side-bar"
+			userListButton.setAttribute("disabled", true)
+			chatButton.setAttribute("disabled", true)
+			scrollToBottom()
+			setTimeout(() => {
+				// sideBarContainer.removeAttribute("style")
+				chatButton.removeAttribute("disabled")
+				userListButton.removeAttribute("disabled")
+			}, 1000)
+		} else if (isInScreenSharingMode && userListButton.classList[1] == "button-small-custom-clicked") {
+			sideBarContainer.style.right = "-100%"
+			userListButton.classList.remove("button-small-custom-clicked")
+			userListButton.classList.add("button-small-custom")
+			userListButton.setAttribute("disabled", true)
+			chatButton.setAttribute("disabled", true)
+			setTimeout(() => {
+				sideBarContainer.removeAttribute("style")
+				chatButton.removeAttribute("disabled")
+				userListButton.removeAttribute("disabled")
+				userListContainer.className = "hide-side-bar"
+			}, 1000)
+		}
+	} else {
+		sideBarContainer.style.minWidth = "25%"
+		if (!isInScreenSharingMode && userListButton.classList[1] == "button-small-custom") {
+			chatButton.className = "btn button-small-custom"
+			chatContainer.className = "hide-side-bar"
+			userListButton.classList.remove("button-small-custom")
+			userListButton.classList.add("button-small-custom-clicked")
+			videoContainer.style.minWidth = "75%"
+			videoContainer.style.maxWidth = "75%"
+			userListContainer.className = "show-side-bar"
+			userListButton.setAttribute("disabled", true)
+			chatButton.setAttribute("disabled", true)
+			scrollToBottom()
+			setTimeout(() => {
+				sideBarContainer.removeAttribute("style")
+				chatButton.removeAttribute("disabled")
+				userListButton.removeAttribute("disabled")
+			}, 1000)
+		} else if (!isInScreenSharingMode && userListButton.classList[1] == "button-small-custom-clicked") {
+			userListButton.classList.remove("button-small-custom-clicked")
+			userListButton.classList.add("button-small-custom")
+			videoContainer.style.minWidth = "100%"
+			videoContainer.style.maxWidth = "100%"
+			userListButton.setAttribute("disabled", true)
+			chatButton.setAttribute("disabled", true)
+			setTimeout(() => {
+				sideBarContainer.removeAttribute("style")
+				chatButton.removeAttribute("disabled")
+				userListButton.removeAttribute("disabled")
+				userListContainer.className = "hide-side-bar"
+			}, 1000)
+		} else if (isInScreenSharingMode && userListButton.classList[1] == "button-small-custom") {
+			let screenSharingContainer = document.getElementById("screen-sharing-container")
+			chatButton.className = "btn button-small-custom"
+			chatContainer.className = "hide-side-bar"
+			userListButton.classList.remove("button-small-custom")
+			userListButton.classList.add("button-small-custom-clicked")
+			screenSharingContainer.style.minWidth = "75%"
+			screenSharingContainer.style.maxWidth = "75%"
+			videoContainer.style.minWidth = "75%"
+			videoContainer.style.maxWidth = "75%"
+			userListContainer.className = "show-side-bar"
+			userListButton.setAttribute("disabled", true)
+			chatButton.setAttribute("disabled", true)
+			scrollToBottom()
+			setTimeout(() => {
+				sideBarContainer.removeAttribute("style")
+				chatButton.removeAttribute("disabled")
+				userListButton.removeAttribute("disabled")
+			}, 1000)
+		} else if (isInScreenSharingMode && userListButton.classList[1] == "button-small-custom-clicked") {
+			let screenSharingContainer = document.getElementById("screen-sharing-container")
+			userListButton.classList.remove("button-small-custom-clicked")
+			userListButton.classList.add("button-small-custom")
+			screenSharingContainer.style.minWidth = "100%"
+			screenSharingContainer.style.maxWidth = "100%"
+			videoContainer.style.minWidth = "100%"
+			videoContainer.style.maxWidth = "100%"
+			userListButton.setAttribute("disabled", true)
+			chatButton.setAttribute("disabled", true)
+			setTimeout(() => {
+				sideBarContainer.removeAttribute("style")
+				chatButton.removeAttribute("disabled")
+				userListButton.removeAttribute("disabled")
+				userListContainer.className = "hide-side-bar"
+			}, 1000)
+		}
 	}
 })
 
@@ -23832,74 +23897,146 @@ chatButton.addEventListener("click", () => {
 	let userListContainer = document.getElementById("user-bar")
 	let chatContainer = document.getElementById("chat-bar-box-id")
 	let iconsNotification = document.getElementById("notification-element-id")
-	if (!isInScreenSharingMode && chatButton.classList[1] == "button-small-custom") {
-		userListButton.className = "btn button-small-custom"
-		userListContainer.className = "hide-side-bar"
-		chatButton.classList.remove("button-small-custom")
-		chatButton.classList.add("button-small-custom-clicked")
-		videoContainer.style.minWidth = "75%"
-		videoContainer.style.maxWidth = "75%"
-		chatContainer.className = "show-side-bar"
-		userListButton.setAttribute("disabled", true)
-		chatButton.setAttribute("disabled", true)
-		iconsNotification.className = "fas fa-envelope notification invisible"
-		setTimeout(() => {
-			chatButton.removeAttribute("disabled")
-			userListButton.removeAttribute("disabled")
-		}, 1000)
-	} else if (!isInScreenSharingMode && chatButton.classList[1] == "button-small-custom-clicked") {
-		chatButton.classList.remove("button-small-custom-clicked")
-		chatButton.classList.add("button-small-custom")
-		videoContainer.style.minWidth = "100%"
-		videoContainer.style.maxWidth = "100%"
-		userListButton.setAttribute("disabled", true)
-		chatButton.setAttribute("disabled", true)
-		let isLineNewMessageExist = document.getElementById("new-message-notification")
-		if (isLineNewMessageExist) {
-			isLineNewMessageExist.remove()
-		}
-		setTimeout(() => {
-			chatButton.removeAttribute("disabled")
-			userListButton.removeAttribute("disabled")
-			chatContainer.className = "hide-side-bar"
-		}, 1000)
-	} else if (isInScreenSharingMode && chatButton.classList[1] == "button-small-custom") {
-		let screenSharingContainer = document.getElementById("screen-sharing-container")
-		userListButton.className = "btn button-small-custom"
-		userListContainer.className = "hide-side-bar"
-		chatButton.classList.remove("button-small-custom")
-		chatButton.classList.add("button-small-custom-clicked")
-		screenSharingContainer.style.minWidth = "75%"
-		screenSharingContainer.style.maxWidth = "75%"
-		videoContainer.style.minWidth = "75%"
-		videoContainer.style.maxWidth = "75%"
-		chatContainer.className = "show-side-bar"
-		userListButton.setAttribute("disabled", true)
-		chatButton.setAttribute("disabled", true)
-		iconsNotification.className = "fas fa-envelope notification invisible"
-		setTimeout(() => {
-			chatButton.removeAttribute("disabled")
-			userListButton.removeAttribute("disabled")
-		}, 1000)
-	} else if (isInScreenSharingMode && chatButton.classList[1] == "button-small-custom-clicked") {
-		let screenSharingContainer = document.getElementById("screen-sharing-container")
-		chatButton.classList.remove("button-small-custom-clicked")
-		chatButton.classList.add("button-small-custom")
-		screenSharingContainer.style.minWidth = "100%"
-		screenSharingContainer.style.maxWidth = "100%"
-		videoContainer.style.minWidth = "100%"
-		videoContainer.style.maxWidth = "100%"
-		userListButton.setAttribute("disabled", true)
-		chatButton.setAttribute("disabled", true)
-		let isLineNewMessageExist = document.getElementById("new-message-notification")
-		if (isLineNewMessageExist) {
-			isLineNewMessageExist.remove()
-		}
-		setTimeout(() => {
-			chatButton.removeAttribute("disabled")
-			userListButton.removeAttribute("disabled")
+	let sideBarContainer = document.getElementById("side-bar-container")
+	if (window.innerWidth <= 950) {
+		if (!isInScreenSharingMode && chatButton.classList[1] == "button-small-custom") {
+			sideBarContainer.style.right = "0%"
+			userListButton.className = "btn button-small-custom"
 			userListContainer.className = "hide-side-bar"
-		}, 1000)
+			chatButton.classList.remove("button-small-custom")
+			chatButton.classList.add("button-small-custom-clicked")
+			chatContainer.className = "show-side-bar"
+			userListButton.setAttribute("disabled", true)
+			chatButton.setAttribute("disabled", true)
+			iconsNotification.className = "fas fa-envelope notification invisible"
+			setTimeout(() => {
+				// sideBarContainer.removeAttribute("style")
+				chatButton.removeAttribute("disabled")
+				userListButton.removeAttribute("disabled")
+			}, 1000)
+		} else if (!isInScreenSharingMode && chatButton.classList[1] == "button-small-custom-clicked") {
+			sideBarContainer.style.right = "-100%"
+			chatButton.classList.remove("button-small-custom-clicked")
+			chatButton.classList.add("button-small-custom")
+			userListButton.setAttribute("disabled", true)
+			chatButton.setAttribute("disabled", true)
+			let isLineNewMessageExist = document.getElementById("new-message-notification")
+			if (isLineNewMessageExist) {
+				isLineNewMessageExist.remove()
+			}
+			setTimeout(() => {
+				sideBarContainer.removeAttribute("style")
+				chatButton.removeAttribute("disabled")
+				userListButton.removeAttribute("disabled")
+				chatContainer.className = "hide-side-bar"
+			}, 1000)
+		} else if (isInScreenSharingMode && chatButton.classList[1] == "button-small-custom") {
+			sideBarContainer.style.right = "0%"
+			userListButton.className = "btn button-small-custom"
+			userListContainer.className = "hide-side-bar"
+			chatButton.classList.remove("button-small-custom")
+			chatButton.classList.add("button-small-custom-clicked")
+			chatContainer.className = "show-side-bar"
+			userListButton.setAttribute("disabled", true)
+			chatButton.setAttribute("disabled", true)
+			iconsNotification.className = "fas fa-envelope notification invisible"
+			setTimeout(() => {
+				// sideBarContainer.removeAttribute("style")
+				chatButton.removeAttribute("disabled")
+				userListButton.removeAttribute("disabled")
+			}, 1000)
+		} else if (isInScreenSharingMode && chatButton.classList[1] == "button-small-custom-clicked") {
+			sideBarContainer.style.right = "-100%"
+			chatButton.classList.remove("button-small-custom-clicked")
+			chatButton.classList.add("button-small-custom")
+			userListButton.setAttribute("disabled", true)
+			chatButton.setAttribute("disabled", true)
+			let isLineNewMessageExist = document.getElementById("new-message-notification")
+			if (isLineNewMessageExist) {
+				isLineNewMessageExist.remove()
+			}
+			setTimeout(() => {
+				sideBarContainer.removeAttribute("style")
+				chatButton.removeAttribute("disabled")
+				userListButton.removeAttribute("disabled")
+				userListContainer.className = "hide-side-bar"
+			}, 1000)
+		}
+	} else {
+		sideBarContainer.style.minWidth = "25%"
+		if (!isInScreenSharingMode && chatButton.classList[1] == "button-small-custom") {
+			userListButton.className = "btn button-small-custom"
+			userListContainer.className = "hide-side-bar"
+			chatButton.classList.remove("button-small-custom")
+			chatButton.classList.add("button-small-custom-clicked")
+			videoContainer.style.minWidth = "75%"
+			videoContainer.style.maxWidth = "75%"
+			chatContainer.className = "show-side-bar"
+			userListButton.setAttribute("disabled", true)
+			chatButton.setAttribute("disabled", true)
+			iconsNotification.className = "fas fa-envelope notification invisible"
+			setTimeout(() => {
+				sideBarContainer.removeAttribute("style")
+				chatButton.removeAttribute("disabled")
+				userListButton.removeAttribute("disabled")
+			}, 1000)
+		} else if (!isInScreenSharingMode && chatButton.classList[1] == "button-small-custom-clicked") {
+			chatButton.classList.remove("button-small-custom-clicked")
+			chatButton.classList.add("button-small-custom")
+			videoContainer.style.minWidth = "100%"
+			videoContainer.style.maxWidth = "100%"
+			userListButton.setAttribute("disabled", true)
+			chatButton.setAttribute("disabled", true)
+			let isLineNewMessageExist = document.getElementById("new-message-notification")
+			if (isLineNewMessageExist) {
+				isLineNewMessageExist.remove()
+			}
+			setTimeout(() => {
+				sideBarContainer.removeAttribute("style")
+				chatButton.removeAttribute("disabled")
+				userListButton.removeAttribute("disabled")
+				chatContainer.className = "hide-side-bar"
+			}, 1000)
+		} else if (isInScreenSharingMode && chatButton.classList[1] == "button-small-custom") {
+			let screenSharingContainer = document.getElementById("screen-sharing-container")
+			userListButton.className = "btn button-small-custom"
+			userListContainer.className = "hide-side-bar"
+			chatButton.classList.remove("button-small-custom")
+			chatButton.classList.add("button-small-custom-clicked")
+			screenSharingContainer.style.minWidth = "75%"
+			screenSharingContainer.style.maxWidth = "75%"
+			videoContainer.style.minWidth = "75%"
+			videoContainer.style.maxWidth = "75%"
+			chatContainer.className = "show-side-bar"
+			userListButton.setAttribute("disabled", true)
+			chatButton.setAttribute("disabled", true)
+			iconsNotification.className = "fas fa-envelope notification invisible"
+			setTimeout(() => {
+				sideBarContainer.removeAttribute("style")
+				chatButton.removeAttribute("disabled")
+				userListButton.removeAttribute("disabled")
+			}, 1000)
+		} else if (isInScreenSharingMode && chatButton.classList[1] == "button-small-custom-clicked") {
+			let screenSharingContainer = document.getElementById("screen-sharing-container")
+			chatButton.classList.remove("button-small-custom-clicked")
+			chatButton.classList.add("button-small-custom")
+			screenSharingContainer.style.minWidth = "100%"
+			screenSharingContainer.style.maxWidth = "100%"
+			videoContainer.style.minWidth = "100%"
+			videoContainer.style.maxWidth = "100%"
+			userListButton.setAttribute("disabled", true)
+			chatButton.setAttribute("disabled", true)
+			let isLineNewMessageExist = document.getElementById("new-message-notification")
+			if (isLineNewMessageExist) {
+				isLineNewMessageExist.remove()
+			}
+			setTimeout(() => {
+				sideBarContainer.removeAttribute("style")
+				chatButton.removeAttribute("disabled")
+				userListButton.removeAttribute("disabled")
+				userListContainer.className = "hide-side-bar"
+			}, 1000)
+		}
 	}
 })
 
@@ -23985,6 +24122,7 @@ hangUpButton.addEventListener("click", () => {
 
 window.addEventListener("beforeunload", function (event) {
 	window.location.href = window.location.origin
+	socket.close()
 })
 
 window.addEventListener("online", function () {

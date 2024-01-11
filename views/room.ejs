@@ -92,6 +92,7 @@
             width: 25%;
             height: 100%;
             top: 0;
+            transition: 1s;
         }
 
         #user-bar {
@@ -413,6 +414,13 @@
                 display: block !important;
             }
 
+            #side-bar-container {
+                position: absolute;
+                width: 100% !important;
+                right: -100%;
+                z-index: 3;
+            }
+
             .optional-button-menu {
                 position: absolute;
                 display: flex !important;
@@ -473,14 +481,14 @@
                 width: 25%;
                 height: 25%;
                 margin: 5px;
-                border-radius: 0;
+                border-radius: 10px;
             }
 
             .optional-button-menu-show>.button-small-custom-clicked {
                 width: 25%;
                 height: 25%;
                 margin: 5px;
-                border-radius: 0;
+                border-radius: 10px;
                 transition: 0.3s;
                 background: #fc5d5b;
             }
@@ -894,7 +902,7 @@
             overflow: hidden;
             display: flex;
             flex-wrap: wrap;
-            word-break: break-all;
+            word-break: break-word;
         }
 
         .your-message>.inside-message {
@@ -907,7 +915,7 @@
             overflow: hidden;
             display: flex;
             flex-wrap: wrap;
-            word-break: break-all;
+            word-break: break-word;
         }
 
         .received-messages {
