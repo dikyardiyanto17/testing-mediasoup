@@ -22590,14 +22590,15 @@ const connectRecvTransport = async ({ parameter, consumerTransport, socket, remo
 								const buffer = document.createElement("img")
 								buffer.src = "/assets/pictures/ZKZg.gif"
 								buffer.id = `buffer-${params.producerSocketOwner}`
-								buffer.style.zIndex = 100
+								buffer.style.zIndex = "100"
 								buffer.style.maxHeight = "100%"
 								buffer.style.maxWidth = "100%"
+								buffer.style.position = "absolute"
 								userVideo.appendChild(buffer)
 							}
 						} else if (e == "connected"){
 							const removeBuffer = document.getElementById(`buffer-${params.producerSocketOwner}`)
-							removeBuffer.remove()
+							if (removeBuffer) removeBuffer.remove()
 						}
 					})
 
@@ -23229,7 +23230,7 @@ const createVideo = ({ id, videoClassName, picture, username, micTrigger }) => {
 			const micIcons = `<div class="icons-mic"><img src="/assets/pictures/mic${
 				micTrigger ? "On" : "Off"
 			}.png" class="mic-image" id="user-mic-${id}"/></div>`
-			userVideoContainer.innerHTML = `${micIcons}<video id="v-${id}" class="user-video" poster="/assets/pictures/unknown.jpg" autoplay></video>${addPicture}<div class="username">${username}</div>`
+			userVideoContainer.innerHTML = `${micIcons}<video id="v-${id}" class="user-video" autoplay></video>${addPicture}<div class="username">${username}</div>`
 			videoContainer.appendChild(userVideoContainer)
 		}
 	} catch (error) {

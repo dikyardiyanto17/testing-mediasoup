@@ -31,7 +31,7 @@ const createVideo = ({ id, videoClassName, picture, username, micTrigger }) => {
 			const micIcons = `<div class="icons-mic"><img src="/assets/pictures/mic${
 				micTrigger ? "On" : "Off"
 			}.png" class="mic-image" id="user-mic-${id}"/></div>`
-			userVideoContainer.innerHTML = `${micIcons}<video id="v-${id}" class="user-video" poster="/assets/pictures/unknown.jpg" autoplay></video>${addPicture}<div class="username">${username}</div>`
+			userVideoContainer.innerHTML = `${micIcons}<video id="v-${id}" class="user-video" autoplay></video>${addPicture}<div class="username">${username}</div>`
 			videoContainer.appendChild(userVideoContainer)
 		}
 	} catch (error) {

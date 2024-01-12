@@ -226,14 +226,15 @@ const connectRecvTransport = async ({ parameter, consumerTransport, socket, remo
 								const buffer = document.createElement("img")
 								buffer.src = "/assets/pictures/ZKZg.gif"
 								buffer.id = `buffer-${params.producerSocketOwner}`
-								buffer.style.zIndex = 100
+								buffer.style.zIndex = "100"
 								buffer.style.maxHeight = "100%"
 								buffer.style.maxWidth = "100%"
+								buffer.style.position = "absolute"
 								userVideo.appendChild(buffer)
 							}
 						} else if (e == "connected"){
 							const removeBuffer = document.getElementById(`buffer-${params.producerSocketOwner}`)
-							removeBuffer.remove()
+							if (removeBuffer) removeBuffer.remove()
 						}
 					})
 
