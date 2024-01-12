@@ -5,7 +5,8 @@ const { createDevice } = require("./mediasoup")
 const getMyStream = async (parameter) => {
 	try {
 		let config = {
-			video: localStorage.getItem("is_video_active") == "true" ? { deviceId: { exact: localStorage.getItem("selectedVideoDevices") }, frameRate: { ideal: 30, max: 35 } } : false,
+			// video: localStorage.getItem("is_video_active") == "true" ? { deviceId: { exact: localStorage.getItem("selectedVideoDevices") }, frameRate: { ideal: 30, max: 35 } } : false,
+			video: localStorage.getItem("is_video_active") == "true" ? { deviceId: { exact: localStorage.getItem("selectedVideoDevices") } } : false,
 			audio: localStorage.getItem("selectedVideoDevices")
 				? {
 						deviceId: { exact: localStorage.getItem("selectedAudioDevices") },
@@ -88,6 +89,15 @@ const getMyStream = async (parameter) => {
 		createUserList({ username: "Diky", socketId: parameter.socketId, cameraTrigger: videoCondition, picture, micTrigger: audioCondition })
 	} catch (error) {
 		console.log("- Error Getting My Stream : ", error)
+		let ae = document.getElementById("alert-error")
+		ae.className = "show"
+		ae.innerHTML = `Error getting your stream\nPlease make sure your camera is working\nThis page will refresh in a few seconds`
+		// Show Warning
+		setTimeout(() => {
+			ae.className = ae.className.replace("show", "")
+			ae.innerHTML = ``
+		}, 5000)
+		return
 	}
 }
 

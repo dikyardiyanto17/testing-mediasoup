@@ -16,6 +16,25 @@ let isAudioActive = true
 let isVideoActive = true
 let videoImage = document.getElementById("video-image")
 
+const everythingIsReady = () => {
+	try {
+		const googleButton = document.getElementById("g-button")
+		const audioButton = document.getElementById("select-audio-button")
+		const videoButton = document.getElementById("select-video-button")
+		const videoDropdownButton = document.getElementById("dropdownMenuButton-video")
+		const audioDropdownButton = document.getElementById("dropdownMenuButton-audio")
+		googleButton.removeAttribute("style")
+		videoDropdownButton.removeAttribute("disabled")
+		audioDropdownButton.removeAttribute("disabled")
+		videoButton.removeAttribute("disabled")
+		audioButton.removeAttribute("disabled")
+		const submitButton = document.getElementById("submit-button")
+		submitButton.removeAttribute("disabled")
+	} catch (error) {
+		console.log(error)
+	}
+}
+
 const init = async () => {
 	try {
 		localStorage.setItem("room_id", roomName)
@@ -53,16 +72,7 @@ const getMyMic = async () => {
 		isReady.audio = true
 
 		if (isReady.audio && isReady.video) {
-			let audioButton = document.getElementById("select-audio-button")
-			let videoButton = document.getElementById("select-video-button")
-			let videoDropdownButton = document.getElementById("dropdownMenuButton-video")
-			let audioDropdownButton = document.getElementById("dropdownMenuButton-audio")
-			videoDropdownButton.removeAttribute("disabled")
-			audioDropdownButton.removeAttribute("disabled")
-			videoButton.removeAttribute("disabled")
-			audioButton.removeAttribute("disabled")
-			let submitButton = document.getElementById("submit-button")
-			submitButton.removeAttribute("disabled")
+			await everythingIsReady()
 		}
 
 		let audioIcons = document.getElementById("select-audio")
@@ -130,16 +140,7 @@ const getMyDevices = async (config) => {
 		isReady.video = true
 
 		if (isReady.audio && isReady.video) {
-			let audioButton = document.getElementById("select-audio-button")
-			let videoButton = document.getElementById("select-video-button")
-			let videoDropdownButton = document.getElementById("dropdownMenuButton-video")
-			let audioDropdownButton = document.getElementById("dropdownMenuButton-audio")
-			videoDropdownButton.removeAttribute("disabled")
-			audioDropdownButton.removeAttribute("disabled")
-			videoButton.removeAttribute("disabled")
-			audioButton.removeAttribute("disabled")
-			let submitButton = document.getElementById("submit-button")
-			submitButton.removeAttribute("disabled")
+			await everythingIsReady()
 		}
 
 		let videoIcons = document.getElementById("select-video")
@@ -401,6 +402,17 @@ init()
 
 const handleCredentialResponse = async (response) => {
 	try {
+		if (!isReady.video || !isReady.audio) {
+			let ae = document.getElementById("alert-error")
+			ae.className = "show"
+			ae.innerHTML = `Your stream is not ready`
+			// Show Warning
+			setTimeout(() => {
+				ae.className = ae.className.replace("show", "")
+				ae.innerHTML = ``
+			}, 3000)
+			return
+		}
 		const result = await fetch(baseUrl + "google-auth", {
 			method: "POST",
 			headers: {

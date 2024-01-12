@@ -276,6 +276,18 @@ switchCameraButton.addEventListener("click", async () => {
 
 let screenSharingButton = document.getElementById("user-screen-share-button")
 screenSharingButton.addEventListener("click", () => {
+	if (parameter.isScreenSharing.isScreenSharing && parameter.isScreenSharing.socketId !== parameter.socketId) {
+		let ae = document.getElementById("alert-error")
+		ae.className = "show"
+		ae.innerHTML = `Someone is already screen-sharing`
+		// Show Warning
+		setTimeout(() => {
+			ae.className = ae.className.replace("show", "")
+			ae.innerHTML = ``
+		}, 3000)
+		return
+	}
+	parameter.isScreenSharing.socketId = parameter.socketId
 	if (screenSharingButton.classList[1] == "button-small-custom") {
 		screenSharingButton.classList.remove("button-small-custom")
 		screenSharingButton.classList.add("button-small-custom-clicked")
