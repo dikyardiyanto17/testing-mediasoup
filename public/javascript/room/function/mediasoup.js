@@ -292,7 +292,6 @@ const connectRecvTransport = async ({ parameter, consumerTransport, socket, remo
 						}
 						parameter.allUsers = [...parameter.allUsers, data]
 						updatingLayout({ parameter })
-						changeLayout({ parameter })
 						createVideo({
 							id: params.producerSocketOwner,
 							videoClassName: parameter.videoLayout,
@@ -300,6 +299,7 @@ const connectRecvTransport = async ({ parameter, consumerTransport, socket, remo
 							username: params.username,
 							micTrigger: params.appData.isMicActive,
 						})
+						changeLayout({ parameter })
 						turnOffOnCamera({ id: params.producerSocketOwner, status: false })
 						createUserList({
 							username: params.username,

@@ -666,7 +666,7 @@ optionButton.addEventListener("click", function (event) {
 
 let optionalButtonTrigger = document.getElementById("optional-button-trigger")
 let optionalMenuId = document.getElementById("optional-button-id")
-optionalButtonTrigger.addEventListener("click", (e) => {
+const optionalMenuTrigger = () => {
 	try {
 		let optionalButtonIcon = document.getElementById("optional-button-trigger-icon")
 		if (optionalMenuId.className == "optional-button-menu") {
@@ -679,6 +679,14 @@ optionalButtonTrigger.addEventListener("click", (e) => {
 			optionalMenuId.className = "optional-button-menu"
 			optionalButtonIcon.className = "fas fa-sort-up"
 		}
+	} catch (error) {
+		console.log("- Error At Optional Menu : ", error)
+	}
+}
+optionalButtonTrigger.addEventListener("click", (e) => {
+	try {
+		e.stopPropagation() // Prevent the click event from propagating to the document
+		optionalMenuTrigger()
 	} catch (error) {
 		console.log("- Error At Optional Button Trigger : ", error)
 	}
@@ -724,8 +732,14 @@ const hideOptionalMenu = () => {
 }
 
 // Click event for the document (to hide the option menu when clicking outside)
-document.addEventListener("click", function () {
+document.addEventListener("click", function (e) {
 	hideOptionMenu()
+	const optionalMenus = document.getElementById("optional-button-id")
+	if (window.innerWidth <= 950 && optionalMenuId.className == "optional-button-menu-show" && !optionalMenus.contains(e.target)) {
+		let optionalButtonIcon = document.getElementById("optional-button-trigger-icon")
+		optionalMenuId.className = "optional-button-menu"
+		optionalButtonIcon.className = "fas fa-sort-up"
+	}
 })
 
 module.exports = { socket, parameter }

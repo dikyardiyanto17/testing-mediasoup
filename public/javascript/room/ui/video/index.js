@@ -1,16 +1,16 @@
 const createMyVideo = async (parameter) => {
 	try {
-		let picture = `<div class="${parameter.initialVideo ? "video-on" : "video-off"}" id="user-picture-container-${parameter.socketId}"><img src="${
-			parameter.picture
-		}" class="image-turn-off" id="user-picture-${parameter.socketId}""/></div>`
+		let picture = `<div class="${parameter.initialVideo ? "video-on" : "video-off"}" id="user-picture-container-${parameter.socketId}"><img src="${parameter.picture
+			}" class="image-turn-off" id="user-picture-${parameter.socketId}""/></div>`
 		let videoContainer = document.getElementById("video-container")
 		let userVideoContainer = document.createElement("div")
 		userVideoContainer.id = "vc-" + parameter.socketId
 		userVideoContainer.className = "user-video-container-1"
-		const micIcons = `<div class="icons-mic"><img src="/assets/pictures/mic${
-			parameter.initialAudio ? "On" : "Off"
-		}.png" class="mic-image" id="user-mic-${parameter.socketId}"></div>`
-		userVideoContainer.innerHTML = `${micIcons}<video id="v-${parameter.socketId}" muted autoplay class="user-video"></video>${picture}<div class="username">${parameter.username}</div>`
+		userVideoContainer.style.zIndex = "2"
+		const micIcons = `<div class="icons-mic"><img src="/assets/pictures/mic${parameter.initialAudio ? "On" : "Off"
+			}.png" class="mic-image" id="user-mic-${parameter.socketId}"></div>`
+		// userVideoContainer.innerHTML = `${micIcons}<video id="v-${parameter.socketId}" muted autoplay class="user-video"></video>${picture}<div class="username">${parameter.username}</div>`
+		userVideoContainer.innerHTML = `<div class="outside-video-user">${micIcons}<video id="v-${parameter.socketId}" muted autoplay class="user-video"></video>${picture}<div class="username">${parameter.username}</div></div>`
 		videoContainer.appendChild(userVideoContainer)
 		document.getElementById(`v-${parameter.socketId}`).srcObject = parameter.localStream
 		createAudioVisualizer({ id: parameter.socketId, track: parameter.localStream.getAudioTracks()[0] })
@@ -28,10 +28,10 @@ const createVideo = ({ id, videoClassName, picture, username, micTrigger }) => {
 			let userVideoContainer = document.createElement("div")
 			userVideoContainer.id = "vc-" + id
 			userVideoContainer.className = videoClassName
-			const micIcons = `<div class="icons-mic"><img src="/assets/pictures/mic${
-				micTrigger ? "On" : "Off"
-			}.png" class="mic-image" id="user-mic-${id}"/></div>`
-			userVideoContainer.innerHTML = `${micIcons}<video id="v-${id}" class="user-video" autoplay></video>${addPicture}<div class="username">${username}</div>`
+			const micIcons = `<div class="icons-mic"><img src="/assets/pictures/mic${micTrigger ? "On" : "Off"
+				}.png" class="mic-image" id="user-mic-${id}"/></div>`
+			// userVideoContainer.innerHTML = `${micIcons}<video id="v-${id}" class="user-video" autoplay></video>${addPicture}<div class="username">${username}</div>`
+			userVideoContainer.innerHTML = `<div class="outside-video-user">${micIcons}<video id="v-${id}" class="user-video" autoplay></video>${addPicture}<div class="username">${username}</div></div>`
 			videoContainer.appendChild(userVideoContainer)
 		}
 	} catch (error) {
@@ -88,7 +88,16 @@ const removeUserList = ({ id }) => {
 
 const changeLayout = ({ parameter }) => {
 	try {
-		// parameter
+		// const secondUserVideo = document.getElementById(`vc-${parameter.socketId}`)
+		const userVideoContainer = document.getElementById("video-container")
+		const secondUserVideo = userVideoContainer.children[1]
+		if (parameter.videoLayout == "user-video-container-2" && window.innerWidth <= 950) {
+			secondUserVideo.style.width = "80%"
+			secondUserVideo.style.height = "80%"
+			secondUserVideo.style.position = "static"
+		} else {
+			secondUserVideo.removeAttribute("style")
+		}
 		const userVideoContainers = document.querySelectorAll("." + parameter.previousVideoLayout)
 		userVideoContainers.forEach((container, index) => {
 			container.classList.remove(parameter.previousVideoLayout)
@@ -165,7 +174,7 @@ const createAudioVisualizer = async ({ id, track }) => {
 		const newElement = document.createElement("canvas")
 		newElement.className = "audio-visualizer"
 		newElement.id = "audio-visualizer-" + id
-		const attachTo = document.getElementById(`vc-${id}`)
+		const attachTo = document.getElementById(`vc-${id}`).firstChild
 		if (attachTo) {
 			attachTo.appendChild(newElement)
 

@@ -124,135 +124,97 @@
             position: relative;
         }
 
-        .user-video-container-1 {
-            margin: 10px;
+        .outside-video-user {
+            width: 100%;
+            height: 100%;
             display: flex;
             justify-content: center;
             background-color: black;
-            height: 80%;
-            width: 80%;
             position: relative;
+            transition: 1s;
+        }
+
+        .user-video-container-1 {
+            height: 80%;
+            margin: 10px;
+            width: 80%;
             transition: 1s;
         }
 
         .user-video-container-2 {
-            margin: 10px;
-            display: flex;
-            justify-content: center;
-            background-color: black;
             height: 80%;
+            margin: 10px;
             width: 40%;
-            position: relative;
             transition: 1s;
         }
 
         .user-video-container-3 {
-            margin: 10px;
-            display: flex;
-            justify-content: center;
-            background-color: black;
             height: 40%;
+            margin: 10px;
             width: 40%;
-            position: relative;
             transition: 1s;
         }
 
         .user-video-container-4 {
-            margin: 10px;
-            display: flex;
-            justify-content: center;
-            background-color: black;
             height: 40%;
+            margin: 10px;
             width: 40%;
-            position: relative;
             transition: 1s;
         }
 
         .user-video-container-5 {
-            margin: 10px;
-            display: flex;
-            justify-content: center;
-            background-color: black;
             height: 40%;
+            margin: 10px;
             width: 30%;
-            position: relative;
             transition: 1s;
         }
 
         .user-video-container-6 {
-            margin: 10px;
-            display: flex;
-            justify-content: center;
-            background-color: black;
             height: 40%;
+            margin: 10px;
             width: 30%;
-            position: relative;
             transition: 1s;
         }
 
         .user-video-container-7 {
-            margin: 10px;
-            display: flex;
-            justify-content: center;
-            background-color: black;
             height: 30%;
+            margin: 10px;
             width: 30%;
-            position: relative;
             transition: 1s;
         }
 
         .user-video-container-8 {
-            margin: 10px;
-            display: flex;
-            justify-content: center;
-            background-color: black;
             height: 30%;
+            margin: 10px;
             width: 30%;
-            position: relative;
             transition: 1s;
         }
 
         .user-video-container-9 {
-            margin: 10px;
-            display: flex;
-            justify-content: center;
-            background-color: black;
             height: 30%;
+            margin: 10px;
             width: 30%;
-            position: relative;
             transition: 1s;
         }
 
         .user-video-container-10 {
-            margin: 10px;
-            display: flex;
-            justify-content: center;
-            background-color: black;
             height: 30%;
+            margin: 10px;
             width: 22%;
-            position: relative;
             transition: 1s;
         }
 
         .user-video-container-11 {
-            margin: 10px;
-            display: flex;
-            justify-content: center;
-            background-color: black;
             height: 30%;
+            margin: 10px;
             width: 22%;
-            position: relative;
             transition: 1s;
         }
 
         .user-video-container-12 {
-            margin: 10px;
-            display: flex;
-            justify-content: center;
-            background-color: black;
             height: 30%;
+            margin: 10px;
             width: 22%;
-            position: relative;
             transition: 1s;
         }
 
@@ -483,6 +445,7 @@
                 height: 25%;
                 margin: 5px;
                 border-radius: 10px;
+                padding: 25px;
             }
 
             .optional-button-menu-show>.button-small-custom-clicked {
@@ -492,28 +455,179 @@
                 border-radius: 10px;
                 transition: 0.3s;
                 background: #fc5d5b;
+                padding: 25px;
             }
 
             .optional-button-menu>.button-small-custom {
                 width: 25%;
                 height: 25%;
                 margin: 5px;
-                border-radius: 0;
+                border-radius: 10px;
+                padding: 25px;
             }
 
             .optional-button-menu>.button-small-custom-clicked {
                 width: 25%;
                 height: 25%;
                 margin: 5px;
-                border-radius: 0;
+                border-radius: 10px ;
                 transition: 0.3s;
                 background: #fc5d5b;
+            }
+
+            .user-video-container-2 {
+                height: 25%;
+                margin: 10px;
+                width: 30%;
+                transition: 1s;
+                right: 0;
+                bottom: 0;
+                position: absolute;
             }
 
 
             .hide {
                 display: none !important;
             }
+
+            #user-mic-button {
+                position: relative;
+            }
+
+            #user-mic-button:hover>#user-mic-button-tooltip {
+                display: none;
+            }
+
+            #user-turn-on-off-camera-button:hover>#user-turn-on-off-camera-button-tooltip {
+                display: none;
+            }
+
+            #user-hang-up-button:hover>#user-hang-up-button-tooltip {
+                display: none;
+            }
+
+            #option-button:hover>#option-button-tooltip {
+                display: none;
+            }
+
+            #user-switch-camera-button:hover>#user-switch-camera-button-tooltip {
+                display: block;
+            }
+
+            #user-switch-camera-button {
+                display: flex;
+                flex-direction: column;
+            }
+
+            #user-switch-camera-button-tooltip {
+                border-radius: 0 !important;
+                background-color: rgba(255, 255, 255, 0) !important;
+                font-size: 10px !important;
+                position: static !important;
+                visibility: visible !important;
+                padding: 0 !important;
+                color: #ffffff;
+            }
+
+            #user-screen-share-button:hover>#user-screen-share-button-tooltip {
+                display: block;
+            }
+
+            #user-screen-share-button {
+                display: flex;
+                flex-direction: column;
+            }
+
+            #user-screen-share-button-tooltip {
+                border-radius: 0 !important;
+                background-color: rgba(255, 255, 255, 0) !important;
+                font-size: 10px !important;
+                position: static !important;
+                visibility: visible !important;
+                padding: 0 !important;
+                color: #ffffff;
+            }
+
+            #user-record-button:hover>#user-record-button-tooltip {
+                display: block;
+            }
+
+            #user-record-button {
+                display: flex;
+                flex-direction: column;
+            }
+
+            #user-record-button-tooltip {
+                border-radius: 0 !important;
+                background-color: rgba(255, 255, 255, 0) !important;
+                font-size: 10px !important;
+                position: static !important;
+                visibility: visible !important;
+                padding: 0 !important;
+                color: #ffffff;
+            }
+
+            #user-list-button:hover>#user-list-button-tooltip {
+                display: block;
+            }
+
+            #user-list-button {
+                display: flex;
+                flex-direction: column;
+            }
+
+            #user-list-button-tooltip {
+                border-radius: 0 !important;
+                background-color: rgba(255, 255, 255, 0) !important;
+                font-size: 10px !important;
+                position: static !important;
+                visibility: visible !important;
+                padding: 0 !important;
+                color: #ffffff;
+            }
+
+            #user-chat-button:hover>#user-chat-button-tooltip {
+                display: block;
+            }
+
+            #user-chat-button {
+                display: flex;
+                flex-direction: column;
+            }
+
+            #user-chat-button-tooltip {
+                border-radius: 0 !important;
+                background-color: rgba(255, 255, 255, 0) !important;
+                font-size: 10px !important;
+                position: static !important;
+                visibility: visible !important;
+                padding: 0 !important;
+                color: #ffffff;
+            }
+
+            #share-link-button:hover>#share-link-button-tooltip {
+                display: block;
+            }
+
+            #share-link-button {
+                display: flex;
+                flex-direction: column;
+            }
+
+            #share-link-button-tooltip {
+                border-radius: 0 !important;
+                background-color: rgba(255, 255, 255, 0) !important;
+                font-size: 10px !important;
+                position: static !important;
+                visibility: visible !important;
+                padding: 0 !important;
+                color: #ffffff;
+            }
+
+            #user-video-display-button:hover>#user-video-display-button-tooltip {
+                display: none;
+            }
+
         }
 
         .optional-button-menu {
@@ -1106,41 +1220,41 @@
             </button>
             <div class="optional-button-menu hide" id="optional-button-id">
                 <button class="btn button-small-custom" id="user-switch-camera-button">
-                    <span id="user-switch-camera-button-tooltip">Switch Camera</span>
                     <img src="/assets/pictures/switchCamera.png" />
+                    <span id="user-switch-camera-button-tooltip">Switch Camera</span>
                 </button>
                 <button class="btn button-small-custom" id="user-screen-share-button">
-                    <span id="user-screen-share-button-tooltip">Sharing Screen</span>
                     <img src="/assets/pictures/share.png" />
+                    <span id="user-screen-share-button-tooltip">Sharing Screen</span>
                 </button>
                 <button class="btn button-small-custom" id="user-record-button">
-                    <span id="user-record-button-tooltip">Record</span>
                     <i class="far fa-dot-circle" id="record-image" style="color: #bbb;"></i>
+                    <span id="user-record-button-tooltip">Record</span>
                 </button>
                 <button class="btn button-small-custom" id="user-list-button">
-                    <span id="user-list-button-tooltip">Participants</span>
                     <i class="fas fa-users" style="color: #ffffff;"></i>
+                    <span id="user-list-button-tooltip">Participants</span>
                 </button>
                 <button class="btn button-small-custom" id="user-chat-button">
-                    <span id="user-chat-button-tooltip">Chat</span>
                     <i class="fas fa-envelope notification invisible" style="color: yellow;"
                         id="notification-element-id"></i>
                     <i class="fas fa-comment-dots" style="color: white;"></i>
+                    <span id="user-chat-button-tooltip">Chat</span>
                 </button>
                 <button class="btn button-small-custom" id="share-link-button">
-                    <span id="share-link-button-tooltip">Share Link</span>
                     <i class="far fa-share-square" style="color: white;"></i>
                     <span id="snackbar">Successfully Copied</span>
+                    <span id="share-link-button-tooltip">Share Link</span>
                 </button>
             </div>
             <button class="btn button-small-custom" id="option-button">
-                <span id="option-button-tooltip">Settings</span>
                 <i class="fas fa-ellipsis-v" style="color: white;"></i>
                 <div id="option-menu" class="invisible">
                     <ul id="all-option-menu">
                         <li id="stay-tuned" style="font-size: 13px;">Stay Tuned For New Feature</li>
                     </ul>
                 </div>
+                <span id="option-button-tooltip">Settings</span>
             </button>
         </section>
     </div>
