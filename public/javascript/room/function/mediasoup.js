@@ -81,6 +81,23 @@ const createSendTransport = async ({ socket, parameter }) => {
 					console.log("- Error Connecting State Change Producer : ", error)
 				}
 			})
+
+			socket.emit("create-webrtc-transport", { consumer: true, roomName: parameter.roomName }, ({ params }) => {
+				parameter.consumerTransport = parameter.device.createRecvTransport(params)
+
+				parameter.consumerTransport.on("connectionstatechange", async (e) => {
+					console.log("- Receiver Transport State : ", e)
+				})
+	
+				parameter.consumerTransport.on("connect", async ({ dtlsParameters }, callback, errback) => {
+					try {
+						await socket.emit("transport-recv-connect", { dtlsParameters, serverConsumerTransportId: params.id })
+						callback()
+					} catch (error) {
+						errback(error)
+					}
+				})
+			})
 			connectSendTransport(parameter)
 		})
 	} catch (error) {
@@ -212,22 +229,6 @@ const connectRecvTransport = async ({ parameter, consumerTransport, socket, remo
 						rtpParameters: params.rtpParameters,
 						streamId,
 					})
-
-					// if (params.kind == "video") {
-					// 	let withCodec,
-					// 		withoutCodec = 0
-					// 	const stat = setInterval(async () => {
-					// 		const report = await parameter.consumerTransport.getStats()
-					// 		for (const value of report.values()) {
-					// 			if (value.kind == "video" && value.codecId) {
-					// 				console.log("- With Codec : ", value.bytesReceived - withCodec)
-					// 				withCodec = value.bytesReceived
-					// 				// break
-					// 			}
-					// 		}
-					// 	}, 1000)
-					// }
-
 					let isUserExist = parameter.allUsers.find((data) => data.socketId == params.producerSocketOwner)
 					const { track } = consumer
 

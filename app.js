@@ -102,9 +102,6 @@ io.on("connection", async (socket) => {
 				delete serverParameter.allRooms[serverParameter.allUsers[socket.id].roomName]
 			}
 			delete serverParameter.allUsers[socket.id]
-			// console.log("- Transport : ", mediasoupParameter.transports.length)
-			// console.log("- Producer : ", mediasoupParameter.producers.length)
-			// console.log("- Consumer	 : ", mediasoupParameter.consumers.length)
 		} catch (error) {
 			console.log("- Error Disconnected : ", error)
 		}
@@ -184,8 +181,6 @@ io.on("connection", async (socket) => {
 
 			serverParameter.allRooms[roomName].participants = [...editParticipants]
 			serverParameter.allUsers[socket.id].producers = [...serverParameter.allUsers[socket.id].producers, producer.id]
-			// console.log("- Server Parameter : ", serverParameter.allRooms[roomName].participants)
-			// console.log("- Mediasoup Parameter : ", mediasoupParameter)
 
 			producer.on("transportclose", () => {
 				producer.close()
@@ -220,7 +215,6 @@ io.on("connection", async (socket) => {
 			const consumerTransport = mediasoupParameter.transports.find(
 				(transportData) => transportData.consumer && transportData.transport.id == serverConsumerTransportId
 			).transport
-			// console.log("- Consumer Transport : ", consumerTransport)
 			consumerTransport.connect({ dtlsParameters })
 		} catch (error) {
 			console.log("- Error Connecting Transport Receive : ", error)

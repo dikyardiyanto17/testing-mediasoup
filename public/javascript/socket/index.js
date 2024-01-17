@@ -35,7 +35,6 @@ let parameter
 // })
 
 const socket = io("/")
-console.log(socket)
 
 // socket.io.on("error", (error) => {
 // 	console.log("-Socket Error : ", error)
