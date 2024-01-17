@@ -9,6 +9,7 @@ class Parameters {
 	screensharingAudioParams = { appData: { label: "screensharingaudio", isActive: true } }
 	consumingTransports = []
 	consumerTransports = []
+	consumerTransport = null
 	totalUsers = 0
 	allUsers = []
 	devices = {

@@ -22494,29 +22494,6 @@ const connectSendTransport = async (parameter) => {
 		parameter.audioProducer.on("transportclose", () => {
 			console.log("audio transport ended")
 		})
-
-		// let r1,
-		// 	r2,
-		// 	r3 = 0
-
-		// const stat = setInterval(async () => {
-		// 	const report = await parameter.producerTransport.getStats()
-		// 	// console.log("- PT : ", )
-		// 	for (const value of report.values()) {
-		// 		if (value.kind == "video" && value.type == "outbound-rtp" && value.rid == "r1") {
-		// 			console.log("- Rid : ", value.rid, " - Sent : ", value.bytesSent - r1)
-		// 			r1 = value.bytesSent
-		// 		}
-		// 		if (value.kind == "video" && value.type == "outbound-rtp" && value.rid == "r2") {
-		// 			console.log("- Rid : ", value.rid, " - Sent : ", value.bytesSent - r2)
-		// 			r2 = value.bytesSent
-		// 		}
-		// 		if (value.kind == "video" && value.type == "outbound-rtp" && value.rid == "r3") {
-		// 			console.log("- Rid : ", value.rid, " - Sent : ", value.bytesSent - r3)
-		// 			r3 = value.bytesSent
-		// 		}
-		// 	}
-		// }, 1000)
 	} catch (error) {
 		window.alert(`Error getting your stream\nPlease make sure your camera is working\nThis page will refresh in a few seconds\n`)
 		setTimeout(() => {
@@ -22544,31 +22521,39 @@ const signalNewConsumerTransport = async ({ remoteProducerId, socket, parameter 
 	try {
 		if (parameter.consumingTransports.includes(remoteProducerId)) return
 		parameter.consumingTransports.push(remoteProducerId)
-		await socket.emit("create-webrtc-transport", { consumer: true, roomName: parameter.roomName }, ({ params }) => {
-			parameter.consumerTransport = parameter.device.createRecvTransport(params)
+		if (!parameter.consumerTransport){
+			await socket.emit("create-webrtc-transport", { consumer: true, roomName: parameter.roomName }, ({ params }) => {
+				parameter.consumerTransport = parameter.device.createRecvTransport(params)
 
-			parameter.consumerTransport.on("connect", async ({ dtlsParameters }, callback, errback) => {
-				try {
-					await socket.emit("transport-recv-connect", { dtlsParameters, serverConsumerTransportId: params.id })
-					callback()
-				} catch (error) {
-					errback(error)
-				}
+				parameter.consumerTransport.on("connectionstatechange", async (e) => {
+					console.log("- Receiver Transport State : ", e)
+				})
+	
+				parameter.consumerTransport.on("connect", async ({ dtlsParameters }, callback, errback) => {
+					try {
+						await socket.emit("transport-recv-connect", { dtlsParameters, serverConsumerTransportId: params.id })
+						callback()
+					} catch (error) {
+						errback(error)
+					}
+				})
+				connectRecvTransport({
+					parameter,
+					consumerTransport: parameter.consumerTransport,
+					socket,
+					remoteProducerId,
+					serverConsumerTransportId: params.id,
+				})
 			})
-			// parameter.consumerTransport.on("connectionstatechange", async (e) => {
-			// 	console.log("- Receiver Transport State : ", e)
-			// 	// if (e === "connecting"){
-			// 	// 	const userVideo = document.getElementById()
-			// 	// }
-			// })
+		} else {
 			connectRecvTransport({
 				parameter,
 				consumerTransport: parameter.consumerTransport,
 				socket,
 				remoteProducerId,
-				serverConsumerTransportId: params.id,
+				serverConsumerTransportId: parameter.consumerTransport.id,
 			})
-		})
+		}
 	} catch (error) {
 		console.log("- Error Signaling New Consumer Transport : ", error)
 	}
@@ -22592,25 +22577,7 @@ const connectRecvTransport = async ({ parameter, consumerTransport, socket, remo
 					let streamId
 					if (params?.appData?.label == "audio" || params?.appData?.label == "video") streamId = `${params.producerSocketOwner}-mic-webcam`
 					else streamId = `${params.producerSocketOwner}-screen-sharing`
-					consumerTransport.on("connectionstatechange", async (e) => {
-						console.log("- Receiver Transport State : ", e)
-						if (e === "connecting"){
-							const userVideo = document.getElementById(`vc-${params.producerSocketOwner}`)
-							if (userVideo){
-								const buffer = document.createElement("img")
-								buffer.src = "/assets/pictures/ZKZg.gif"
-								buffer.id = `buffer-${params.producerSocketOwner}`
-								buffer.style.zIndex = "100"
-								buffer.style.maxHeight = "100%"
-								buffer.style.maxWidth = "100%"
-								buffer.style.position = "absolute"
-								userVideo.appendChild(buffer)
-							}
-						} else if (e == "connected"){
-							const removeBuffer = document.getElementById(`buffer-${params.producerSocketOwner}`)
-							if (removeBuffer) removeBuffer.remove()
-						}
-					})
+
 
 					const consumer = await consumerTransport.consume({
 						id: params.id,
@@ -22738,6 +22705,7 @@ class Parameters {
 	screensharingAudioParams = { appData: { label: "screensharingaudio", isActive: true } }
 	consumingTransports = []
 	consumerTransports = []
+	consumerTransport = null
 	totalUsers = 0
 	allUsers = []
 	devices = {
@@ -23529,7 +23497,7 @@ socket.on("new-producer", ({ producerId, socketId }) => {
 socket.on("producer-closed", ({ remoteProducerId, socketId }) => {
 	try {
 		const producerToClose = parameter.consumerTransports.find((transportData) => transportData.producerId === remoteProducerId)
-		producerToClose.consumerTransport.close()
+		// producerToClose.consumerTransport.close()
 		producerToClose.consumer.close()
 
 		let checkData = parameter.allUsers.find((data) => data.socketId === socketId)

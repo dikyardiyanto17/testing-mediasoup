@@ -73,7 +73,7 @@ socket.on("new-producer", ({ producerId, socketId }) => {
 socket.on("producer-closed", ({ remoteProducerId, socketId }) => {
 	try {
 		const producerToClose = parameter.consumerTransports.find((transportData) => transportData.producerId === remoteProducerId)
-		producerToClose.consumerTransport.close()
+		// producerToClose.consumerTransport.close()
 		producerToClose.consumer.close()
 
 		let checkData = parameter.allUsers.find((data) => data.socketId === socketId)

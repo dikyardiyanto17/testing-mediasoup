@@ -102,6 +102,9 @@ io.on("connection", async (socket) => {
 				delete serverParameter.allRooms[serverParameter.allUsers[socket.id].roomName]
 			}
 			delete serverParameter.allUsers[socket.id]
+			// console.log("- Transport : ", mediasoupParameter.transports.length)
+			// console.log("- Producer : ", mediasoupParameter.producers.length)
+			// console.log("- Consumer	 : ", mediasoupParameter.consumers.length)
 		} catch (error) {
 			console.log("- Error Disconnected : ", error)
 		}
@@ -130,8 +133,8 @@ io.on("connection", async (socket) => {
 		try {
 			let router = serverParameter.allRooms[roomName].router
 			const transport = await createWebRtcTransport({ router, serverParameter })
-			transport.setMaxIncomingBitrate(2000000)
-			transport.setMaxOutgoingBitrate(2000000)
+			transport.setMaxIncomingBitrate(1500000)
+			transport.setMaxOutgoingBitrate(1500000)
 			let username
 			const editParticipants = serverParameter.allRooms[roomName].participants.map((data) => {
 				if (data.socketId == socket.id) {
@@ -167,7 +170,7 @@ io.on("connection", async (socket) => {
 				kind,
 				rtpParameters,
 				appData,
-				keyFrameRequestDelay: 3000
+				keyFrameRequestDelay: 1000
 			})
 			let username
 			const editParticipants = serverParameter.allRooms[roomName].participants.map((data) => {
@@ -272,11 +275,7 @@ io.on("connection", async (socket) => {
 					)
 					removeConsumerAndTransport.consumers = removeConsumerAndTransport.consumers.filter((data) => data != consumer.id)
 
-					removeConsumerAndTransport.transports = removeConsumerAndTransport.transports.filter((data) => data != consumerTransport.id)
-
 					serverParameter.allUsers[socket.id].consumers = serverParameter.allUsers[socket.id].consumers.filter((id) => id != consumer.id)
-					consumerTransport.close([])
-					mediasoupParameter.transports = mediasoupParameter.transports.filter((transportData) => transportData.transport.id !== consumerTransport.id)
 					consumer.close()
 					mediasoupParameter.consumers = mediasoupParameter.consumers.filter((consumerData) => consumerData.consumer.id !== consumer.id)
 				})
