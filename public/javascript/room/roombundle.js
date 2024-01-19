@@ -22773,19 +22773,26 @@ const turnOffOnCamera = ({ id, status }) => {
 
 const switchCamera = async ({ parameter }) => {
 	try {
+		const myVideo = document.getElementById(`v-${parameter.socketId}`)
+		console.log(myVideo.srcObject.getVideoTracks()[0])
 		let myData = parameter.allUsers.find((data) => data.socketId == parameter.socketId)
 		let videoDevices = (await navigator.mediaDevices.enumerateDevices()).filter((device) => device.kind === "videoinput")
-		console.log("- Parameter : ", parameter.devices)
+		// console.log("- Parameter : ", parameter.devices)
 		parameter.devices.video.iteration++
 		if (parameter.devices.video.iteration >= videoDevices?.length) parameter.devices.video.iteration = 0
 		parameter.devices.video.id = videoDevices[parameter.devices.video.iteration].deviceId
+		// let mode = await videoDevices[parameter.devices.video.iteration].getCapabilities().facingMode
+		// console.log("- Mode : ", mode[0])
+		// mode.length === 0 ? "environment" : mode[0]
 
 		let config = {
 			video: {
 				deviceId: { exact: parameter.devices.video.id },
-				video: { facingMode: "environment" },
+				// video: { facingMode: { exact: mode[0] ? mode[0] : "environment" } },
 			},
 		}
+
+		myVideo.srcObject.getVideoTracks()[0].stop()
 
 		let newStream = await navigator.mediaDevices.getUserMedia(config)
 		parameter.localStream.getVideoTracks()[0].stop()
@@ -22960,6 +22967,8 @@ const slideUserVideoButton = ({ status }) => {
 		})
 	} else {
 		let userVideoButton = document.getElementById("user-video-display-button")
+		let videoContainer = document.getElementById("video-container")
+		videoContainer.removeAttribute("style")
 		if (userVideoButton) userVideoButton.remove()
 	}
 }
@@ -23468,8 +23477,31 @@ const socket = io("/")
 // 	console.log("- Ping Socket")
 // })
 
+
 socket.on("connection-success", async ({ socketId }) => {
 	try {
+		const isMobile = /Mobi|Android/i.test(navigator.userAgent)
+		if (isMobile){
+			const screenSharingButton = document.getElementById("user-screen-share-button")
+			const recordButton = document.getElementById("user-record-button")
+			const optionalMenu = document.getElementById("optional-button-id")
+			screenSharingButton.style.display = "none"
+			recordButton.style.display = "none"
+
+			const switchCameraButton = document.getElementById("user-switch-camera-button")
+			switchCameraButton.style.marginLeft = "30px"
+			switchCameraButton.style.marginRight = "30px"
+			const userListButton = document.getElementById("user-list-button")
+			userListButton.style.marginLeft = "30px"
+			userListButton.style.marginRight = "30px"
+			const chatButton = document.getElementById("user-chat-button")
+			chatButton.style.marginLeft = "30px"
+			chatButton.style.marginRight = "30px"
+			const shareLinkButton = document.getElementById("share-link-button")
+			shareLinkButton.style.marginLeft = "30px"
+			shareLinkButton.style.marginRight = "30px"
+		}
+
 		console.log("- Id : ", socketId)
 		parameter = new Parameters()
 		parameter.username = "Diky"

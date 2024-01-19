@@ -20,19 +20,26 @@ const turnOffOnCamera = ({ id, status }) => {
 
 const switchCamera = async ({ parameter }) => {
 	try {
+		const myVideo = document.getElementById(`v-${parameter.socketId}`)
+		console.log(myVideo.srcObject.getVideoTracks()[0])
 		let myData = parameter.allUsers.find((data) => data.socketId == parameter.socketId)
 		let videoDevices = (await navigator.mediaDevices.enumerateDevices()).filter((device) => device.kind === "videoinput")
-		console.log("- Parameter : ", parameter.devices)
+		// console.log("- Parameter : ", parameter.devices)
 		parameter.devices.video.iteration++
 		if (parameter.devices.video.iteration >= videoDevices?.length) parameter.devices.video.iteration = 0
 		parameter.devices.video.id = videoDevices[parameter.devices.video.iteration].deviceId
+		// let mode = await videoDevices[parameter.devices.video.iteration].getCapabilities().facingMode
+		// console.log("- Mode : ", mode[0])
+		// mode.length === 0 ? "environment" : mode[0]
 
 		let config = {
 			video: {
 				deviceId: { exact: parameter.devices.video.id },
-				video: { facingMode: "environment" },
+				// video: { facingMode: { exact: mode[0] ? mode[0] : "environment" } },
 			},
 		}
+
+		myVideo.srcObject.getVideoTracks()[0].stop()
 
 		let newStream = await navigator.mediaDevices.getUserMedia(config)
 		parameter.localStream.getVideoTracks()[0].stop()
@@ -207,6 +214,8 @@ const slideUserVideoButton = ({ status }) => {
 		})
 	} else {
 		let userVideoButton = document.getElementById("user-video-display-button")
+		let videoContainer = document.getElementById("video-container")
+		videoContainer.removeAttribute("style")
 		if (userVideoButton) userVideoButton.remove()
 	}
 }

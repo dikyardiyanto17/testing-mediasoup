@@ -43,8 +43,31 @@ const socket = io("/")
 // 	console.log("- Ping Socket")
 // })
 
+
 socket.on("connection-success", async ({ socketId }) => {
 	try {
+		const isMobile = /Mobi|Android/i.test(navigator.userAgent)
+		if (isMobile){
+			const screenSharingButton = document.getElementById("user-screen-share-button")
+			const recordButton = document.getElementById("user-record-button")
+			const optionalMenu = document.getElementById("optional-button-id")
+			screenSharingButton.style.display = "none"
+			recordButton.style.display = "none"
+
+			const switchCameraButton = document.getElementById("user-switch-camera-button")
+			switchCameraButton.style.marginLeft = "30px"
+			switchCameraButton.style.marginRight = "30px"
+			const userListButton = document.getElementById("user-list-button")
+			userListButton.style.marginLeft = "30px"
+			userListButton.style.marginRight = "30px"
+			const chatButton = document.getElementById("user-chat-button")
+			chatButton.style.marginLeft = "30px"
+			chatButton.style.marginRight = "30px"
+			const shareLinkButton = document.getElementById("share-link-button")
+			shareLinkButton.style.marginLeft = "30px"
+			shareLinkButton.style.marginRight = "30px"
+		}
+
 		console.log("- Id : ", socketId)
 		parameter = new Parameters()
 		parameter.username = "Diky"
