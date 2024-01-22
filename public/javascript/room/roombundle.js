@@ -22328,7 +22328,7 @@ const getMyStream = async (parameter) => {
 		parameter.allUsers = [...parameter.allUsers, user]
 		parameter.localStream = stream
 		parameter.audioParams.track = stream.getAudioTracks()[0]
-		createUserList({ username: "Diky", socketId: parameter.socketId, cameraTrigger: videoCondition, picture, micTrigger: audioCondition })
+		createUserList({ username: parameter.username, socketId: parameter.socketId, cameraTrigger: videoCondition, picture, micTrigger: audioCondition })
 	} catch (error) {
 		console.log("- Error Getting My Stream : ", error)
 		let ae = document.getElementById("alert-error")
@@ -22493,10 +22493,12 @@ const connectSendTransport = async (parameter) => {
 			myData.video.transportId = parameter.producerTransport.id
 			// parameter.videoProducer.setMaxIncomingBitrate(900000)
 			parameter.videoProducer.on("trackended", () => {
+				window.location.reload()
 				console.log("video track ended")
 			})
 
 			parameter.videoProducer.on("transportclose", () => {
+				window.location.reload()
 				console.log("video transport ended")
 			})
 		}
@@ -23456,6 +23458,8 @@ const {
 } = require("../room/ui/button")
 const { createMyVideo, removeVideoAndAudio, updatingLayout, changeLayout, changeUserMic, removeUserList } = require("../room/ui/video")
 
+let isDisconnected = 0
+
 let parameter
 
 // const socket = require("socket.io-client")("/")
@@ -23480,6 +23484,8 @@ const socket = io("/")
 
 socket.on("connection-success", async ({ socketId }) => {
 	try {
+		if (isDisconnected >= 1) window.location.reload()
+		isDisconnected++
 		const isMobile = /Mobi|Android/i.test(navigator.userAgent)
 		if (isMobile){
 			const screenSharingButton = document.getElementById("user-screen-share-button")

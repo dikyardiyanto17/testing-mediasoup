@@ -86,7 +86,7 @@ const getMyStream = async (parameter) => {
 		parameter.allUsers = [...parameter.allUsers, user]
 		parameter.localStream = stream
 		parameter.audioParams.track = stream.getAudioTracks()[0]
-		createUserList({ username: "Diky", socketId: parameter.socketId, cameraTrigger: videoCondition, picture, micTrigger: audioCondition })
+		createUserList({ username: parameter.username, socketId: parameter.socketId, cameraTrigger: videoCondition, picture, micTrigger: audioCondition })
 	} catch (error) {
 		console.log("- Error Getting My Stream : ", error)
 		let ae = document.getElementById("alert-error")

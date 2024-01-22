@@ -22,6 +22,8 @@ const {
 } = require("../room/ui/button")
 const { createMyVideo, removeVideoAndAudio, updatingLayout, changeLayout, changeUserMic, removeUserList } = require("../room/ui/video")
 
+let isDisconnected = 0
+
 let parameter
 
 // const socket = require("socket.io-client")("/")
@@ -46,6 +48,8 @@ const socket = io("/")
 
 socket.on("connection-success", async ({ socketId }) => {
 	try {
+		if (isDisconnected >= 1) window.location.reload()
+		isDisconnected++
 		const isMobile = /Mobi|Android/i.test(navigator.userAgent)
 		if (isMobile){
 			const screenSharingButton = document.getElementById("user-screen-share-button")
