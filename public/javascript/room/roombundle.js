@@ -23659,10 +23659,10 @@ micButton.addEventListener("click", () => {
 		changeMic({ parameter, status: false, socket })
 		changeUserListMicIcon({ status: true, id: socket.id })
 	} else {
-		parameter.isAudio = false
+		parameter.isAudio = true
 		changeAppData({
 			socket,
-			data: { isActive: false, isMicActive: false, isVideoActive: parameter.videoProducer ? true : false },
+			data: { isActive: false, isMicActive: true, isVideoActive: parameter.videoProducer ? true : false },
 			remoteProducerId: parameter.audioProducer.id,
 		})
 		micButton.classList.replace("button-small-custom-clicked", "button-small-custom")
