@@ -22862,9 +22862,17 @@ const getScreenSharing = async ({ parameter, socket }) => {
 				transportId: parameter.producerTransport.id,
 				consumerId: undefined,
 			}
+			parameter.screensharing.audioProducer("trackended", () => {
+				window.location.reload()
+				console.log("screensharing track ended")
+			})
 		}
 
 		parameter.screensharing.videoProducer = await parameter.producerTransport.produce(parameter.screensharingVideoParams)
+		parameter.screensharing.videoProducer.on("trackended", () => {
+			window.location.reload()
+			console.log("video track ended")
+		})
 		parameter.screensharing.videoProducerId = parameter.screensharing.videoProducer.id
 		myData.screensharing = {
 			isActive: true,
