@@ -22119,6 +22119,7 @@ const receiveMessage = ({ message, sender, date }) => {
 		messageElement.className = "message-container"
 		messageElement.innerHTML = `<div class="received-messages">${customName}<div class="received-message"><div class="inside-message"><span>${message}</span></div></div>${customDate}</div>`
 		chatMessagesContainer.appendChild(messageElement)
+		scrollToBottom()
 	} catch (error) {
 		console.log("- Error Receiving Message : ", error)
 	}
@@ -22862,15 +22863,13 @@ const getScreenSharing = async ({ parameter, socket }) => {
 				transportId: parameter.producerTransport.id,
 				consumerId: undefined,
 			}
-			parameter.screensharing.audioProducer("trackended", () => {
-				window.location.reload()
+			parameter.screensharing.audioProducer.on("trackended", () => {
 				console.log("screensharing track ended")
 			})
 		}
 
 		parameter.screensharing.videoProducer = await parameter.producerTransport.produce(parameter.screensharingVideoParams)
 		parameter.screensharing.videoProducer.on("trackended", () => {
-			window.location.reload()
 			console.log("video track ended")
 		})
 		parameter.screensharing.videoProducerId = parameter.screensharing.videoProducer.id
@@ -23209,6 +23208,7 @@ const createMyVideo = async (parameter) => {
 		// userVideoContainer.innerHTML = `${micIcons}<video id="v-${parameter.socketId}" muted autoplay class="user-video"></video>${picture}<div class="username">${parameter.username}</div>`
 		userVideoContainer.innerHTML = `<div class="outside-video-user">${micIcons}<video id="v-${parameter.socketId}" muted autoplay class="user-video"></video>${picture}<div class="username">${parameter.username}</div></div>`
 		videoContainer.appendChild(userVideoContainer)
+		// document.getElementById(`v-${parameter.socketId}`).style.transform = "rotateY(0deg)"
 		document.getElementById(`v-${parameter.socketId}`).srcObject = parameter.localStream
 		createAudioVisualizer({ id: parameter.socketId, track: parameter.localStream.getAudioTracks()[0] })
 	} catch (error) {
@@ -24181,13 +24181,13 @@ window.addEventListener("beforeunload", function (event) {
 
 window.addEventListener("online", function () {
 	console.log("Network is online")
-	// Your custom action when the network becomes available
+	window.location.reload()
 })
 
 window.addEventListener("offline", function () {
 	console.log("Network is offline")
-	socket.close()
-	// Your custom action when the network becomes unavailable
+	// window.location.reload()
+	// socket.close()
 })
 
 const hideOptionalMenu = () => {

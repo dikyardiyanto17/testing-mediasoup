@@ -176,6 +176,7 @@ const receiveMessage = ({ message, sender, date }) => {
 		messageElement.className = "message-container"
 		messageElement.innerHTML = `<div class="received-messages">${customName}<div class="received-message"><div class="inside-message"><span>${message}</span></div></div>${customDate}</div>`
 		chatMessagesContainer.appendChild(messageElement)
+		scrollToBottom()
 	} catch (error) {
 		console.log("- Error Receiving Message : ", error)
 	}

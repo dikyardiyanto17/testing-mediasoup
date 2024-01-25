@@ -737,13 +737,13 @@ window.addEventListener("beforeunload", function (event) {
 
 window.addEventListener("online", function () {
 	console.log("Network is online")
-	// Your custom action when the network becomes available
+	window.location.reload()
 })
 
 window.addEventListener("offline", function () {
 	console.log("Network is offline")
-	socket.close()
-	// Your custom action when the network becomes unavailable
+	// window.location.reload()
+	// socket.close()
 })
 
 const hideOptionalMenu = () => {

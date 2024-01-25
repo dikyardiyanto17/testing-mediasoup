@@ -32,7 +32,10 @@ const httpsServer = https.createServer(options, app)
 httpsServer.listen(port, () => {
 	console.log("App On : " + port)
 })
-const io = new Server(httpsServer)
+const io = new Server(httpsServer, {
+	pingInterval: 5000,
+	pingTimeout: 6000
+})
 
 // const httpServer = http.createServer(app)
 // httpServer.listen(port, () => {
