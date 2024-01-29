@@ -1,5 +1,45 @@
 # telepathy
 
+## Scheme
+![Mediasoup Scheme](https://i.imgur.com/okNFEdE.png)
+
+
+## Panduan untuk menjalankan conference meeting
+- Jalankan aplikasi sesuai port yang akan digunakan */app.js
+```js
+const port = 3001 // rubah port sesuai kebutuhan
+```
+- Rubah pengaturan Public IP yang akan digunakan */config/mediasoup/config.js
+```js
+let publicIp = "147.139.136.209" // rubah IP sesuai kebutuhan
+```
+- Sebelum menjalankan aplikasi, pastikan salah satu port terbuka dan bisa di akses untuk transfer udp/tcp protocol dan pastikan port tersebut sedang tidak digunakan untuk aplikasi lain */config/mediasoup/config.js
+```js
+const listenInfo = {
+	listenInfos: [
+		{
+			protocol: "udp",
+			ip: privateIp,
+			announcedIp: publicIp,
+			port: 1028 // rubah port udp sesuai pengaturan port server yang terbuka
+		},
+		{
+			protocol: "tcp",
+			ip: privateIp,
+			announcedIp: publicIp,
+			port: 1028 // rubah port udp sesuai pengaturan port server yang terbuka
+		},
+	],
+}
+```
+
+## Information
+- Test VPS Ram 1 Core = 8 orang = 20-35 % CPU
+- Test Server Komputer = 6-8 orang = 1-10 % CPU
+
+## Bug
+- Saat User 1 membuka aplikasi HP (sedang dalam kondisi meeting) dan membuka tab/aplikasi lain, tampilan User 1 di user lain video akan freeze dan akan kembali normal jika User 1 membuka tab meeting yang sedang berlangsung
+
 ## Parameter Server
 
 ### Server_Parameter || serverParameter
@@ -65,10 +105,6 @@ mediasoupParameter = {
         username: "String"
     }]
 }
-```
-
-```js
-
 ```
 
 ## Parameter Client
@@ -155,6 +191,3 @@ parameter = {
 ```
 
 
-## Question
-- Case 1 hari bisa berapa total user yang menggunakan aplikasi
-- Case 1 room paling banyak berapa orang
