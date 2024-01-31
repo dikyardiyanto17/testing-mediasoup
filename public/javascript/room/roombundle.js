@@ -22541,39 +22541,27 @@ const signalNewConsumerTransport = async ({ remoteProducerId, socket, parameter 
 	try {
 		if (parameter.consumingTransports.includes(remoteProducerId)) return
 		parameter.consumingTransports.push(remoteProducerId)
-		if (!parameter.consumerTransport){
-			await socket.emit("create-webrtc-transport", { consumer: true, roomName: parameter.roomName }, ({ params }) => {
-				parameter.consumerTransport = parameter.device.createRecvTransport(params)
-
-				parameter.consumerTransport.on("connectionstatechange", async (e) => {
-					console.log("- Receiver Transport State : ", e)
-				})
-	
-				parameter.consumerTransport.on("connect", async ({ dtlsParameters }, callback, errback) => {
-					try {
-						await socket.emit("transport-recv-connect", { dtlsParameters, serverConsumerTransportId: params.id })
-						callback()
-					} catch (error) {
-						errback(error)
-					}
-				})
-				connectRecvTransport({
+		let totalReconnecting = 0
+		const connectingRecvTransport = async () => {
+			if (!parameter.consumerTransport) {
+				totalReconnecting++
+				setTimeout(() => {
+					connectingRecvTransport()
+				}, 1000)
+			} else if (totalReconnecting >= 20) {
+				console.log("Receiver Transport Wont Connected")
+			} else {
+				await connectRecvTransport({
 					parameter,
 					consumerTransport: parameter.consumerTransport,
 					socket,
 					remoteProducerId,
-					serverConsumerTransportId: params.id,
+					serverConsumerTransportId: parameter.consumerTransport.id,
 				})
-			})
-		} else {
-			connectRecvTransport({
-				parameter,
-				consumerTransport: parameter.consumerTransport,
-				socket,
-				remoteProducerId,
-				serverConsumerTransportId: parameter.consumerTransport.id,
-			})
+			}
 		}
+
+		await connectingRecvTransport()
 	} catch (error) {
 		console.log("- Error Signaling New Consumer Transport : ", error)
 	}
@@ -22597,7 +22585,6 @@ const connectRecvTransport = async ({ parameter, consumerTransport, socket, remo
 					let streamId
 					if (params?.appData?.label == "audio" || params?.appData?.label == "video") streamId = `${params.producerSocketOwner}-mic-webcam`
 					else streamId = `${params.producerSocketOwner}-screen-sharing`
-
 
 					const consumer = await consumerTransport.consume({
 						id: params.id,
