@@ -1,6 +1,6 @@
 const mediasoupClient = require("mediasoup-client")
 const { createVideo, createAudio, insertVideo, updatingLayout, changeLayout, createAudioVisualizer } = require("../ui/video")
-const { turnOffOnCamera, changeLayoutScreenSharingClient, addMuteAllButton } = require("../ui/button")
+const { turnOffOnCamera, changeLayoutScreenSharingClient, addMuteAllButton, getMicOptions, videoDisplayModeScreenSharing } = require("../ui/button")
 const { createUserList, muteAllParticipants, goToLobby } = require(".")
 const { encodingVP8, encodingsVP9 } = require("../config/mediasoup")
 
@@ -88,7 +88,7 @@ const createSendTransport = async ({ socket, parameter }) => {
 				parameter.consumerTransport.on("connectionstatechange", async (e) => {
 					console.log("- Receiver Transport State : ", e)
 				})
-	
+
 				parameter.consumerTransport.on("connect", async ({ dtlsParameters }, callback, errback) => {
 					try {
 						await socket.emit("transport-recv-connect", { dtlsParameters, serverConsumerTransportId: params.id })
@@ -98,14 +98,14 @@ const createSendTransport = async ({ socket, parameter }) => {
 					}
 				})
 			})
-			connectSendTransport(parameter)
+			connectSendTransport({ parameter, socket })
 		})
 	} catch (error) {
 		console.log("- Error Creating Send Transport : ", error)
 	}
 }
 
-const connectSendTransport = async (parameter) => {
+const connectSendTransport = async ({ parameter, socket }) => {
 	try {
 		// Producing Audio And Video Transport
 		let myData = parameter.allUsers.find((data) => data.socketId == parameter.socketId)
@@ -128,6 +128,8 @@ const connectSendTransport = async (parameter) => {
 				console.log("video transport ended")
 			})
 		}
+
+		await getMicOptions({ parameter, socket })
 
 		myData.audio.producerId = parameter.audioProducer.id
 		myData.audio.transportId = parameter.producerTransport.id
@@ -235,6 +237,7 @@ const connectRecvTransport = async ({ parameter, consumerTransport, socket, remo
 						}
 					} else {
 						parameter.totalUsers++
+						parameter.isScreenSharing.screenSharingUserViewTotalPage = Math.ceil(parameter.totalUsers / parameter.isScreenSharing.screenSharingUserViewCurrentDisplay)
 						let data = {
 							username: params.username,
 							socketId: params.producerSocketOwner,
@@ -255,6 +258,7 @@ const connectRecvTransport = async ({ parameter, consumerTransport, socket, remo
 							picture: params.appData.picture,
 							username: params.username,
 							micTrigger: params.appData.isMicActive,
+							parameter,
 						})
 						changeLayout({ parameter })
 						turnOffOnCamera({ id: params.producerSocketOwner, status: false })
@@ -276,6 +280,8 @@ const connectRecvTransport = async ({ parameter, consumerTransport, socket, remo
 					}
 					if (params.appData.label == "screensharing") {
 						changeLayoutScreenSharingClient({ track, id: params.producerSocketOwner, parameter, status: true })
+						updatingLayout({ parameter })
+						changeLayout({ parameter })
 					}
 					if (params.kind == "audio" && params.appData.label == "screensharingaudio") {
 						createAudio({ id: params.producerSocketOwner + "screensharingaudio", track })
@@ -284,6 +290,10 @@ const connectRecvTransport = async ({ parameter, consumerTransport, socket, remo
 					if (parameter.record.isRecording && params.kind == "audio") {
 						const audioSource = parameter.record.audioContext.createMediaStreamSource(new MediaStream([track]))
 						audioSource.connect(parameter.record.audioDestination)
+					}
+
+					if (parameter.isScreenSharing.isScreenSharing) {
+						videoDisplayModeScreenSharing({ parameter, status: true })
 					}
 
 					parameter.consumerTransports = [

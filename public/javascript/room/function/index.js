@@ -45,6 +45,21 @@ const timerLayout = ({ status }) => {
 	}
 }
 
+const newUserNotification = ({ username, picture }) => {
+	try {
+		const newUserNotificationContainer = document.getElementById("new-user-join-notification-container")
+		const newUserContainer = document.createElement("section")
+		newUserContainer.className = "new-user-join"
+		newUserContainer.innerHTML = `<img src="${picture}" alt="new-user-join" class="new-user-profile-picture"><span class="notification-text">${username} join the room</span>`
+		newUserNotificationContainer.appendChild(newUserContainer)
+		setTimeout(() => {
+			newUserContainer.remove()
+		}, 3000)
+	} catch (error) {
+		console.log("- Error Displaying New User Joined The Room Notification : ", error)
+	}
+}
+
 // Create User Online List
 const createUserList = ({ username, socketId, cameraTrigger, picture, micTrigger }) => {
 	try {
@@ -225,6 +240,24 @@ function hideOptionMenu() {
 	}
 }
 
+const showMicOptionsMenu = () => {
+	try {
+		const micOptionsContainer = document.getElementById("mic-options")
+		micOptionsContainer.className = "visible"
+	} catch (error) {
+		console.log("- Error Hiding Options Menu")
+	}
+}
+
+const hideMicOptionsMenu = () => {
+	try {
+		const micOptionsContainer = document.getElementById("mic-options")
+		micOptionsContainer.className = "invisible"
+	} catch (error) {
+		console.log("- Error Hiding Options Menu")
+	}
+}
+
 const muteAllParticipants = ({ parameter, socket }) => {
 	parameter.allUsers.forEach((data) => {
 		if (data.socketId != socket.id) {
@@ -295,4 +328,7 @@ module.exports = {
 	checkLocalStorage,
 	changeAppData,
 	goToLobby,
+	newUserNotification,
+	showMicOptionsMenu,
+	hideMicOptionsMenu,
 }

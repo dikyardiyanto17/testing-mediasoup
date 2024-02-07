@@ -28,23 +28,23 @@ app.use(express.json())
 app.use(express.static("public"))
 app.use(express.static(path.join(__dirname, "public")))
 
-// const httpsServer = https.createServer(options, app)
-// httpsServer.listen(port, () => {
-// 	console.log("App On : " + port)
-// })
-// const io = new Server(httpsServer, {
-// 	pingInterval: 5000,
-// 	pingTimeout: 6000
-// })
-
-const httpServer = http.createServer(app)
-httpServer.listen(port, () => {
+const httpsServer = https.createServer(options, app)
+httpsServer.listen(port, () => {
 	console.log("App On : " + port)
 })
-const io = new Server(httpServer, {
+const io = new Server(httpsServer, {
 	pingInterval: 5000,
 	pingTimeout: 6000,
 })
+
+// const httpServer = http.createServer(app)
+// httpServer.listen(port, () => {
+// 	console.log("App On : " + port)
+// })
+// const io = new Server(httpServer, {
+// 	pingInterval: 5000,
+// 	pingTimeout: 6000,
+// })
 
 let serverParameter = new Server_Parameter()
 let mediasoupParameter = new Mediasoup_Parameter()
@@ -190,6 +190,12 @@ io.on("connection", async (socket) => {
 
 			producer.on("transportclose", () => {
 				producer.close()
+			})
+
+			serverParameter.allRooms[roomName].participants.forEach((user) => {
+				if (user.socketId !== socket.id && kind == "audio") {
+					socket.to(user.socketId).emit("new-user-notification", { username, picture: appData.picture })
+				}
 			})
 
 			informConsumer({ roomName, socketId: socket.id, producerId: producer.id, mediasoupParameter, serverParameter })

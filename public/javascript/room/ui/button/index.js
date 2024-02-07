@@ -1,5 +1,6 @@
 const RecordRTC = require("recordrtc")
-const { timerLayout, muteAllParticipants, unlockAllMic } = require("../../function")
+const { timerLayout, muteAllParticipants, unlockAllMic, changeAppData, changeUserListMicIcon } = require("../../function")
+const { updatingLayout, changeLayout, createAudioVisualizer } = require("../video")
 
 const changeMic = ({ parameter, socket, status }) => {
 	parameter.allUsers.forEach((data) => {
@@ -21,7 +22,7 @@ const turnOffOnCamera = ({ id, status }) => {
 const switchCamera = async ({ parameter }) => {
 	try {
 		const myVideo = document.getElementById(`v-${parameter.socketId}`)
-		console.log(myVideo.srcObject.getVideoTracks()[0])
+		// console.log(myVideo.srcObject.getVideoTracks()[0])
 		let myData = parameter.allUsers.find((data) => data.socketId == parameter.socketId)
 		let videoDevices = (await navigator.mediaDevices.enumerateDevices()).filter((device) => device.kind === "videoinput")
 		// console.log("- Parameter : ", parameter.devices)
@@ -32,6 +33,8 @@ const switchCamera = async ({ parameter }) => {
 		// console.log("- Mode : ", mode[0])
 		// mode.length === 0 ? "environment" : mode[0]
 
+		// console.log(parameter.devices.video, " --- ", videoDevices)
+
 		let config = {
 			video: {
 				deviceId: { exact: parameter.devices.video.id },
@@ -39,11 +42,14 @@ const switchCamera = async ({ parameter }) => {
 			},
 		}
 
-		myVideo.srcObject.getVideoTracks()[0].stop()
+		if (myVideo.srcObject.getVideoTracks()[0]) myVideo.srcObject.getVideoTracks()[0].stop()
 
 		let newStream = await navigator.mediaDevices.getUserMedia(config)
-		parameter.localStream.getVideoTracks()[0].stop()
-		parameter.localStream.removeTrack(parameter.localStream.getVideoTracks()[0])
+
+		if (parameter.localStream.getVideoTracks()[0]) {
+			parameter.localStream.getVideoTracks()[0].stop()
+			parameter.localStream.removeTrack(parameter.localStream.getVideoTracks()[0])
+		}
 		parameter.localStream.addTrack(newStream.getVideoTracks()[0])
 
 		if (!parameter.videoProducer) {
@@ -58,6 +64,102 @@ const switchCamera = async ({ parameter }) => {
 		}
 	} catch (error) {
 		console.log("- Error Switching Camera : ", error)
+	}
+}
+
+const switchMicrophone = async ({ parameter, deviceId, socket }) => {
+	try {
+		if (parameter.micCondition.isLocked) {
+			let ae = document.getElementById("alert-error")
+			ae.className = "show"
+			ae.innerHTML = `Mic is Locked By Host`
+			// Show Warning
+			setTimeout(() => {
+				ae.className = ae.className.replace("show", "")
+				ae.innerHTML = ``
+			}, 3000)
+			return
+		}
+		const myVideo = document.getElementById(`v-${parameter.socketId}`)
+		let myData = parameter.allUsers.find((data) => data.socketId == parameter.socketId)
+
+		let config = {
+			audio: {
+				deviceId: { exact: deviceId },
+				autoGainControl: false,
+				noiseSuppression: true,
+				echoCancellation: true,
+			},
+		}
+
+		myVideo.srcObject.getAudioTracks()[0].stop()
+
+		let newStream = await navigator.mediaDevices.getUserMedia(config)
+		parameter.localStream.getAudioTracks()[0].stop()
+		parameter.localStream.removeTrack(parameter.localStream.getAudioTracks()[0])
+		parameter.localStream.addTrack(newStream.getAudioTracks()[0])
+		parameter.audioParams.appData.isActive = true
+		parameter.audioParams.appData.isAudioActive = true
+		myData.audio.isActive = true
+		parameter.audioProducer.replaceTrack({ track: newStream.getAudioTracks()[0] })
+		changeMicCondition({ parameter, socket, status: true })
+		document.getElementById(`audio-visualizer-${parameter.socketId}`).remove()
+		createAudioVisualizer({ id: parameter.socketId, track: newStream.getAudioTracks()[0] })
+	} catch (error) {
+		console.log("- Error Switching Microphone : ", error)
+	}
+}
+
+const changeMicCondition = ({ parameter, socket, status }) => {
+	try {
+		console.log("- Condition : ", parameter.localStream.getAudioTracks()[0])
+		const micButton = document.getElementById("user-mic-button")
+		let myIconMic = document.getElementById(`user-mic-${socket.id}`)
+		let user = parameter.allUsers.find((data) => data.socketId == socket.id)
+		if (!status) {
+			parameter.localStream.getAudioTracks()[0].enabled = false
+			parameter.isAudio = false
+			changeAppData({
+				socket,
+				data: { isActive: false, isMicActive: false, isVideoActive: parameter.videoProducer ? true : false },
+				remoteProducerId: parameter.audioProducer.id,
+			})
+			micButton.classList.replace("button-small-custom", "button-small-custom-clicked")
+			user.audio.track.enabled = false
+			user.audio.isActive = false
+			myIconMic.src = "/assets/pictures/micOff.png"
+			micButton.querySelector("img").src = "/assets/pictures/micOff.png"
+			changeMic({ parameter, status: false, socket })
+			changeUserListMicIcon({ status: true, id: socket.id })
+		} else {
+			if (parameter.micCondition.isLocked) {
+				let ae = document.getElementById("alert-error")
+				ae.className = "show"
+				ae.innerHTML = `Mic is Locked By Host`
+				// Show Warning
+				setTimeout(() => {
+					ae.className = ae.className.replace("show", "")
+					ae.innerHTML = ``
+				}, 3000)
+				return
+			}
+			parameter.localStream.getAudioTracks()[0].enabled = true
+			parameter.isAudio = true
+			changeAppData({
+				socket,
+				data: { isActive: true, isMicActive: true, isVideoActive: parameter.videoProducer ? true : false },
+				remoteProducerId: parameter.audioProducer.id,
+			})
+			micButton.classList.replace("button-small-custom-clicked", "button-small-custom")
+			user.audio.track.enabled = true
+			user.audio.isActive = true
+			myIconMic.src = "/assets/pictures/micOn.png"
+			micButton.querySelector("img").src = "/assets/pictures/micOn.png"
+			changeMic({ parameter, status: true, socket })
+			changeUserListMicIcon({ status: false, id: socket.id })
+		}
+	} catch (error) {
+		console.log("- Error Changing Mic Conditions : ", error)
 	}
 }
 
@@ -124,6 +226,7 @@ const getScreenSharing = async ({ parameter, socket }) => {
 			transportId: parameter.producerTransport.id,
 			consumerId: undefined,
 		}
+		videoDisplayModeScreenSharing({ parameter, status: true })
 	} catch (error) {
 		changeLayoutScreenSharing({ parameter, status: false })
 		let screenSharingButton = document.getElementById("user-screen-share-button")
@@ -136,8 +239,69 @@ const changeLayoutScreenSharingClient = ({ track, status, parameter, id }) => {
 	let upperContainer = document.getElementById("upper-container")
 	let videoContainer = document.getElementById("video-container")
 
+	const mouseUpHandler = () => {
+		parameter.isDragging = false
+	}
+
+	const mouseMoveHandler = (e) => {
+		if (parameter.isDragging) {
+			if (!parameter.isDragging) return
+
+			const x = e.clientX - parameter.offsetX
+			const y = e.clientY - parameter.offsetY
+
+			// Ensure the div stays within the viewport
+			const maxX = window.innerWidth - videoContainer.offsetWidth
+			const maxY = window.innerHeight - videoContainer.offsetHeight
+
+			const clampedX = Math.max(0, Math.min(x, maxX))
+			const clampedY = Math.max(0, Math.min(y, maxY))
+
+			videoContainer.style.left = clampedX + "px"
+			videoContainer.style.top = clampedY + "px"
+		}
+	}
+
+	const displayViewController = () => {
+		try {
+			const displayViewControllerIcon = document.getElementById("display-view-controller-icon")
+			if (displayViewControllerIcon.className === "fas fa-external-link-square-alt fa-rotate-180 fa-lg") {
+				displayViewControllerIcon.className = "fas fa-external-link-square-alt fa-lg"
+				parameter.isScreenSharing.screenSharingUserViewCurrentDisplay = 3
+				parameter.isScreenSharing.screenSharingUserViewTotalPage = Math.ceil(parameter.isScreenSharing.screenSharingUserViewTotalPage / 3)
+				parameter.isScreenSharing.screenSharingUserViewCurrentPage = Math.ceil(parameter.isScreenSharing.screenSharingUserViewCurrentPage / 3)
+			} else {
+				displayViewControllerIcon.className = "fas fa-external-link-square-alt fa-rotate-180 fa-lg"
+				parameter.isScreenSharing.screenSharingUserViewCurrentDisplay = 1
+				parameter.isScreenSharing.screenSharingUserViewCurrentPage = parameter.isScreenSharing.screenSharingUserViewTotalPage * 3 - 2
+				if (parameter.isScreenSharing.screenSharingUserViewCurrentPage < 1) {
+					parameter.isScreenSharing.screenSharingUserViewCurrentPage = 1
+				}
+				parameter.isScreenSharing.screenSharingUserViewTotalPage = parameter.userVideoElements.length
+			}
+			console.log(parameter.isScreenSharing.screenSharingUserViewCurrentDisplay)
+			videoDisplayModeScreenSharing({ parameter, status: true })
+		} catch (error) {
+			console.log("- Error Controlling View Controller : ", error)
+		}
+	}
+
 	if (status) {
 		let userListButton = document.getElementById("user-list-button")
+
+		const usersVideoHeader = document.createElement("div")
+		usersVideoHeader.id = "video-screen-sharing-header"
+		usersVideoHeader.innerHTML = `<span>Users</span><button class="btn" id="display-view-controller"><i id="display-view-controller-icon" class="fas fa-external-link-square-alt fa-lg"></i></button>`
+		videoContainer.insertBefore(usersVideoHeader, videoContainer.firstChild)
+
+		usersVideoHeader.addEventListener("mousedown", function (e) {
+			parameter.isDragging = true
+			parameter.offsetX = e.clientX - videoContainer.getBoundingClientRect().left
+			parameter.offsetY = e.clientY - videoContainer.getBoundingClientRect().top
+		})
+
+		document.addEventListener("mouseup", mouseUpHandler)
+		document.addEventListener("mousemove", mouseMoveHandler)
 
 		let screenSharingContainer = document.createElement("div")
 		screenSharingContainer.id = "screen-sharing-container"
@@ -145,7 +309,6 @@ const changeLayoutScreenSharingClient = ({ track, status, parameter, id }) => {
 		upperContainer.insertBefore(screenSharingContainer, upperContainer.firstChild)
 		videoContainer.className = "video-container-screen-sharing-mode"
 		document.getElementById("screen-sharing-video").srcObject = new MediaStream([track])
-		slideUserVideoButton({ status: true })
 		parameter.isScreenSharing.isScreenSharing = true
 		parameter.isScreenSharing.socketId = id
 		let chatButton = document.getElementById("user-chat-button")
@@ -153,21 +316,105 @@ const changeLayoutScreenSharingClient = ({ track, status, parameter, id }) => {
 			screenSharingContainer.style.minWidth = "75%"
 			screenSharingContainer.style.maxWidth = "75%"
 		}
+
+		const displayViewControllerIcon = document.getElementById("display-view-controller-icon")
+		displayViewControllerIcon.addEventListener("click", displayViewController)
+
+		videoDisplayModeScreenSharing({ parameter, status: true })
+		if (window.innerWidth <= 950) {
+			slideUserVideoButton({ status: true })
+		}
 	} else {
 		let screenSharingContainer = document.getElementById("screen-sharing-container")
 		if (screenSharingContainer) screenSharingContainer.remove()
 		parameter.isScreenSharing.isScreenSharing = false
 		parameter.isScreenSharing.socketId = undefined
 		videoContainer.removeAttribute("class")
-		slideUserVideoButton({ status: false })
+
+		const displayViewControllerIcon = document.getElementById("display-view-controller-icon")
+		displayViewControllerIcon.removeAttribute("click", displayViewController)
+
+		document.getElementById("video-screen-sharing-header").remove()
+		document.removeEventListener("mouseup", mouseUpHandler)
+		document.removeEventListener("mousemove", mouseMoveHandler)
+		addPreviousButtonScreenSharingView({ parameter, status: false })
+		addNextButtonScreenSharingView({ status: false, parameter })
+		if (window.innerWidth <= 950) {
+			slideUserVideoButton({ status: false })
+		}
 	}
+	updatingLayout({ parameter })
+	changeLayout({ parameter })
 }
 
 const changeLayoutScreenSharing = ({ parameter, status }) => {
 	let upperContainer = document.getElementById("upper-container")
 	let videoContainer = document.getElementById("video-container")
 
+	updatingLayout({ parameter })
+	changeLayout({ parameter })
+
+	const mouseUpHandler = () => {
+		parameter.isDragging = false
+	}
+
+	const mouseMoveHandler = (e) => {
+		if (parameter.isDragging) {
+			if (!parameter.isDragging) return
+
+			const x = e.clientX - parameter.offsetX
+			const y = e.clientY - parameter.offsetY
+
+			// Ensure the div stays within the viewport
+			const maxX = window.innerWidth - videoContainer.offsetWidth
+			const maxY = window.innerHeight - videoContainer.offsetHeight
+
+			const clampedX = Math.max(0, Math.min(x, maxX))
+			const clampedY = Math.max(0, Math.min(y, maxY))
+
+			videoContainer.style.left = clampedX + "px"
+			videoContainer.style.top = clampedY + "px"
+		}
+	}
+
+	const displayViewController = () => {
+		try {
+			const displayViewControllerIcon = document.getElementById("display-view-controller-icon")
+			if (displayViewControllerIcon.className === "fas fa-external-link-square-alt fa-rotate-180 fa-lg") {
+				displayViewControllerIcon.className = "fas fa-external-link-square-alt fa-lg"
+				parameter.isScreenSharing.screenSharingUserViewCurrentDisplay = 3
+				parameter.isScreenSharing.screenSharingUserViewTotalPage = Math.ceil(parameter.isScreenSharing.screenSharingUserViewTotalPage / 3)
+				parameter.isScreenSharing.screenSharingUserViewCurrentPage = Math.ceil(parameter.isScreenSharing.screenSharingUserViewCurrentPage / 3)
+			} else {
+				displayViewControllerIcon.className = "fas fa-external-link-square-alt fa-rotate-180 fa-lg"
+				parameter.isScreenSharing.screenSharingUserViewCurrentDisplay = 1
+				parameter.isScreenSharing.screenSharingUserViewCurrentPage = parameter.isScreenSharing.screenSharingUserViewTotalPage * 3 - 2
+				if (parameter.isScreenSharing.screenSharingUserViewCurrentPage < 1) {
+					parameter.isScreenSharing.screenSharingUserViewCurrentPage = 1
+				}
+				parameter.isScreenSharing.screenSharingUserViewTotalPage = parameter.userVideoElements.length
+			}
+			videoDisplayModeScreenSharing({ parameter, status: true })
+		} catch (error) {
+			console.log("- Error Controlling View Controller : ", error)
+		}
+	}
+
 	if (status) {
+		const usersVideoHeader = document.createElement("div")
+		usersVideoHeader.id = "video-screen-sharing-header"
+		usersVideoHeader.innerHTML = `<span>Users</span><button class="btn" id="display-view-controller"><i id="display-view-controller-icon" class="fas fa-external-link-square-alt fa-lg"></i></button>`
+		videoContainer.insertBefore(usersVideoHeader, videoContainer.firstChild)
+
+		usersVideoHeader.addEventListener("mousedown", function (e) {
+			parameter.isDragging = true
+			parameter.offsetX = e.clientX - videoContainer.getBoundingClientRect().left
+			parameter.offsetY = e.clientY - videoContainer.getBoundingClientRect().top
+		})
+
+		document.addEventListener("mouseup", mouseUpHandler)
+		document.addEventListener("mousemove", mouseMoveHandler)
+
 		let userListButton = document.getElementById("user-list-button")
 		let screenSharingContainer = document.createElement("div")
 
@@ -175,13 +422,19 @@ const changeLayoutScreenSharing = ({ parameter, status }) => {
 		screenSharingContainer.innerHTML = `<div id="screen-sharing-video-container"><video id="screen-sharing-video" muted autoplay></video></div>`
 		upperContainer.insertBefore(screenSharingContainer, upperContainer.firstChild)
 		videoContainer.className = "video-container-screen-sharing-mode"
+
 		document.getElementById("screen-sharing-video").srcObject = parameter.screensharing.stream
-		slideUserVideoButton({ status: true })
+		// slideUserVideoButton({ status: true })
 		let chatButton = document.getElementById("user-chat-button")
 		if (userListButton.classList[1] == "button-small-custom-clicked" || chatButton.classList[1] == "button-small-custom-clicked") {
 			screenSharingContainer.style.minWidth = "75%"
 			screenSharingContainer.style.maxWidth = "75%"
 		}
+
+		const displayViewControllerIcon = document.getElementById("display-view-controller-icon")
+		displayViewControllerIcon.addEventListener("click", displayViewController)
+
+		videoDisplayModeScreenSharing({ parameter, status: true })
 	} else {
 		if (parameter.screensharing.stream) {
 			parameter.screensharing.stream.getTracks().forEach((track) => track.stop())
@@ -192,8 +445,20 @@ const changeLayoutScreenSharing = ({ parameter, status }) => {
 		parameter.isScreenSharing.isScreenSharing = false
 		parameter.isScreenSharing.socketId = undefined
 		videoContainer.removeAttribute("class")
-		slideUserVideoButton({ status: false })
+		// slideUserVideoButton({ status: false })
+
+		const displayViewControllerIcon = document.getElementById("display-view-controller-icon")
+		displayViewControllerIcon.removeAttribute("click", displayViewController)
+
+		document.getElementById("video-screen-sharing-header").remove()
+		document.removeEventListener("mouseup", mouseUpHandler)
+		document.removeEventListener("mousemove", mouseMoveHandler)
+
+		addPreviousButtonScreenSharingView({ parameter, status: false })
+		addNextButtonScreenSharingView({ status: false, parameter })
 	}
+	updatingLayout({ parameter })
+	changeLayout({ parameter })
 }
 
 const slideUserVideoButton = ({ status }) => {
@@ -223,6 +488,151 @@ const slideUserVideoButton = ({ status }) => {
 		let videoContainer = document.getElementById("video-container")
 		videoContainer.removeAttribute("style")
 		if (userVideoButton) userVideoButton.remove()
+	}
+}
+
+const addNextButtonScreenSharingView = ({ status, parameter }) => {
+	try {
+		let videoContainer = document.getElementById("video-container")
+		const nextVideo = (e) => {
+			try {
+				if (parameter.isScreenSharing.screenSharingUserViewCurrentPage === parameter.isScreenSharing.screenSharingUserViewTotalPage) return
+				parameter.isScreenSharing.screenSharingUserViewCurrentPage++
+
+				videoDisplayModeScreenSharing({ parameter, status: true })
+				addPreviousButtonScreenSharingView({ status: true, parameter })
+			} catch (error) {
+				console.log("- Error Displaying Next Video : ", error)
+			}
+		}
+		if (status) {
+			if (document.getElementById("next-button")) return
+			const nextButton = document.createElement("button")
+			nextButton.id = "next-button"
+			nextButton.className = "btn"
+			nextButton.innerHTML = `<i class="fas fa-chevron-right fa-lg" style="color: #ffffff;"></i>`
+			nextButton.addEventListener("click", nextVideo)
+			videoContainer.append(nextButton)
+		} else {
+			const nextButton = document.getElementById("next-button")
+			if (nextButton) {
+				nextButton.removeEventListener("click", nextVideo)
+				nextButton.remove()
+			}
+		}
+	} catch (error) {
+		console.log("- Error Adding Next Button Screen Sharing View : ", error)
+	}
+}
+
+const addPreviousButtonScreenSharingView = ({ status, parameter }) => {
+	try {
+		let videoContainer = document.getElementById("video-container")
+		const previousVideo = (e) => {
+			try {
+				if (parameter.isScreenSharing.screenSharingUserViewCurrentPage <= 1) return
+				parameter.isScreenSharing.screenSharingUserViewCurrentPage--
+				videoDisplayModeScreenSharing({ parameter, status: true })
+				addNextButtonScreenSharingView({ status: true, parameter })
+			} catch (error) {
+				console.log("- Error Displaying Next Video : ", error)
+			}
+		}
+		if (status) {
+			if (document.getElementById("previous-button")) return
+			const previousButton = document.createElement("button")
+			previousButton.id = "previous-button"
+			previousButton.className = "btn"
+			previousButton.innerHTML = `<i class="fas fa-chevron-left fa-lg" style="color: #ffffff;"></i>`
+			previousButton.addEventListener("click", previousVideo)
+			videoContainer.append(previousButton)
+		} else {
+			const previousButton = document.getElementById("previous-button")
+			if (previousButton) {
+				previousButton.removeEventListener("click", previousVideo)
+				previousButton.remove()
+			}
+		}
+	} catch (error) {
+		console.log("- Error Adding Previous Button Screen Sharing View : ", error)
+	}
+}
+
+const videoDisplayModeScreenSharing = ({ parameter, status }) => {
+	try {
+		addPreviousButtonScreenSharingView({ parameter, status: false })
+		addNextButtonScreenSharingView({ status: false, parameter })
+
+		if (status) {
+			if (parameter.isScreenSharing.screenSharingUserViewCurrentDisplay === 3) {
+				if (parameter.isScreenSharing.screenSharingUserViewCurrentPage < parameter.isScreenSharing.screenSharingUserViewTotalPage) {
+					addNextButtonScreenSharingView({ status: true, parameter })
+				}
+				if (parameter.isScreenSharing.screenSharingUserViewCurrentPage > parameter.isScreenSharing.screenSharingUserViewTotalPage) {
+					parameter.isScreenSharing.screenSharingUserViewCurrentPage--
+					if (parameter.isScreenSharing.screenSharingUserViewCurrentPage === 1) {
+						addPreviousButtonScreenSharingView({ parameter, status: false })
+					}
+				}
+				if (
+					parameter.isScreenSharing.screenSharingUserViewCurrentPage !== 1 &&
+					parameter.isScreenSharing.screenSharingUserViewCurrentPage !== parameter.isScreenSharing.screenSharingUserViewTotalPage
+				) {
+					addPreviousButtonScreenSharingView({ parameter, status: true })
+					addNextButtonScreenSharingView({ status: true, parameter })
+				}
+				if (parameter.isScreenSharing.screenSharingUserViewCurrentPage !== 1 && parameter.isScreenSharing.screenSharingUserViewTotalPage > 1) {
+					addPreviousButtonScreenSharingView({ parameter, status: true })
+				}
+				parameter.userVideoElements.forEach((userVideo, index) => {
+					const endView = parameter.isScreenSharing.screenSharingUserViewCurrentPage * parameter.isScreenSharing.screenSharingUserViewCurrentDisplay
+					const startView = endView - 3
+					if (index >= startView && index < endView) {
+						userVideo.style.display = "block"
+					} else {
+						userVideo.style.display = "none"
+					}
+				})
+			} else {
+				if (parameter.isScreenSharing.screenSharingUserViewCurrentPage > parameter.isScreenSharing.screenSharingUserViewTotalPage) {
+					parameter.isScreenSharing.screenSharingUserViewCurrentPage--
+					if (parameter.isScreenSharing.screenSharingUserViewCurrentPage === 1) {
+						addPreviousButtonScreenSharingView({ parameter, status: false })
+					}
+				}
+				if (
+					parameter.isScreenSharing.screenSharingUserViewCurrentPage !== 1 &&
+					parameter.isScreenSharing.screenSharingUserViewCurrentPage < parameter.isScreenSharing.screenSharingUserViewTotalPage
+				) {
+					addPreviousButtonScreenSharingView({ status: true, parameter })
+					addNextButtonScreenSharingView({ parameter, status: true })
+				}
+				if (parameter.isScreenSharing.screenSharingUserViewCurrentPage < parameter.isScreenSharing.screenSharingUserViewTotalPage) {
+					addNextButtonScreenSharingView({ status: true, parameter })
+				}
+				if (
+					parameter.isScreenSharing.screenSharingUserViewCurrentPage <= parameter.isScreenSharing.screenSharingUserViewTotalPage &&
+					parameter.isScreenSharing.screenSharingUserViewTotalPage > 1 &&
+					parameter.isScreenSharing.screenSharingUserViewCurrentPage != 1
+				) {
+					addPreviousButtonScreenSharingView({ status: true, parameter })
+				}
+				parameter.userVideoElements.forEach((userVideo, index) => {
+					if (index === parameter.isScreenSharing.screenSharingUserViewCurrentPage - 1) {
+						userVideo.style.display = "block"
+					} else {
+						userVideo.style.display = "none"
+					}
+				})
+			}
+		} else {
+			parameter.userVideoElements.forEach((userVideo) => {
+				userVideo.removeAttribute("style")
+			})
+			console.log(parameter.userVideoElements)
+		}
+	} catch (error) {
+		console.log("- Error Displaying Mode Screen Sharing Video : ", error)
 	}
 }
 
@@ -426,6 +836,28 @@ const addMuteAllButton = ({ parameter, socket }) => {
 	}
 }
 
+const getMicOptions = async ({ parameter, socket }) => {
+	try {
+		let audioDevices = (await navigator.mediaDevices.enumerateDevices()).filter((device) => device.kind === "audioinput")
+		const micOptionsContainer = document.getElementById("mic-options")
+		audioDevices.forEach((audio, index) => {
+			let newElement = document.createElement("li")
+			newElement.id = audio.deviceId
+			newElement.innerHTML = audio.label
+			micOptionsContainer.appendChild(newElement)
+			newElement.addEventListener("click", () => {
+				try {
+					switchMicrophone({ parameter, deviceId: audio.deviceId, socket })
+				} catch (error) {
+					console.log("- Error Switching Microphone : ", error)
+				}
+			})
+		})
+	} catch (error) {
+		console.log("- Error Getting Mic Options : ", error)
+	}
+}
+
 module.exports = {
 	changeMic,
 	turnOffOnCamera,
@@ -435,4 +867,7 @@ module.exports = {
 	changeLayoutScreenSharingClient,
 	recordVideo,
 	addMuteAllButton,
+	getMicOptions,
+	changeMicCondition,
+	videoDisplayModeScreenSharing,
 }

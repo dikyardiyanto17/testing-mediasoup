@@ -1,17 +1,20 @@
 const createMyVideo = async (parameter) => {
 	try {
-		let picture = `<div class="${parameter.initialVideo ? "video-on" : "video-off"}" id="user-picture-container-${parameter.socketId}"><img src="${parameter.picture
-			}" class="image-turn-off" id="user-picture-${parameter.socketId}""/></div>`
+		let picture = `<div class="${parameter.initialVideo ? "video-on" : "video-off"}" id="user-picture-container-${parameter.socketId}"><img src="${
+			parameter.picture
+		}" class="image-turn-off" id="user-picture-${parameter.socketId}""/></div>`
 		let videoContainer = document.getElementById("video-container")
 		let userVideoContainer = document.createElement("div")
 		userVideoContainer.id = "vc-" + parameter.socketId
 		userVideoContainer.className = "user-video-container-1"
-		userVideoContainer.style.zIndex = "2"
-		const micIcons = `<div class="icons-mic"><img src="/assets/pictures/mic${parameter.initialAudio ? "On" : "Off"
-			}.png" class="mic-image" id="user-mic-${parameter.socketId}"></div>`
+		userVideoContainer.style.zIndex = "4"
+		const micIcons = `<div class="icons-mic"><img src="/assets/pictures/mic${
+			parameter.initialAudio ? "On" : "Off"
+		}.png" class="mic-image" id="user-mic-${parameter.socketId}"></div>`
 		// userVideoContainer.innerHTML = `${micIcons}<video id="v-${parameter.socketId}" muted autoplay class="user-video"></video>${picture}<div class="username">${parameter.username}</div>`
 		userVideoContainer.innerHTML = `<div class="outside-video-user">${micIcons}<video id="v-${parameter.socketId}" muted autoplay class="user-video"></video>${picture}<div class="username">${parameter.username}</div></div>`
 		videoContainer.appendChild(userVideoContainer)
+		parameter.userVideoElements.push(userVideoContainer)
 		// document.getElementById(`v-${parameter.socketId}`).style.transform = "rotateY(0deg)"
 		document.getElementById(`v-${parameter.socketId}`).srcObject = parameter.localStream
 		createAudioVisualizer({ id: parameter.socketId, track: parameter.localStream.getAudioTracks()[0] })
@@ -20,7 +23,7 @@ const createMyVideo = async (parameter) => {
 	}
 }
 
-const createVideo = ({ id, videoClassName, picture, username, micTrigger }) => {
+const createVideo = ({ id, videoClassName, picture, username, micTrigger, parameter }) => {
 	try {
 		let isVideoExist = document.getElementById("vc-" + id)
 		let addPicture = `<div class="video-on" id="user-picture-container-${id}"><img src="${picture}" class="image-turn-off" id="user-picture-${id}""/></div>`
@@ -29,11 +32,13 @@ const createVideo = ({ id, videoClassName, picture, username, micTrigger }) => {
 			let userVideoContainer = document.createElement("div")
 			userVideoContainer.id = "vc-" + id
 			userVideoContainer.className = videoClassName
-			const micIcons = `<div class="icons-mic"><img src="/assets/pictures/mic${micTrigger ? "On" : "Off"
-				}.png" class="mic-image" id="user-mic-${id}"/></div>`
+			const micIcons = `<div class="icons-mic"><img src="/assets/pictures/mic${
+				micTrigger ? "On" : "Off"
+			}.png" class="mic-image" id="user-mic-${id}"/></div>`
 			// userVideoContainer.innerHTML = `${micIcons}<video id="v-${id}" class="user-video" autoplay></video>${addPicture}<div class="username">${username}</div>`
 			userVideoContainer.innerHTML = `<div class="outside-video-user">${micIcons}<video id="v-${id}" class="user-video" autoplay></video>${addPicture}<div class="username">${username}</div></div>`
 			videoContainer.appendChild(userVideoContainer)
+			parameter.userVideoElements.push(userVideoContainer)
 		}
 	} catch (error) {
 		console.log("- Error Creating User Video : ", error)
@@ -89,15 +94,17 @@ const removeUserList = ({ id }) => {
 
 const changeLayout = ({ parameter }) => {
 	try {
-		// const secondUserVideo = document.getElementById(`vc-${parameter.socketId}`)
 		const userVideoContainer = document.getElementById("video-container")
 		const secondUserVideo = userVideoContainer.children[1]
-		if (parameter.videoLayout == "user-video-container-2" && window.innerWidth <= 950) {
+		parameter.userVideoElements.forEach((userVideo) => {
+			userVideo.removeAttribute("style")
+		})
+		if (parameter.videoLayout == "user-video-container-2" && window.innerWidth <= 950 && !parameter.isScreenSharing.isScreenSharing) {
 			secondUserVideo.style.width = "80%"
 			secondUserVideo.style.height = "80%"
 			secondUserVideo.style.position = "static"
 		} else {
-			secondUserVideo.removeAttribute("style")
+			if (secondUserVideo) secondUserVideo.removeAttribute("style")
 		}
 		const userVideoContainers = document.querySelectorAll("." + parameter.previousVideoLayout)
 		userVideoContainers.forEach((container, index) => {
@@ -111,6 +118,11 @@ const changeLayout = ({ parameter }) => {
 
 const updatingLayout = ({ parameter }) => {
 	try {
+		if (parameter.isScreenSharing.isScreenSharing) {
+			parameter.previousVideoLayout = parameter.videoLayout
+			parameter.videoLayout = "user-video-container-screen-sharing"
+			return
+		}
 		switch (parameter.totalUsers) {
 			case 1:
 				parameter.previousVideoLayout = parameter.videoLayout

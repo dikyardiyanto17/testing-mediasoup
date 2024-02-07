@@ -34,6 +34,9 @@ class Parameters {
 	isScreenSharing = {
 		isScreenSharing: false,
 		socketId: undefined,
+		screenSharingUserViewCurrentPage: 1,
+		screenSharingUserViewTotalPage: 1,
+		screenSharingUserViewCurrentDisplay: 3,
 	}
 	record = {
 		isRecording: false,
@@ -47,6 +50,10 @@ class Parameters {
 		isLocked: false,
 		socketId: undefined,
 	}
+	offsetX
+	offsetY
+	isDragging = false
+	userVideoElements = []
 }
 
 module.exports = { Parameters }
