@@ -1,0 +1,1487 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+        integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <title>Telepati</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        ::-webkit-scrollbar-track {
+            -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+            background-color: #F5F5F5;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            background-color: #F5F5F5;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background-color: #000000;
+        }
+
+        #full-container {
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            background-color: #1e1f20;
+            overflow: hidden;
+            position: relative;
+        }
+
+        #new-user-join-notification-container {
+            position: absolute;
+            left: 0;
+            top: 0;
+            z-index: 2;
+        }
+
+        #upper-container {
+            width: 100%;
+            height: 90%;
+            /* background-color: green; */
+            position: relative;
+            display: flex;
+        }
+
+        #bottom-container {
+            width: 100%;
+            height: 10%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        #video-container {
+            min-width: 100%;
+            max-width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            overflow-y: auto;
+            z-index: 1;
+            transition: 1s;
+        }
+
+
+
+        @keyframes showBar {
+            from {
+                transform: translateX(100%);
+            }
+
+            to {
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes hideBar {
+            from {
+                transform: translateX(0);
+            }
+
+            to {
+                transform: translateX(100%);
+            }
+        }
+
+        .hide-side-bar {
+            display: none;
+            animation: hideBar 0.5s ease-out;
+        }
+
+        .show-side-bar {
+            display: block;
+            animation: showBar 0.5s ease-out;
+        }
+
+        .hide-username {
+            visibility: hidden;
+            height: 0;
+            padding: 0;
+            margin: 0;
+        }
+
+        #side-bar-container {
+            width: 25%;
+            height: 100%;
+            top: 0;
+            transition: 1s;
+            z-index: 1;
+        }
+
+        #user-bar {
+            border-radius: 10px;
+            background-color: #f1f1f1;
+            border: 1px solid #d3d3d3;
+            min-width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: 1s;
+        }
+
+        #user-bar-header {
+            background: #2196f3;
+            color: #fff;
+            cursor: move;
+            width: 100%;
+            padding: 10px;
+            z-index: 6 !important;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+        }
+
+        .user-video {
+            width: 100%;
+            max-height: 100%;
+            transform: rotateY(180deg);
+            -webkit-transform: rotateY(180deg);
+            -moz-transform: rotateY(180deg);
+            position: relative;
+            z-index: 1;
+        }
+
+        .outside-video-user {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            background-color: black;
+            position: relative;
+            transition: 1s;
+        }
+
+        .user-video-container-1 {
+            height: 80%;
+            margin: 10px;
+            width: 80%;
+            transition: 1s;
+        }
+
+        .user-video-container-2 {
+            height: 80%;
+            margin: 10px;
+            width: 40%;
+            transition: 1s;
+        }
+
+        .user-video-container-3 {
+            height: 40%;
+            margin: 10px;
+            width: 40%;
+            transition: 1s;
+        }
+
+        .user-video-container-4 {
+            height: 40%;
+            margin: 10px;
+            width: 40%;
+            transition: 1s;
+        }
+
+        .user-video-container-5 {
+            height: 40%;
+            margin: 10px;
+            width: 30%;
+            transition: 1s;
+        }
+
+        .user-video-container-6 {
+            height: 40%;
+            margin: 10px;
+            width: 30%;
+            transition: 1s;
+        }
+
+        .user-video-container-7 {
+            height: 30%;
+            margin: 10px;
+            width: 30%;
+            transition: 1s;
+        }
+
+        .user-video-container-8 {
+            height: 30%;
+            margin: 10px;
+            width: 30%;
+            transition: 1s;
+        }
+
+        .user-video-container-9 {
+            height: 30%;
+            margin: 10px;
+            width: 30%;
+            transition: 1s;
+        }
+
+        .user-video-container-10 {
+            height: 30%;
+            margin: 10px;
+            width: 22%;
+            transition: 1s;
+        }
+
+        .user-video-container-11 {
+            height: 30%;
+            margin: 10px;
+            width: 22%;
+            transition: 1s;
+        }
+
+        .user-video-container-12 {
+            height: 30%;
+            margin: 10px;
+            width: 22%;
+            transition: 1s;
+        }
+
+        .user-video-container-screen-sharing {
+            /* height: 90%; */
+            height: 22.5vh;
+            width: 80%;
+            margin: 5px;
+            /* transition: 1s; */
+        }
+
+        .button-small-custom {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            transition: 0.3s;
+            background: #44474A;
+            margin-left: 10px;
+            margin-right: 10px;
+        }
+
+        .button-small-custom:hover {
+            background-color: #959ca3;
+        }
+
+        .button-big-custom {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #fc5d5b;
+            transition: 0.3s;
+            margin-left: 10px;
+            margin-right: 10px;
+        }
+
+        .button-big-custom:hover {
+            background-color: #ff0000;
+        }
+
+        .icons-mic {
+            position: absolute;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            top: 10px;
+            right: 10px;
+            width: 20px;
+            height: 20px;
+            border-radius: 30px;
+            transition: 0.3s;
+            background: #1e1f20;
+            z-index: 5;
+        }
+
+        .mic-image {
+            width: 12px;
+            height: 12px;
+        }
+
+        .audio-visualizer {
+            position: absolute;
+            background-color: #33333300;
+            width: 20px;
+            height: 20px;
+            right: 10px;
+            top: 10px;
+            border-radius: 50%;
+            z-index: 4;
+        }
+
+        #user-mic-button {
+            position: relative;
+        }
+
+        #user-mic-button:hover>#user-mic-button-tooltip {
+            visibility: visible;
+            z-index: 3;
+        }
+
+        #user-mic-button-tooltip {
+            background-color: #bbbbbba1;
+            white-space: nowrap;
+            border-radius: 10px;
+            padding: 10px;
+            position: absolute;
+            visibility: hidden;
+            top: -100%;
+        }
+
+        #user-turn-on-off-camera-button {
+            position: relative;
+        }
+
+        #user-turn-on-off-camera-button:hover>#user-turn-on-off-camera-button-tooltip {
+            visibility: visible;
+            z-index: 3;
+        }
+
+        #user-turn-on-off-camera-button-tooltip {
+            background-color: #bbbbbba1;
+            white-space: nowrap;
+            border-radius: 10px;
+            padding: 10px;
+            position: absolute;
+            visibility: hidden;
+            top: -100%;
+        }
+
+        .video-off {
+            /* z-index: 3; */
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            background-color: #000000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .video-on {
+            width: 100%;
+            z-index: 0;
+            position: absolute;
+            background-color: #000000;
+            display: none;
+        }
+
+        .image-turn-off {
+            aspect-ratio: 1;
+            /* width: 25%; */
+            height: 25%;
+            border-radius: 50%;
+            z-index: 1;
+        }
+
+        #user-hang-up-button {
+            position: relative;
+        }
+
+        #user-hang-up-button:hover>#user-hang-up-button-tooltip {
+            visibility: visible;
+            z-index: 3;
+        }
+
+        #user-hang-up-button-tooltip {
+            background-color: #bbbbbba1;
+            white-space: nowrap;
+            border-radius: 10px;
+            padding: 10px;
+            position: absolute;
+            visibility: hidden;
+            top: -100%;
+        }
+
+        #optional-button-trigger {
+            display: none;
+        }
+
+        @media (max-width: 950px) {
+            #optional-button-trigger {
+                display: block !important;
+            }
+
+            #side-bar-container {
+                position: absolute;
+                width: 100% !important;
+                right: -100%;
+                z-index: 3;
+            }
+
+            .optional-button-menu {
+                position: absolute;
+                display: flex !important;
+                padding: 10px;
+                height: 200%;
+                z-index: 5;
+                flex-wrap: wrap;
+                width: 100%;
+                background-color: rgba(0, 0, 0, 0.717);
+                border-top-right-radius: 20px;
+                border-top-left-radius: 20px;
+                bottom: -200%;
+                justify-content: center;
+                align-items: center;
+                animation-name: slide-out;
+                animation-duration: 2s;
+            }
+
+            @keyframes slide-out {
+                0% {
+                    bottom: 100%;
+                }
+
+                100% {
+                    bottom: -200%;
+                }
+            }
+
+            .optional-button-menu-show {
+                position: absolute;
+                display: flex;
+                padding: 10px;
+                height: 200%;
+                z-index: 5;
+                flex-wrap: wrap;
+                width: 100%;
+                background-color: rgba(0, 0, 0, 0.717);
+                border-top-right-radius: 20px;
+                border-top-left-radius: 20px;
+                bottom: 100%;
+                justify-content: center;
+                align-items: center;
+                animation-name: slide-in;
+                animation-duration: 2s;
+            }
+
+            @keyframes slide-in {
+                0% {
+                    bottom: -100%;
+                }
+
+                100% {
+                    bottom: 100%;
+                }
+            }
+
+            .optional-button-menu-show>.button-small-custom {
+                width: 25%;
+                height: 25%;
+                margin: 5px;
+                border-radius: 10px;
+                padding: 25px;
+            }
+
+            .optional-button-menu-show>.button-small-custom-clicked {
+                width: 25%;
+                height: 25%;
+                margin: 5px;
+                border-radius: 10px;
+                transition: 0.3s;
+                background: #fc5d5b;
+                padding: 25px;
+            }
+
+            .optional-button-menu>.button-small-custom {
+                width: 25%;
+                height: 25%;
+                margin: 5px;
+                border-radius: 10px;
+                padding: 25px;
+            }
+
+            .optional-button-menu>.button-small-custom-clicked {
+                width: 25%;
+                height: 25%;
+                margin: 5px;
+                border-radius: 10px;
+                transition: 0.3s;
+                background: #fc5d5b;
+            }
+
+            .user-video-container-2 {
+                height: 25%;
+                margin: 10px;
+                width: 30%;
+                transition: 1s;
+                right: 0;
+                bottom: 0;
+                position: absolute;
+            }
+
+
+            .hide {
+                display: none !important;
+            }
+
+            #user-mic-button {
+                position: relative;
+            }
+
+            #user-mic-button:hover>#user-mic-button-tooltip {
+                display: none;
+            }
+
+            #user-turn-on-off-camera-button:hover>#user-turn-on-off-camera-button-tooltip {
+                display: none;
+            }
+
+            #user-hang-up-button:hover>#user-hang-up-button-tooltip {
+                display: none;
+            }
+
+            #option-button:hover>#option-button-tooltip {
+                display: none;
+            }
+
+            #user-switch-camera-button:hover>#user-switch-camera-button-tooltip {
+                display: block;
+            }
+
+            #user-switch-camera-button {
+                display: flex;
+                flex-direction: column;
+            }
+
+            #user-switch-camera-button-tooltip {
+                border-radius: 0 !important;
+                background-color: rgba(255, 255, 255, 0) !important;
+                font-size: 10px !important;
+                position: static !important;
+                visibility: visible !important;
+                padding: 0 !important;
+                color: #ffffff;
+            }
+
+            #user-screen-share-button:hover>#user-screen-share-button-tooltip {
+                display: block;
+            }
+
+            #user-screen-share-button {
+                display: flex;
+                flex-direction: column;
+            }
+
+            #user-screen-share-button-tooltip {
+                border-radius: 0 !important;
+                background-color: rgba(255, 255, 255, 0) !important;
+                font-size: 10px !important;
+                position: static !important;
+                visibility: visible !important;
+                padding: 0 !important;
+                color: #ffffff;
+            }
+
+            #user-record-button:hover>#user-record-button-tooltip {
+                display: block;
+            }
+
+            #user-record-button {
+                display: flex;
+                flex-direction: column;
+            }
+
+            #user-record-button-tooltip {
+                border-radius: 0 !important;
+                background-color: rgba(255, 255, 255, 0) !important;
+                font-size: 10px !important;
+                position: static !important;
+                visibility: visible !important;
+                padding: 0 !important;
+                color: #ffffff;
+            }
+
+            #user-list-button:hover>#user-list-button-tooltip {
+                display: block;
+            }
+
+            #user-list-button {
+                display: flex;
+                flex-direction: column;
+            }
+
+            #user-list-button-tooltip {
+                border-radius: 0 !important;
+                background-color: rgba(255, 255, 255, 0) !important;
+                font-size: 10px !important;
+                position: static !important;
+                visibility: visible !important;
+                padding: 0 !important;
+                color: #ffffff;
+            }
+
+            #user-chat-button:hover>#user-chat-button-tooltip {
+                display: block;
+            }
+
+            #user-chat-button {
+                display: flex;
+                flex-direction: column;
+            }
+
+            #user-chat-button-tooltip {
+                border-radius: 0 !important;
+                background-color: rgba(255, 255, 255, 0) !important;
+                font-size: 10px !important;
+                position: static !important;
+                visibility: visible !important;
+                padding: 0 !important;
+                color: #ffffff;
+            }
+
+            #share-link-button:hover>#share-link-button-tooltip {
+                display: block;
+            }
+
+            #share-link-button {
+                display: flex;
+                flex-direction: column;
+            }
+
+            #share-link-button-tooltip {
+                border-radius: 0 !important;
+                background-color: rgba(255, 255, 255, 0) !important;
+                font-size: 10px !important;
+                position: static !important;
+                visibility: visible !important;
+                padding: 0 !important;
+                color: #ffffff;
+            }
+
+            #user-video-display-button:hover>#user-video-display-button-tooltip {
+                display: none;
+            }
+
+            .video-container-screen-sharing-mode {
+                top: 0;
+                position: absolute !important;
+                left: 100%;
+                transition: 1s;
+                background-color: #1e1f20;
+                min-width: 100% !important;
+                max-width: 100% !important;
+                height: 100% !important;
+                display: flex;
+                overflow: auto;
+                flex-wrap: wrap !important;
+                padding-top: 9vh;
+            }
+
+            #video-screen-sharing-header {
+                top: 0%;
+                position: absolute !important;
+            }
+
+            #screen-sharing-container {
+                min-width: 100% !important;
+                max-width: 100% !important;
+                height: 100%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                transition: 1s;
+            }
+        }
+
+        .optional-button-menu {
+            display: flex;
+        }
+
+        #user-switch-camera-button {
+            position: relative;
+        }
+
+        #user-switch-camera-button:hover>#user-switch-camera-button-tooltip {
+            visibility: visible;
+            z-index: 3;
+        }
+
+        #user-switch-camera-button-tooltip {
+            background-color: #bbbbbba1;
+            white-space: nowrap;
+            border-radius: 10px;
+            padding: 10px;
+            position: absolute;
+            visibility: hidden;
+            top: -100%;
+        }
+
+        #user-screen-share-button {
+            position: relative;
+        }
+
+        #user-screen-share-button:hover>#user-screen-share-button-tooltip {
+            visibility: visible;
+            z-index: 3;
+        }
+
+        #user-screen-share-button-tooltip {
+            background-color: #bbbbbba1;
+            white-space: nowrap;
+            border-radius: 10px;
+            padding: 10px;
+            position: absolute;
+            visibility: hidden;
+            top: -100%;
+        }
+
+        #user-record-button {
+            position: relative;
+        }
+
+        #user-record-button:hover>#user-record-button-tooltip {
+            visibility: visible;
+            z-index: 3;
+        }
+
+        #user-record-button-tooltip {
+            background-color: #bbbbbba1;
+            white-space: nowrap;
+            border-radius: 10px;
+            padding: 10px;
+            position: absolute;
+            visibility: hidden;
+            top: -100%;
+        }
+
+        #user-list-button {
+            position: relative;
+        }
+
+        #user-list-button:hover>#user-list-button-tooltip {
+            visibility: visible;
+            z-index: 3;
+        }
+
+        #user-list-button-tooltip {
+            background-color: #bbbbbba1;
+            white-space: nowrap;
+            border-radius: 10px;
+            padding: 10px;
+            position: absolute;
+            visibility: hidden;
+            top: -100%;
+        }
+
+        #user-chat-button {
+            position: relative;
+        }
+
+        #user-chat-button:hover>#user-chat-button-tooltip {
+            visibility: visible;
+            z-index: 3;
+        }
+
+        #user-chat-button-tooltip {
+            background-color: #bbbbbba1;
+            white-space: nowrap;
+            border-radius: 10px;
+            padding: 10px;
+            position: absolute;
+            visibility: hidden;
+            top: -100%;
+        }
+
+        #share-link-button {
+            position: relative;
+        }
+
+        #share-link-button:hover>#share-link-button-tooltip {
+            visibility: visible;
+            z-index: 3;
+        }
+
+        #share-link-button-tooltip {
+            background-color: #bbbbbba1;
+            white-space: nowrap;
+            border-radius: 10px;
+            padding: 10px;
+            position: absolute;
+            visibility: hidden;
+            top: -100%;
+        }
+
+        #user-video-display-button {
+            position: relative;
+        }
+
+        #user-video-display-button:hover>#user-video-display-button-tooltip {
+            visibility: visible;
+            z-index: 3;
+        }
+
+        #user-video-display-button-tooltip {
+            background-color: #bbbbbba1;
+            white-space: nowrap;
+            border-radius: 10px;
+            padding: 10px;
+            position: absolute;
+            visibility: hidden;
+            top: -100%;
+        }
+
+        #snackbar {
+            visibility: hidden;
+            color: #fff;
+            background-color: #333;
+            margin-left: -125px;
+            border-radius: 10px;
+            padding: 10px;
+            text-align: center;
+            bottom: 30px;
+            right: -50px;
+            z-index: 4;
+            position: absolute;
+        }
+
+        #snackbar.show {
+            visibility: visible;
+            -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+            animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        }
+
+        .notification {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+        }
+
+        .screen-sharing-template {
+            position: absolute;
+        }
+
+        .button-small-custom-clicked {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            transition: 0.3s;
+            background: #fc5d5b;
+            margin-left: 10px;
+            margin-right: 10px;
+        }
+
+        .button-small-custom-clicked:hover {
+            background-color: #ff0000;
+        }
+
+        #screen-sharing-container {
+            min-width: 100%;
+            max-width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: 1s;
+        }
+
+        #screen-sharing-video-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #screen-sharing-video {
+            width: 100%;
+            max-height: 100%;
+            position: relative;
+        }
+
+        @media (min-width: 951px) {
+            .video-container-screen-sharing-mode {
+                position: absolute !important;
+                background-color: #1e1f20;
+                min-width: 25% !important;
+                max-width: 25% !important;
+                height: auto !important;
+                max-height: 100% !important;
+                display: flex !important;
+                flex-direction: column;
+                overflow: auto;
+                flex-wrap: nowrap !important;
+                z-index: 8 !important;
+                transition: 0s !important;
+                padding-top: 9vh;
+            }
+        }
+
+        .record-timer {
+            position: absolute;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            top: 10px;
+            left: 10px;
+            background-color: rgba(239, 235, 235, 0.541);
+            border-radius: 10px;
+            font-size: 12px;
+            padding: 10px;
+        }
+
+        #user-list {
+            text-align: left;
+            padding-left: 10px;
+        }
+
+        #user-list>p {
+            margin-bottom: 0px;
+        }
+
+        .user-list-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 10px;
+        }
+
+        .mini-picture {
+            height: 100%;
+            border-radius: 50%;
+            margin-right: 3px;
+        }
+
+        .profile-list {
+            height: 25px;
+            display: flex;
+            align-items: center;
+        }
+
+        .user-list-icons-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .user-list-microphone {
+            border-radius: 50%;
+            background-color: #44474A;
+            padding: 5px;
+            margin: 5px;
+            aspect-ratio: 1;
+            height: 32px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .user-list-camera {
+            border-radius: 50%;
+            background-color: #44474A;
+            padding: 5px;
+            margin: 5px;
+            aspect-ratio: 1;
+            height: 32px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #chat-bar-box-id {
+            min-width: 100%;
+            height: 100%;
+            border-radius: 10px;
+            background-color: white;
+            transition: 1s;
+        }
+
+        #chat-bar-header {
+            text-align: center;
+            position: relative;
+            border-top-right-radius: 5px;
+            border-top-left-radius: 5px;
+            background-color: #2196f3;
+            color: #fff;
+            width: 100%;
+            height: 5%;
+            padding: 10px;
+            z-index: 6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .chat-container {
+            background-color: white;
+            font-size: 13px;
+            width: 100%;
+            height: 88%;
+            /* max-height: 200px;
+            max-width: 100%;
+            min-height: 200px; */
+            overflow-y: auto;
+            padding-bottom: 10px;
+            position: relative;
+        }
+
+        .chat-footer {
+            width: 100%;
+            background-color: white;
+            height: 7%;
+            border-bottom-left-radius: 10px;
+            border-bottom-right-radius: 10px;
+        }
+
+        .chat-send {
+            bottom: 0;
+            display: flex;
+            height: 100%;
+            justify-content: center;
+            padding: 5px;
+            position: -webkit-sticky;
+            position: sticky;
+            width: 100%;
+        }
+
+        #sending-message {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            width: 100%;
+        }
+
+        .send-button {
+            margin-left: 0;
+            width: 15% !important;
+            height: 90%;
+            background-color: #2196f3;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 0 !important;
+            border-top-right-radius: 5px !important;
+            border-bottom-right-radius: 5px !important;
+        }
+
+        .your-messages {
+            text-align: right;
+            width: 100%;
+        }
+
+        .sender {
+            margin: 0;
+        }
+
+        .your-messages>.sender {
+            display: none;
+        }
+
+        .your-message {
+            width: 100%;
+            margin: 0;
+            display: flex;
+            justify-content: right;
+        }
+
+        .received-message {
+            width: 100%;
+            margin: 0;
+            display: flex;
+            justify-content: left;
+        }
+
+        .received-message>.inside-message {
+            max-width: 50%;
+            background-color: #D2D6DE;
+            color: black;
+            border-radius: 10px;
+            border-top-left-radius: 5px !important;
+            padding: 5px;
+            overflow: hidden;
+            display: flex;
+            flex-wrap: wrap;
+            word-break: break-word;
+        }
+
+        .your-message>.inside-message {
+            max-width: 50%;
+            background-color: #D2D6DE;
+            color: black;
+            border-radius: 10px;
+            border-top-right-radius: 5px !important;
+            padding: 5px;
+            overflow: hidden;
+            display: flex;
+            flex-wrap: wrap;
+            word-break: break-word;
+        }
+
+        .received-messages {
+            text-align: left;
+            width: 100%;
+        }
+
+        .type-box {
+            height: 90%;
+            width: 70% !important;
+            color: black !important;
+            width: 75% !important;
+            background-color: white !important;
+            border-radius: 0 !important;
+            border-bottom-left-radius: 5px !important;
+            border-top-left-radius: 5px !important;
+            padding: 5px;
+            margin-right: 0;
+            font-size: 7px;
+        }
+
+        .button-v2 {
+            background-color: rgb(60, 64, 67);
+            border-radius: 20px;
+            width: 40px;
+        }
+
+        .message-container {
+            margin: 10px;
+        }
+
+        #message-input {
+            font-size: 10px;
+        }
+
+        .message-time {
+            font-size: 10px;
+        }
+
+        .notification {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+        }
+
+        .new-message-text {
+            text-align: center;
+        }
+
+        .new-message-line {
+            height: 1px;
+            background-color: #ccc;
+            margin-top: 5px;
+            margin-bottom: 10px;
+        }
+
+        .send-text {
+            font-size: 13px;
+            color: white;
+            font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+        }
+
+        #option-button {
+            position: relative;
+        }
+
+        #option-button:hover>#option-button-tooltip {
+            visibility: visible;
+            z-index: 3;
+        }
+
+        #option-button-tooltip {
+            background-color: #bbbbbba1;
+            white-space: nowrap;
+            border-radius: 10px;
+            padding: 10px;
+            position: absolute;
+            visibility: hidden;
+            top: -100%;
+        }
+
+        #option-menu {
+            z-index: 5;
+            position: absolute;
+            background-color: rgba(68, 71, 74, 0.7);
+            padding: 10px;
+            bottom: 40px;
+            color: #fff;
+            border-radius: 10px;
+        }
+
+        #option-menu>ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        #option-menu>ul>li {
+            padding: 5px;
+            white-space: nowrap;
+            text-align: left;
+        }
+
+        #option-menu>ul>li:hover {
+            background-color: rgba(68, 71, 74, 1);
+            border-radius: 10px;
+        }
+
+        #alert-error {
+            visibility: hidden;
+            color: #fff;
+            background-color: #333;
+            margin-left: -125px;
+            border-radius: 10px;
+            padding: 10px;
+            text-align: center;
+            top: 30px;
+            left: 50%;
+            z-index: 4;
+            position: absolute;
+        }
+
+        #alert-error.show {
+            visibility: visible;
+            -webkit-animation: fadein-as 0.5s, fadeout-as 0.5s 2.5s;
+            animation: fadein-as 0.5s, fadeout-as 0.5s 2.5s;
+        }
+
+        .username {
+            border-radius: 4px;
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            color: white;
+            font-size: 11px;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 4px;
+            z-index: 4;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(-100%);
+            }
+
+            to {
+                transform: translateX(0);
+            }
+        }
+
+        .new-user-join {
+            border-radius: 10px;
+            padding: 7px;
+            background-color: #ffffff;
+            margin: 17px;
+            display: flex;
+            height: 50px;
+            align-items: center;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .new-user-profile-picture {
+            height: 100%;
+            border-radius: 50%;
+        }
+
+        .notification-text {
+            margin-left: 7px;
+        }
+
+        #mic-options {
+            z-index: 5;
+            position: absolute;
+            background-color: rgba(68, 71, 74, 0.7);
+            padding: 10px;
+            bottom: 40px;
+            color: #fff;
+            border-radius: 10px;
+            font-size: 13px;
+        }
+
+        #user-mic-button>ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        #user-mic-button>ul>li {
+            padding: 5px;
+            white-space: nowrap;
+            text-align: left;
+            margin: 5px;
+        }
+
+        #user-mic-button>ul>li:hover {
+            background-color: rgba(68, 71, 74, 1);
+            border-radius: 10px;
+        }
+
+        #video-screen-sharing-header {
+            width: 100%;
+            cursor: grab;
+            background-color: #2196f3;
+            color: #fff;
+            text-align: center;
+            position: absolute;
+            top: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 9vh;
+        }
+
+        #next-button {
+            position: absolute;
+            top: 50%;
+            right: 0;
+            z-index: 3;
+            border-radius: 50%;
+            aspect-ratio: 1;
+        }
+
+        #previous-button {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            z-index: 3;
+            border-radius: 50%;
+            aspect-ratio: 1;
+        }
+
+        #display-view-controller {
+            position: absolute;
+            right: 0%;
+            top: 0%;
+            border-width: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="full-container">
+        <section id="new-user-join-notification-container">
+        </section>
+        <span id="alert-error"></span>
+        <section id="upper-container">
+            <div id="audio-collection"></div>
+            <div id="video-container">
+            </div>
+            <div id="side-bar-container" style="display: none;">
+                <div id="user-bar" class="hide-side-bar">
+                    <div id="user-bar-header"><i class="fas fa-users"></i>User</div>
+                    <div id="user-list">
+                    </div>
+                </div>
+                <div id="chat-bar-box-id" class="hide-side-bar">
+                    <div id="chat-bar-header">
+                        <span>In Call Message</span>
+                    </div>
+                    <div class="chat-container" id="chat-container-id">
+                        <div class="chat-messages" id="chat-messages-id">
+                        </div>
+                    </div>
+                    <div class="chat-footer">
+                        <div class="chat-send">
+                            <form id="sending-message" autocomplete="off">
+                                <input class="form-control type-box" id="message-input" placeholder="Type Message..." />
+                                <button class="btn send-button" id="send-message-button" type="submit">
+                                    <span class="send-text">Send</span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section id="bottom-container">
+            <button class="btn button-small-custom" id="user-mic-button">
+                <ul id="mic-options" class="invisible">
+                    <li id="turn-off-microphone-option">Turn Off Microphone</li>
+                    <li id="turn-on-microphone-option">Turn On Microphone</li>
+                </ul>
+                <span id="user-mic-button-tooltip">Microphone</span>
+                <img src="/assets/pictures/micOn.png" id="mic-image" />
+            </button>
+            <button class="btn button-small-custom" id="user-turn-on-off-camera-button">
+                <span id="user-turn-on-off-camera-button-tooltip">Camera</span>
+                <i class="fas fa-video" style="color: #ffffff;" id="turn-on-off-camera-icons"></i>
+            </button>
+            <button class="btn button-big-custom" id="user-hang-up-button">
+                <span id="user-hang-up-button-tooltip">Hang Up</span>
+                <img src="/assets/pictures/hangUp.png" />
+            </button>
+            <button class="btn button-small-custom" id="optional-button-trigger">
+                <i class="fas fa-sort-up" style="color: #ffffff;" id="optional-button-trigger-icon"></i>
+            </button>
+            <div class="optional-button-menu hide" id="optional-button-id">
+                <button class="btn button-small-custom" id="user-switch-camera-button">
+                    <img src="/assets/pictures/switchCamera.png" />
+                    <span id="user-switch-camera-button-tooltip">Switch Camera</span>
+                </button>
+                <button class="btn button-small-custom" id="user-screen-share-button">
+                    <img src="/assets/pictures/share.png" />
+                    <span id="user-screen-share-button-tooltip">Sharing Screen</span>
+                </button>
+                <button class="btn button-small-custom" id="user-record-button">
+                    <i class="far fa-dot-circle" id="record-image" style="color: #bbb;"></i>
+                    <span id="user-record-button-tooltip">Record</span>
+                </button>
+                <button class="btn button-small-custom" id="user-list-button">
+                    <i class="fas fa-users" style="color: #ffffff;"></i>
+                    <span id="user-list-button-tooltip">Participants</span>
+                </button>
+                <button class="btn button-small-custom" id="user-chat-button">
+                    <i class="fas fa-envelope notification invisible" style="color: yellow;"
+                        id="notification-element-id"></i>
+                    <i class="fas fa-comment-dots" style="color: white;"></i>
+                    <span id="user-chat-button-tooltip">Chat</span>
+                </button>
+                <button class="btn button-small-custom" id="share-link-button">
+                    <i class="far fa-share-square" style="color: white;"></i>
+                    <span id="snackbar">Successfully Copied</span>
+                    <span id="share-link-button-tooltip">Share Link</span>
+                </button>
+            </div>
+            <button class="btn button-small-custom" id="option-button">
+                <i class="fas fa-ellipsis-v" style="color: white;"></i>
+                <div id="option-menu" class="invisible">
+                    <ul id="all-option-menu">
+                        <li id="stay-tuned" style="font-size: 13px;">Stay Tuned For New Feature</li>
+                    </ul>
+                </div>
+                <span id="option-button-tooltip">Settings</span>
+            </button>
+        </section>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.js"></script>
+    <script>
+        NProgress.start();
+        window.onload = function () {
+            NProgress.done();
+        };
+    </script>
+    <script defer src="/javascript/room/roombundle.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+</body>
+
+</html>
