@@ -286,12 +286,25 @@ const changeLayoutScreenSharingClient = ({ track, status, parameter, id }) => {
 		}
 	}
 
+	const minMaxDisplayButtonController = () => {
+		const minMaxButton = document.getElementById("min-max-display-button")
+		if (minMaxButton.className === "fa-solid fa-minimize fa-lg") {
+			minMaxButton.className = "fa-solid fa-maximize fa-lg"
+			parameter.userVideoElements.forEach((userVideo) => {
+				userVideo.style.display = "none"
+			})
+		} else {
+			minMaxButton.className = "fa-solid fa-minimize fa-lg"
+			videoDisplayModeScreenSharing({ parameter, status: true })
+		}
+	}
+
 	if (status) {
 		let userListButton = document.getElementById("user-list-button")
 
 		const usersVideoHeader = document.createElement("div")
 		usersVideoHeader.id = "video-screen-sharing-header"
-		usersVideoHeader.innerHTML = `<span>Users</span><button class="btn" id="display-view-controller"><i id="display-view-controller-icon" class="fas fa-external-link-square-alt fa-lg"></i></button>`
+		usersVideoHeader.innerHTML = `<span>Users</span><div id="display-view-controller"><button class="btn"><i id="min-max-display-button" class="fa-solid fa-minimize fa-lg"></i></button><button class="btn" id="button-display-view-controller"><i id="display-view-controller-icon" class="fas fa-external-link-square-alt fa-lg"></i></button></div>`
 		videoContainer.insertBefore(usersVideoHeader, videoContainer.firstChild)
 
 		usersVideoHeader.addEventListener("mousedown", function (e) {
@@ -320,6 +333,9 @@ const changeLayoutScreenSharingClient = ({ track, status, parameter, id }) => {
 		const displayViewControllerIcon = document.getElementById("display-view-controller-icon")
 		displayViewControllerIcon.addEventListener("click", displayViewController)
 
+		const minMaxButtonControllerIcon = document.getElementById("min-max-display-button")
+		minMaxButtonControllerIcon.addEventListener("click", minMaxDisplayButtonController)
+
 		videoDisplayModeScreenSharing({ parameter, status: true })
 		if (window.innerWidth <= 950) {
 			slideUserVideoButton({ status: true })
@@ -333,6 +349,9 @@ const changeLayoutScreenSharingClient = ({ track, status, parameter, id }) => {
 
 		const displayViewControllerIcon = document.getElementById("display-view-controller-icon")
 		displayViewControllerIcon.removeAttribute("click", displayViewController)
+
+		const minMaxButtonControllerIcon = document.getElementById("min-max-display-button")
+		minMaxButtonControllerIcon.removeEventListener("click", minMaxDisplayButtonController)
 
 		document.getElementById("video-screen-sharing-header").remove()
 		document.removeEventListener("mouseup", mouseUpHandler)
@@ -400,10 +419,23 @@ const changeLayoutScreenSharing = ({ parameter, status }) => {
 		}
 	}
 
+	const minMaxDisplayButtonController = () => {
+		const minMaxButton = document.getElementById("min-max-display-button")
+		if (minMaxButton.className === "fa-solid fa-minimize fa-lg") {
+			minMaxButton.className = "fa-solid fa-maximize fa-lg"
+			parameter.userVideoElements.forEach((userVideo) => {
+				userVideo.style.display = "none"
+			})
+		} else {
+			minMaxButton.className = "fa-solid fa-minimize fa-lg"
+			videoDisplayModeScreenSharing({ parameter, status: true })
+		}
+	}
+
 	if (status) {
 		const usersVideoHeader = document.createElement("div")
 		usersVideoHeader.id = "video-screen-sharing-header"
-		usersVideoHeader.innerHTML = `<span>Users</span><button class="btn" id="display-view-controller"><i id="display-view-controller-icon" class="fas fa-external-link-square-alt fa-lg"></i></button>`
+		usersVideoHeader.innerHTML = `<span>Users</span><div id="display-view-controller"><button class="btn"><i id="min-max-display-button" class="fa-solid fa-minimize fa-lg"></i></button><button class="btn" id="button-display-view-controller"><i id="display-view-controller-icon" class="fas fa-external-link-square-alt fa-lg"></i></button></div>`
 		videoContainer.insertBefore(usersVideoHeader, videoContainer.firstChild)
 
 		usersVideoHeader.addEventListener("mousedown", function (e) {
@@ -434,6 +466,9 @@ const changeLayoutScreenSharing = ({ parameter, status }) => {
 		const displayViewControllerIcon = document.getElementById("display-view-controller-icon")
 		displayViewControllerIcon.addEventListener("click", displayViewController)
 
+		const minMaxButtonControllerIcon = document.getElementById("min-max-display-button")
+		minMaxButtonControllerIcon.addEventListener("click", minMaxDisplayButtonController)
+
 		videoDisplayModeScreenSharing({ parameter, status: true })
 	} else {
 		if (parameter.screensharing.stream) {
@@ -449,6 +484,9 @@ const changeLayoutScreenSharing = ({ parameter, status }) => {
 
 		const displayViewControllerIcon = document.getElementById("display-view-controller-icon")
 		displayViewControllerIcon.removeAttribute("click", displayViewController)
+
+		const minMaxButtonControllerIcon = document.getElementById("min-max-display-button")
+		minMaxButtonControllerIcon.removeEventListener("click", minMaxDisplayButtonController)
 
 		document.getElementById("video-screen-sharing-header").remove()
 		document.removeEventListener("mouseup", mouseUpHandler)
@@ -560,6 +598,8 @@ const addPreviousButtonScreenSharingView = ({ status, parameter }) => {
 
 const videoDisplayModeScreenSharing = ({ parameter, status }) => {
 	try {
+		const minMaxButton = document.getElementById("min-max-display-button")
+		minMaxButton.className = "fa-solid fa-minimize fa-lg"
 		addPreviousButtonScreenSharingView({ parameter, status: false })
 		addNextButtonScreenSharingView({ status: false, parameter })
 

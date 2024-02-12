@@ -2,7 +2,7 @@
 // let publicIp = "192.168.206.123"
 // let publicIp = '192.168.205.229'
 // let publicIp = "203.194.113.166" // VPS Mr. Indra IP
-// let publicIp = "203.175.10.29" // My VPS
+let publicIp = "203.175.10.29" // My VPS
 // let publicIp = "192.168.18.68" // Laptop Jaringan 5G
 // let publicIp = '192.168.3.135' // IP Kost
 // let publicIp = "192.168.3.208"
@@ -16,7 +16,7 @@
 // let publicIp = "104.21.9.106" // test-meet ip dns cloudflare
 // let publicIp = "192.168.100.14" // Gemoy
 // let publicIp = "192.168.3.237" // Indonesia Merdeka
-let publicIp = "147.139.136.209" // Wire Guard
+// let publicIp = "147.139.136.209" // Wire Guard
 // let publicIp = "103.119.141.42"
 
 // let privateIp = "103.119.141.42"
