@@ -24,11 +24,11 @@ const switchCamera = async ({ parameter }) => {
 		const myVideo = document.getElementById(`v-${parameter.socketId}`)
 		// console.log(myVideo.srcObject.getVideoTracks()[0])
 		let myData = parameter.allUsers.find((data) => data.socketId == parameter.socketId)
-		let videoDevices = (await navigator.mediaDevices.enumerateDevices()).filter((device) => device.kind === "videoinput")
+		// let videoDevices = (await navigator.mediaDevices.enumerateDevices()).filter((device) => device.kind === "videoinput")
 		// console.log("- Parameter : ", parameter.devices)
-		parameter.devices.video.iteration++
-		if (parameter.devices.video.iteration >= videoDevices?.length) parameter.devices.video.iteration = 0
-		parameter.devices.video.id = videoDevices[parameter.devices.video.iteration].deviceId
+		// parameter.devices.video.iteration++
+		// if (parameter.devices.video.iteration >= videoDevices?.length) parameter.devices.video.iteration = 0
+		// parameter.devices.video.id = videoDevices[parameter.devices.video.iteration].deviceId
 		// let mode = await videoDevices[parameter.devices.video.iteration].getCapabilities().facingMode
 		// console.log("- Mode : ", mode[0])
 		// mode.length === 0 ? "environment" : mode[0]
@@ -52,16 +52,16 @@ const switchCamera = async ({ parameter }) => {
 		}
 		parameter.localStream.addTrack(newStream.getVideoTracks()[0])
 
-		if (!parameter.videoProducer) {
-			parameter.videoParams.appData.isActive = true
-			parameter.videoParams.appData.isVideoActive = true
-			parameter.videoParams.track = newStream.getVideoTracks()[0]
-			parameter.videoProducer = await parameter.producerTransport.produce(parameter.videoParams)
-			myData.video.producerId = parameter.videoProducer.id
-			myData.video.isActive = true
-		} else {
-			parameter.videoProducer.replaceTrack({ track: newStream.getVideoTracks()[0] })
-		}
+		// if (!parameter.videoProducer) {
+		// 	parameter.videoParams.appData.isActive = true
+		// 	parameter.videoParams.appData.isVideoActive = true
+		// 	parameter.videoParams.track = newStream.getVideoTracks()[0]
+		// 	parameter.videoProducer = await parameter.producerTransport.produce(parameter.videoParams)
+		// 	myData.video.producerId = parameter.videoProducer.id
+		// 	myData.video.isActive = true
+		// } else {
+		parameter.videoProducer.replaceTrack({ track: newStream.getVideoTracks()[0] })
+		// }
 	} catch (error) {
 		console.log("- Error Switching Camera : ", error)
 	}
@@ -69,17 +69,11 @@ const switchCamera = async ({ parameter }) => {
 
 const switchMicrophone = async ({ parameter, deviceId, socket }) => {
 	try {
-		if (parameter.micCondition.isLocked) {
-			let ae = document.getElementById("alert-error")
-			ae.className = "show"
-			ae.innerHTML = `Mic is Locked By Host`
-			// Show Warning
-			setTimeout(() => {
-				ae.className = ae.className.replace("show", "")
-				ae.innerHTML = ``
-			}, 3000)
-			return
-		}
+		let previousIcon = document.getElementById(`${parameter.devices.audio.id}-audio-input`).firstChild.firstChild
+		previousIcon.className = `fa-regular fa-square`
+		let iconCheckListMicrophone = document.getElementById(`${deviceId}-audio-input`).firstChild.firstChild
+		iconCheckListMicrophone.className = `fa-regular fa-square-check`
+		parameter.devices.audio.id = deviceId
 		const myVideo = document.getElementById(`v-${parameter.socketId}`)
 		let myData = parameter.allUsers.find((data) => data.socketId == parameter.socketId)
 
@@ -95,14 +89,15 @@ const switchMicrophone = async ({ parameter, deviceId, socket }) => {
 		myVideo.srcObject.getAudioTracks()[0].stop()
 
 		let newStream = await navigator.mediaDevices.getUserMedia(config)
+		newStream.getAudioTracks()[0].enabled = myData.audio.isActive
 		parameter.localStream.getAudioTracks()[0].stop()
 		parameter.localStream.removeTrack(parameter.localStream.getAudioTracks()[0])
 		parameter.localStream.addTrack(newStream.getAudioTracks()[0])
-		parameter.audioParams.appData.isActive = true
-		parameter.audioParams.appData.isAudioActive = true
-		myData.audio.isActive = true
+		// parameter.audioParams.appData.isActive = true
+		// parameter.audioParams.appData.isAudioActive = true
+		// myData.audio.isActive = true
 		parameter.audioProducer.replaceTrack({ track: newStream.getAudioTracks()[0] })
-		changeMicCondition({ parameter, socket, status: true })
+		// changeMicCondition({ parameter, socket, status: true })
 		document.getElementById(`audio-visualizer-${parameter.socketId}`).remove()
 		createAudioVisualizer({ id: parameter.socketId, track: newStream.getAudioTracks()[0] })
 	} catch (error) {
@@ -112,7 +107,7 @@ const switchMicrophone = async ({ parameter, deviceId, socket }) => {
 
 const changeMicCondition = ({ parameter, socket, status }) => {
 	try {
-		console.log("- Condition : ", parameter.localStream.getAudioTracks()[0])
+		console.log("- Mic Condition : ", parameter.audioParams.appData.isActive, " - ", parameter.audioParams.appData.isActive)
 		const micButton = document.getElementById("user-mic-button")
 		let myIconMic = document.getElementById(`user-mic-${socket.id}`)
 		let user = parameter.allUsers.find((data) => data.socketId == socket.id)
@@ -293,6 +288,8 @@ const changeLayoutScreenSharingClient = ({ track, status, parameter, id }) => {
 			parameter.userVideoElements.forEach((userVideo) => {
 				userVideo.style.display = "none"
 			})
+			addPreviousButtonScreenSharingView({ parameter, status: false })
+			addNextButtonScreenSharingView({ status: false, parameter })
 		} else {
 			minMaxButton.className = "fa-solid fa-minimize fa-lg"
 			videoDisplayModeScreenSharing({ parameter, status: true })
@@ -426,6 +423,8 @@ const changeLayoutScreenSharing = ({ parameter, status }) => {
 			parameter.userVideoElements.forEach((userVideo) => {
 				userVideo.style.display = "none"
 			})
+			addPreviousButtonScreenSharingView({ parameter, status: false })
+			addNextButtonScreenSharingView({ status: false, parameter })
 		} else {
 			minMaxButton.className = "fa-solid fa-minimize fa-lg"
 			videoDisplayModeScreenSharing({ parameter, status: true })
@@ -599,7 +598,9 @@ const addPreviousButtonScreenSharingView = ({ status, parameter }) => {
 const videoDisplayModeScreenSharing = ({ parameter, status }) => {
 	try {
 		const minMaxButton = document.getElementById("min-max-display-button")
-		minMaxButton.className = "fa-solid fa-minimize fa-lg"
+		if (minMaxButton) {
+			minMaxButton.className = "fa-solid fa-minimize fa-lg"
+		}
 		addPreviousButtonScreenSharingView({ parameter, status: false })
 		addNextButtonScreenSharingView({ status: false, parameter })
 
@@ -678,11 +679,14 @@ const videoDisplayModeScreenSharing = ({ parameter, status }) => {
 
 const recordVideo = async ({ parameter }) => {
 	try {
-		let recordButton = document.getElementById("user-record-button")
+		let recordButton = document.getElementById("record-video")
 
-		if (recordButton.classList[1] == "button-small-custom") {
-			recordButton.classList.remove("button-small-custom")
-			recordButton.classList.add("button-small-custom-clicked")
+		if (recordButton.innerHTML === "Record Video") {
+			// recordButton.classList.remove("button-small-custom")
+			// recordButton.classList.add("button-small-custom-clicked")
+			recordButton.innerHTML = "Stop Record Video"
+			recordButton.style.backgroundColor = "red"
+			recordButton.style.borderRadius = "10px"
 			const videoStream = await navigator.mediaDevices.getDisplayMedia({
 				video: {
 					cursor: "always",
@@ -769,8 +773,10 @@ const recordVideo = async ({ parameter }) => {
 
 			timerLayout({ status: true })
 		} else {
-			recordButton.classList.remove("button-small-custom-clicked")
-			recordButton.classList.add("button-small-custom")
+			// recordButton.classList.remove("button-small-custom-clicked")
+			// recordButton.classList.add("button-small-custom")
+			recordButton.innerHTML = "Record Video"
+			recordButton.removeAttribute("style")
 			parameter.record.recordedMedia.stopRecording(() => {
 				// socket.send({ type: 'uploading' })
 				timerLayout({ status: false })
@@ -876,21 +882,106 @@ const addMuteAllButton = ({ parameter, socket }) => {
 	}
 }
 
+const getCameraOptions = async ({ parameter }) => {
+	try {
+		const listCameraContainer = document.getElementById("video-options")
+		let videoDevices = (await navigator.mediaDevices.enumerateDevices()).filter((device) => device.kind === "videoinput")
+		videoDevices.forEach((videoList) => {
+			let currentCameraIcons = '<i class="fa-regular fa-square"></i>'
+			if (videoList.deviceId === parameter.devices.video.id) {
+				currentCameraIcons = '<i class="fa-regular fa-square-check"></i>'
+			}
+			const cameraLabel = document.createElement("li")
+			cameraLabel.innerHTML = `<span class="mic-options-icons">${currentCameraIcons}</span><span>${videoList.label}</span>`
+			cameraLabel.id = videoList.deviceId
+			cameraLabel.addEventListener("click", (e) => {
+				e.stopPropagation()
+				const currentActiveCameraIcon = document.getElementById(parameter.devices.video.id).firstChild.firstChild
+				currentActiveCameraIcon.className = "fa-regular fa-square"
+				parameter.devices.video.id = videoList.deviceId
+				document.getElementById(parameter.devices.video.id).firstChild.firstChild.className = "fa-regular fa-square-check"
+				if (parameter.videoProducer) {
+					switchCamera({ parameter })
+				}
+			})
+			listCameraContainer.appendChild(cameraLabel)
+		})
+	} catch (error) {
+		console.log("- Error Showing Camera Options : ", error)
+	}
+}
+
 const getMicOptions = async ({ parameter, socket }) => {
 	try {
 		let audioDevices = (await navigator.mediaDevices.enumerateDevices()).filter((device) => device.kind === "audioinput")
+		let audioDevicesOutput = (await navigator.mediaDevices.enumerateDevices()).filter((device) => device.kind === "audiooutput")
 		const micOptionsContainer = document.getElementById("mic-options")
+		const audioOutputOptions = document.getElementById("audio-output")
 		audioDevices.forEach((audio, index) => {
 			let newElement = document.createElement("li")
-			newElement.id = audio.deviceId
-			newElement.innerHTML = audio.label
-			micOptionsContainer.appendChild(newElement)
-			newElement.addEventListener("click", () => {
+			newElement.id = audio.deviceId + "-audio-input"
+			let currentAudio = '<i class="fa-regular fa-square"></i>'
+			if (audio.deviceId === parameter.devices.audio.id) {
+				currentAudio = `<i class="fa-regular fa-square-check"></i>`
+			}
+
+			newElement.innerHTML = `<span class="mic-options-icons">${currentAudio}</span><span>${audio.label}</span>`
+			micOptionsContainer.insertBefore(newElement, audioOutputOptions)
+			newElement.addEventListener("click", (e) => {
 				try {
+					e.stopPropagation()
 					switchMicrophone({ parameter, deviceId: audio.deviceId, socket })
 				} catch (error) {
 					console.log("- Error Switching Microphone : ", error)
 				}
+			})
+		})
+		audioDevicesOutput.forEach((audioDevices, index) => {
+			let currentAudio = '<i class="fa-regular fa-square"></i>'
+			if (index === 0) {
+				currentAudio = `<i class="fa-regular fa-square-check"></i>`
+				parameter.devices.speaker.id = audioDevices.deviceId
+			}
+			let newElement = document.createElement("li")
+			newElement.id = audioDevices.deviceId + "-audio-output"
+			newElement.innerHTML = `<span class="mic-options-icons">${currentAudio}</span><span>${audioDevices.label}</span>`
+			micOptionsContainer.appendChild(newElement)
+			newElement.addEventListener("click", (e) => {
+				e.stopPropagation()
+				const iconSpeaker = document.getElementById(`${parameter.devices.speaker.id}-audio-output`).firstChild.firstChild
+				iconSpeaker.className = "fa-regular fa-square"
+				parameter.devices.speaker.id = audioDevices.deviceId
+				const currentSpeaker = document.getElementById(`${parameter.devices.speaker.id}-audio-output`).firstChild.firstChild
+				currentSpeaker.className = "fa-regular fa-square-check"
+				parameter.userVideoElements.forEach((videoElement) => {
+					let videoId = videoElement.id.slice(3)
+					let theAudio = document.getElementById(`a-${videoId}`)
+
+					if (theAudio && typeof theAudio.sinkId !== "undefined") {
+						console.log("- Sink Id Is Exist")
+						theAudio
+							.setSinkId(audioDevices.deviceId)
+							.then(() => {
+								console.log(`Success, audio output device attached: ${audioDevices.deviceId}`)
+							})
+							.catch((error) => {
+								let errorMessage = error
+								if (error.name === "SecurityError") {
+									errorMessage = `You need to use HTTPS for selecting audio output device: ${error}`
+								}
+								console.error(errorMessage)
+							})
+					} else {
+						console.warn("Browser does not support output device selection.")
+					}
+				})
+				// console.log(myVideo)
+				// console.log("- Sink Id", myVideo.sinkId)
+				// // Get the prototype of the element
+				// const proto = Object.getPrototypeOf(myVideo)
+
+				// // Log the functions
+				// console.log(proto)
 			})
 		})
 	} catch (error) {
@@ -910,4 +1001,5 @@ module.exports = {
 	getMicOptions,
 	changeMicCondition,
 	videoDisplayModeScreenSharing,
+	getCameraOptions,
 }

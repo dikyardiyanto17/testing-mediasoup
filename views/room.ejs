@@ -1318,6 +1318,18 @@
             font-size: 13px;
         }
 
+        #audio-options {
+            z-index: 5;
+            position: absolute;
+            background-color: rgba(68, 71, 74, 0.7);
+            padding: 10px;
+            bottom: 40px;
+            color: #fff;
+            border-radius: 10px;
+            font-size: 13px;
+        }
+
+
         #user-mic-button>ul {
             list-style-type: none;
             margin: 0;
@@ -1331,7 +1343,7 @@
             margin: 5px;
         }
 
-        #user-mic-button>ul>li:hover {
+        #user-mic-button>ul>li:hover:not(#audio-input):not(#audio-output) {
             background-color: rgba(68, 71, 74, 1);
             border-radius: 10px;
         }
@@ -1347,7 +1359,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 9vh;
+            padding: 10px;
         }
 
         #next-button {
@@ -1378,6 +1390,77 @@
             display: flex;
             justify-content: center;
             align-items: center;
+        }
+
+        #audio-button-options,
+        #video-button-options {
+            position: absolute;
+            top: 0;
+            right: 0;
+        }
+
+        #audio-input-output-options {
+            z-index: 5;
+            position: absolute;
+            background-color: rgba(68, 71, 74, 0.7);
+            padding: 10px;
+            bottom: 40px;
+            color: #fff;
+            border-radius: 10px;
+        }
+
+        #user-mic-button>ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        #user-mic-button>ul>li {
+            padding: 5px;
+            white-space: nowrap;
+            text-align: left;
+        }
+
+        #user-mic-button>ul>li:hover:not(#audio-input):not(#audio-output) {
+            background-color: rgba(68, 71, 74, 1);
+            border-radius: 10px;
+        }
+
+        .mic-options-icons {
+            padding: 5px;
+        }
+
+        #video-options {
+            z-index: 5;
+            position: absolute;
+            background-color: rgba(68, 71, 74, 0.7);
+            padding: 10px;
+            bottom: 40px;
+            color: #fff;
+            border-radius: 10px;
+            font-size: 13px;
+        }
+
+        #user-turn-on-off-camera-button>ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        #user-turn-on-off-camera-button>ul>li {
+            padding: 5px;
+            white-space: nowrap;
+            text-align: left;
+            margin: 5px;
+        }
+
+        #user-turn-on-off-camera-button>ul>li:hover:not(#video-input) {
+            background-color: rgba(68, 71, 74, 1);
+            border-radius: 10px;
+        }
+
+        .option-menus-font-size {
+            font-size: 13px;
         }
     </style>
 </head>
@@ -1421,15 +1504,23 @@
         <section id="bottom-container">
             <button class="btn button-small-custom" id="user-mic-button">
                 <ul id="mic-options" class="invisible">
-                    <li id="turn-off-microphone-option">Turn Off Microphone</li>
-                    <li id="turn-on-microphone-option">Turn On Microphone</li>
+                    <li id="audio-input"><span class="mic-options-icons"><i
+                                class="fa-solid fa-microphone-lines"></i></span><span>Microphone</span></li>
+                    <li id="audio-output"><span class="mic-options-icons"><i
+                                class="fa-solid fa-volume-high"></i></span><span>Speaker</span></li>
                 </ul>
                 <span id="user-mic-button-tooltip">Microphone</span>
                 <img src="/assets/pictures/micOn.png" id="mic-image" />
+                <i id="audio-button-options" class="fa-regular fa-square-caret-up" style="color: #ffffff;"></i>
             </button>
             <button class="btn button-small-custom" id="user-turn-on-off-camera-button">
                 <span id="user-turn-on-off-camera-button-tooltip">Camera</span>
                 <i class="fas fa-video" style="color: #ffffff;" id="turn-on-off-camera-icons"></i>
+                <i id="video-button-options" class="fa-regular fa-square-caret-up" style="color: #ffffff;"></i>
+                <ul id="video-options" class="invisible">
+                    <li id="video-input"><span class="mic-options-icons"><i
+                                class="fa-solid fa-video"></i></span><span>Camera</span></li>
+                </ul>
             </button>
             <button class="btn button-big-custom" id="user-hang-up-button">
                 <span id="user-hang-up-button-tooltip">Hang Up</span>
@@ -1439,18 +1530,18 @@
                 <i class="fas fa-sort-up" style="color: #ffffff;" id="optional-button-trigger-icon"></i>
             </button>
             <div class="optional-button-menu hide" id="optional-button-id">
-                <button class="btn button-small-custom" id="user-switch-camera-button">
+                <!-- <button class="btn button-small-custom" id="user-switch-camera-button">
                     <img src="/assets/pictures/switchCamera.png" />
                     <span id="user-switch-camera-button-tooltip">Switch Camera</span>
-                </button>
+                </button> -->
                 <button class="btn button-small-custom" id="user-screen-share-button">
                     <img src="/assets/pictures/share.png" />
                     <span id="user-screen-share-button-tooltip">Sharing Screen</span>
                 </button>
-                <button class="btn button-small-custom" id="user-record-button">
+                <!-- <button class="btn button-small-custom" id="user-record-button">
                     <i class="far fa-dot-circle" id="record-image" style="color: #bbb;"></i>
                     <span id="user-record-button-tooltip">Record</span>
-                </button>
+                </button> -->
                 <button class="btn button-small-custom" id="user-list-button">
                     <i class="fas fa-users" style="color: #ffffff;"></i>
                     <span id="user-list-button-tooltip">Participants</span>
@@ -1471,7 +1562,8 @@
                 <i class="fas fa-ellipsis-v" style="color: white;"></i>
                 <div id="option-menu" class="invisible">
                     <ul id="all-option-menu">
-                        <li id="stay-tuned" style="font-size: 13px;">Stay Tuned For New Feature</li>
+                        <li id="stay-tuned" class="option-menus-font-size">Stay Tuned For New Feature</li>
+                        <li id="record-video" class="option-menus-font-size">Record Video</li>
                     </ul>
                 </div>
                 <span id="option-button-tooltip">Settings</span>

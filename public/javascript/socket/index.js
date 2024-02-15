@@ -10,6 +10,7 @@ const {
 	newUserNotification,
 	showMicOptionsMenu,
 	hideMicOptionsMenu,
+	hideVideoOptionsMenu,
 } = require("../room/function")
 const { getMyStream, getRoomId, joinRoom } = require("../room/function/initialization")
 const { signalNewConsumerTransport } = require("../room/function/mediasoup")
@@ -57,14 +58,14 @@ socket.on("connection-success", async ({ socketId }) => {
 		const isMobile = /Mobi|Android/i.test(navigator.userAgent)
 		if (isMobile) {
 			const screenSharingButton = document.getElementById("user-screen-share-button")
-			const recordButton = document.getElementById("user-record-button")
+			const recordButton = document.getElementById("record-video")
 			const optionalMenu = document.getElementById("optional-button-id")
 			screenSharingButton.style.display = "none"
 			recordButton.style.display = "none"
 
-			const switchCameraButton = document.getElementById("user-switch-camera-button")
-			switchCameraButton.style.marginLeft = "30px"
-			switchCameraButton.style.marginRight = "30px"
+			// const switchCameraButton = document.getElementById("user-switch-camera-button")
+			// switchCameraButton.style.marginLeft = "30px"
+			// switchCameraButton.style.marginRight = "30px"
 			const userListButton = document.getElementById("user-list-button")
 			userListButton.style.marginLeft = "30px"
 			userListButton.style.marginRight = "30px"
@@ -153,7 +154,6 @@ socket.on("producer-closed", ({ remoteProducerId, socketId }) => {
 			parameter.isScreenSharing.screenSharingUserViewTotalPage = Math.ceil(
 				parameter.totalUsers / parameter.isScreenSharing.screenSharingUserViewCurrentDisplay
 			)
-			console.log(parameter.isScreenSharing.screenSharingUserViewCurrentDisplay, " <<<")
 			updatingLayout({ parameter })
 			changeLayout({ parameter })
 			removeVideoAndAudio({ socketId })
@@ -219,7 +219,29 @@ socket.on("unmute-all", (data) => {
 
 let micButton = document.getElementById("user-mic-button")
 micButton.addEventListener("click", (e) => {
-	e.stopPropagation() // Prevent the click event from propagating to the document
+	e.stopPropagation()
+	if (micButton.className === "btn button-small-custom") {
+		changeMicCondition({ parameter, socket, status: false })
+		micButton.className = "btn button-small-custom-clicked"
+	} else {
+		changeMicCondition({ parameter, socket, status: true })
+		micButton.className = "btn button-small-custom"
+	}
+	// let micOptionsIcon = document.getElementById("audio-button-options")
+
+	// const micOptionsContainer = document.getElementById("mic-options")
+	// if (micOptionsContainer.className == "invisible") {
+	// 	showMicOptionsMenu()
+	// } else {
+	// 	hideMicOptionsMenu()
+	// }
+})
+
+let micOptionsIcon = document.getElementById("audio-button-options")
+micOptionsIcon.addEventListener("click", (e) => {
+	e.stopPropagation()
+	// let micOptionsIcon = document.getElementById("audio-button-options")
+	console.log("Icon Mic Clicked")
 
 	const micOptionsContainer = document.getElementById("mic-options")
 	if (micOptionsContainer.className == "invisible") {
@@ -229,22 +251,15 @@ micButton.addEventListener("click", (e) => {
 	}
 })
 
-let turnOffMicOption = document.getElementById("turn-off-microphone-option")
-turnOffMicOption.addEventListener("click", () => {
-	try {
-		changeMicCondition({ parameter, socket, status: false })
-	} catch (error) {
-		console.log("- Error Turning Off Microphone : ", error)
-	}
+const audioInputDecoration = document.getElementById("audio-input")
+const audioOutputDecoration = document.getElementById("audio-output")
+
+audioInputDecoration.addEventListener("click", (e) => {
+	e.stopPropagation()
 })
 
-let turnOnMicOption = document.getElementById("turn-on-microphone-option")
-turnOnMicOption.addEventListener("click", () => {
-	try {
-		changeMicCondition({ parameter, socket, status: true })
-	} catch (error) {
-		console.log("- Error Turning Off Microphone : ", error)
-	}
+audioOutputDecoration.addEventListener("click", (e) => {
+	e.stopPropagation()
 })
 
 let cameraButton = document.getElementById("user-turn-on-off-camera-button")
@@ -264,8 +279,10 @@ cameraButton.addEventListener("click", async () => {
 			parameter.videoProducer = null
 			myData.video.producerId = undefined
 			myData.video.isActive = false
+			parameter.videoParams.appData.isActive = false
+			parameter.videoParams.appData.isVideoActive = false
 		} else {
-			let newStream = await navigator.mediaDevices.getUserMedia({ video: true })
+			let newStream = await navigator.mediaDevices.getUserMedia({ video: { deviceId: { exact: parameter.devices.video.id } } })
 			cameraButton.classList.replace("button-small-custom-clicked", "button-small-custom")
 			if (parameter.localStream.getVideoTracks()[0]) {
 				parameter.localStream.removeTrack(parameter.localStream.getVideoTracks()[0])
@@ -295,18 +312,34 @@ cameraButton.addEventListener("click", async () => {
 	}
 })
 
-let switchCameraButton = document.getElementById("user-switch-camera-button")
-switchCameraButton.addEventListener("click", async () => {
-	parameter.videoParams.appData.isMicActive = parameter.isAudio
-	let isActive = document.getElementById("turn-on-off-camera-icons").classList
-	await switchCamera({ parameter })
-	if (isActive[1] == "fa-video-slash") {
-		cameraButton.classList.replace("button-small-custom-clicked", "button-small-custom")
-		isActive.add("fa-video")
-		isActive.remove("fa-video-slash")
-		turnOffOnCamera({ id: socket.id, status: true })
+let cameraOptionIcon = document.getElementById("video-button-options")
+cameraOptionIcon.addEventListener("click", (e) => {
+	e.stopPropagation()
+	const videoOptions = document.getElementById("video-options")
+	if (videoOptions.className === "invisible") {
+		videoOptions.className = "visible"
+	} else {
+		videoOptions.className = "invisible"
 	}
 })
+
+const videoInputDecoration = document.getElementById("video-input")
+videoInputDecoration.addEventListener("click", (e) => {
+	e.stopPropagation()
+})
+
+// let switchCameraButton = document.getElementById("user-switch-camera-button")
+// switchCameraButton.addEventListener("click", async () => {
+// 	parameter.videoParams.appData.isMicActive = parameter.isAudio
+// 	let isActive = document.getElementById("turn-on-off-camera-icons").classList
+// 	await switchCamera({ parameter })
+// 	if (isActive[1] == "fa-video-slash") {
+// 		cameraButton.classList.replace("button-small-custom-clicked", "button-small-custom")
+// 		isActive.add("fa-video")
+// 		isActive.remove("fa-video-slash")
+// 		turnOffOnCamera({ id: socket.id, status: true })
+// 	}
+// })
 
 let screenSharingButton = document.getElementById("user-screen-share-button")
 screenSharingButton.addEventListener("click", () => {
@@ -342,7 +375,12 @@ screenSharingButton.addEventListener("click", () => {
 	}
 })
 
-let recordButton = document.getElementById("user-record-button")
+// let recordButton = document.getElementById("user-record-button")
+// recordButton.addEventListener("click", () => {
+// 	recordVideo({ parameter })
+// })
+
+let recordButton = document.getElementById("record-video")
 recordButton.addEventListener("click", () => {
 	recordVideo({ parameter })
 })
@@ -791,6 +829,7 @@ const hideOptionalMenu = () => {
 document.addEventListener("click", function (e) {
 	hideOptionMenu()
 	hideMicOptionsMenu()
+	hideVideoOptionsMenu()
 	const optionalMenus = document.getElementById("optional-button-id")
 	// const micOptionsMenus = this.doctype.getElementById("mic-options")
 	if (window.innerWidth <= 950 && optionalMenuId.className == "optional-button-menu-show" && !optionalMenus.contains(e.target)) {

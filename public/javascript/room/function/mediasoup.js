@@ -1,6 +1,13 @@
 const mediasoupClient = require("mediasoup-client")
 const { createVideo, createAudio, insertVideo, updatingLayout, changeLayout, createAudioVisualizer } = require("../ui/video")
-const { turnOffOnCamera, changeLayoutScreenSharingClient, addMuteAllButton, getMicOptions, videoDisplayModeScreenSharing } = require("../ui/button")
+const {
+	turnOffOnCamera,
+	changeLayoutScreenSharingClient,
+	addMuteAllButton,
+	getMicOptions,
+	videoDisplayModeScreenSharing,
+	getCameraOptions,
+} = require("../ui/button")
 const { createUserList, muteAllParticipants, goToLobby } = require(".")
 const { encodingVP8, encodingsVP9 } = require("../config/mediasoup")
 
@@ -130,6 +137,7 @@ const connectSendTransport = async ({ parameter, socket }) => {
 		}
 
 		await getMicOptions({ parameter, socket })
+		await getCameraOptions({ parameter })
 
 		myData.audio.producerId = parameter.audioProducer.id
 		myData.audio.transportId = parameter.producerTransport.id
@@ -237,7 +245,9 @@ const connectRecvTransport = async ({ parameter, consumerTransport, socket, remo
 						}
 					} else {
 						parameter.totalUsers++
-						parameter.isScreenSharing.screenSharingUserViewTotalPage = Math.ceil(parameter.totalUsers / parameter.isScreenSharing.screenSharingUserViewCurrentDisplay)
+						parameter.isScreenSharing.screenSharingUserViewTotalPage = Math.ceil(
+							parameter.totalUsers / parameter.isScreenSharing.screenSharingUserViewCurrentDisplay
+						)
 						let data = {
 							username: params.username,
 							socketId: params.producerSocketOwner,
@@ -271,7 +281,7 @@ const connectRecvTransport = async ({ parameter, consumerTransport, socket, remo
 						})
 					}
 					if (params.kind == "audio" && params.appData.label == "audio") {
-						createAudio({ id: params.producerSocketOwner, track })
+						createAudio({ id: params.producerSocketOwner, track, parameter })
 						createAudioVisualizer({ id: params.producerSocketOwner, track })
 					}
 					if (params.kind == "video" && params.appData.label == "video") {
@@ -284,7 +294,7 @@ const connectRecvTransport = async ({ parameter, consumerTransport, socket, remo
 						changeLayout({ parameter })
 					}
 					if (params.kind == "audio" && params.appData.label == "screensharingaudio") {
-						createAudio({ id: params.producerSocketOwner + "screensharingaudio", track })
+						createAudio({ id: params.producerSocketOwner + "screensharingaudio", track, parameter })
 					}
 
 					if (parameter.record.isRecording && params.kind == "audio") {

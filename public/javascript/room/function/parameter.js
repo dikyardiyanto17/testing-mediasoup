@@ -21,6 +21,10 @@ class Parameters {
 			iteration: 0,
 			id: undefined,
 		},
+		speaker: {
+			iteration: 0,
+			id: "default",
+		},
 	}
 	screensharing = {
 		isActive: false,

@@ -86,6 +86,9 @@ const getMyStream = async (parameter) => {
 		parameter.allUsers = [...parameter.allUsers, user]
 		parameter.localStream = stream
 		parameter.audioParams.track = stream.getAudioTracks()[0]
+
+		parameter.devices.audio.id = localStorage.getItem("selectedAudioDevices")
+		parameter.devices.video.id = localStorage.getItem("selectedVideoDevices")
 		createUserList({ username: parameter.username, socketId: parameter.socketId, cameraTrigger: videoCondition, picture, micTrigger: audioCondition })
 	} catch (error) {
 		console.log("- Error Getting My Stream : ", error)
@@ -119,7 +122,9 @@ const joinRoom = async ({ parameter, socket }) => {
 		parameter.videoLayout = "user-video-container-1"
 		socket.emit("joinRoom", { roomName: parameter.roomName, username: parameter.username }, (data) => {
 			parameter.rtpCapabilities = data.rtpCapabilities
-			parameter.rtpCapabilities.headerExtensions = parameter.rtpCapabilities.headerExtensions.filter((ext) => ext.uri !== 'urn:3gpp:video-orientation');
+			parameter.rtpCapabilities.headerExtensions = parameter.rtpCapabilities.headerExtensions.filter(
+				(ext) => ext.uri !== "urn:3gpp:video-orientation"
+			)
 			createDevice({ parameter, socket })
 		})
 	} catch (error) {

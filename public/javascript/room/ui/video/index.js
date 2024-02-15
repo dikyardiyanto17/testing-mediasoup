@@ -45,7 +45,7 @@ const createVideo = ({ id, videoClassName, picture, username, micTrigger, parame
 	}
 }
 
-const createAudio = ({ id, track }) => {
+const createAudio = ({ id, track, parameter }) => {
 	try {
 		let checkAudio = document.getElementById(`ac-${id}`)
 		if (!checkAudio) {
@@ -62,6 +62,23 @@ const createAudio = ({ id, track }) => {
 			audioContainer.appendChild(newElem)
 			// console.log("- A", document.getElementById("a-" + id))
 			document.getElementById("a-" + id).srcObject = new MediaStream([track])
+			if (document.getElementById("a-" + id) && typeof document.getElementById("a-" + id).sinkId !== "undefined") {
+				document
+					.getElementById("a-" + id)
+					.setSinkId(parameter.devices.speaker.id)
+					.then(() => {
+						console.log(`Success, audio output device attached: ${parameter.devices.speaker.id}`)
+					})
+					.catch((error) => {
+						let errorMessage = error
+						if (error.name === "SecurityError") {
+							errorMessage = `You need to use HTTPS for selecting audio output device: ${error}`
+						}
+						console.error(errorMessage)
+					})
+			} else {
+				console.warn("Browser does not support output device selection.")
+			}
 		}
 	} catch (error) {
 		console.log("- Error Creating Audio : ", error)

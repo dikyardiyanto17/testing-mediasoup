@@ -37,8 +37,9 @@ const timerLayout = ({ status }) => {
 		} else {
 			let timerElement = document.getElementById("timer")
 			if (timerElement) timerElement.remove()
-			let recordButton = document.getElementById("user-record-button")
-			recordButton.className = "btn button-small-custom"
+			let recordButton = document.getElementById("record-video")
+			recordButton.innerHTML = "Record Video"
+			recordButton.removeAttribute("style")
 		}
 	} catch (error) {
 		console.log("- Error At Timer Layout : ", error)
@@ -258,6 +259,15 @@ const hideMicOptionsMenu = () => {
 	}
 }
 
+const hideVideoOptionsMenu = () => {
+	try {
+		const videoOptions = document.getElementById("video-options")
+		videoOptions.className = "invisible"
+	} catch (error) {
+		console.log("- Error Hiding Options Menu")
+	}
+}
+
 const muteAllParticipants = ({ parameter, socket }) => {
 	parameter.allUsers.forEach((data) => {
 		if (data.socketId != socket.id) {
@@ -331,4 +341,5 @@ module.exports = {
 	newUserNotification,
 	showMicOptionsMenu,
 	hideMicOptionsMenu,
+	hideVideoOptionsMenu,
 }
