@@ -1,8 +1,8 @@
 // let publicIp = '127.0.0.1'
 // let publicIp = "192.168.206.123"
 // let publicIp = '192.168.205.229'
-let publicIp = "203.194.113.166" // VPS Mr. Indra IP
-// let publicIp = "203.175.10.29" // My VPS
+// let publicIp = "203.194.113.166" // VPS Mr. Indra IP
+let publicIp = "203.175.10.29" // My VPS
 // let publicIp = "192.168.18.68" // Laptop Jaringan 5G
 // let publicIp = '192.168.3.135' // IP Kost
 // let publicIp = "192.168.3.208"
