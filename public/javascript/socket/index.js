@@ -11,6 +11,7 @@ const {
 	showMicOptionsMenu,
 	hideMicOptionsMenu,
 	hideVideoOptionsMenu,
+	timerLayout,
 } = require("../room/function")
 const { getMyStream, getRoomId, joinRoom } = require("../room/function/initialization")
 const { signalNewConsumerTransport } = require("../room/function/mediasoup")
@@ -799,8 +800,47 @@ hangUpButton.addEventListener("click", () => {
 })
 
 window.addEventListener("beforeunload", function (event) {
-	window.location.href = window.location.origin
-	socket.close()
+	try {
+		if (parameter.record.recordedStream) {
+			parameter.record.recordedMedia.stopRecording(() => {
+				// socket.send({ type: 'uploading' })
+				timerLayout({ status: false })
+				parameter.record.isRecording = false
+				let blob = parameter.record.recordedMedia.getBlob()
+
+				// require('recordrtc').getSeekableBlob(recordedMediaRef.current.getBlob(), (seekable) => {
+				//     console.log("- SeekableBlob : ", seekable)
+				//     downloadRTC(seekable)
+				// })
+				// downloadRTC(blob)
+				const currentDate = new Date()
+				const formattedDate = currentDate
+					.toLocaleDateString("en-GB", {
+						day: "2-digit",
+						month: "2-digit",
+						year: "numeric",
+					})
+					.replace(/\//g, "") // Remove slashes from the formatted date
+
+				const file = new File([blob], formattedDate, {
+					type: "video/mp4",
+				})
+				require("recordrtc").invokeSaveAsDialog(file, file.name)
+				parameter.record.recordedStream.getTracks().forEach((track) => track.stop())
+				parameter.record.recordedStream = null
+				parameter.record.recordedMedia.reset()
+				parameter.record.recordedMedia = null
+			})
+			let confirmationMessage = "Anda yakin ingin menutup tab ini?"
+			// (Standar) For modern browsers
+			event.returnValue = confirmationMessage
+
+			// (IE) For Internet Explorer
+			return confirmationMessage
+		}
+		window.location.href = window.location.origin
+		socket.close()
+	} catch (error) {}
 })
 
 window.addEventListener("online", function () {

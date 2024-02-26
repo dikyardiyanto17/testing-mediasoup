@@ -42,8 +42,8 @@ httpServer.listen(port, () => {
 	console.log("App On : " + port)
 })
 const io = new Server(httpServer, {
-	pingInterval: 5000,
-	pingTimeout: 6000,
+	pingInterval: 7000,
+	pingTimeout: 8000,
 })
 
 let serverParameter = new Server_Parameter()
