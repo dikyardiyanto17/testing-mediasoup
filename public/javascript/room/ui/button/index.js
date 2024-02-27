@@ -301,7 +301,7 @@ const changeLayoutScreenSharingClient = ({ track, status, parameter, id }) => {
 
 		const usersVideoHeader = document.createElement("div")
 		usersVideoHeader.id = "video-screen-sharing-header"
-		usersVideoHeader.innerHTML = `<span>Users</span><div id="display-view-controller"><button class="btn"><i id="min-max-display-button" class="fa-solid fa-minimize fa-lg"></i></button><button class="btn" id="button-display-view-controller"><i id="display-view-controller-icon" class="fas fa-external-link-square-alt fa-lg"></i></button></div>`
+		usersVideoHeader.innerHTML = `<span>Users</span><div id="display-view-controller"><button class="btn"><i style="color:white;" id="min-max-display-button" class="fa-solid fa-minimize fa-lg"></i></button><button class="btn" id="button-display-view-controller"><i id="display-view-controller-icon" style="color:white;" class="fas fa-external-link-square-alt fa-lg"></i></button></div>`
 		videoContainer.insertBefore(usersVideoHeader, videoContainer.firstChild)
 
 		usersVideoHeader.addEventListener("mousedown", function (e) {
@@ -434,7 +434,7 @@ const changeLayoutScreenSharing = ({ parameter, status }) => {
 	if (status) {
 		const usersVideoHeader = document.createElement("div")
 		usersVideoHeader.id = "video-screen-sharing-header"
-		usersVideoHeader.innerHTML = `<span>Users</span><div id="display-view-controller"><button class="btn"><i id="min-max-display-button" class="fa-solid fa-minimize fa-lg"></i></button><button class="btn" id="button-display-view-controller"><i id="display-view-controller-icon" class="fas fa-external-link-square-alt fa-lg"></i></button></div>`
+		usersVideoHeader.innerHTML = `<span>Users</span><div id="display-view-controller"><button class="btn"><i id="min-max-display-button" style="color:white;" class="fa-solid fa-minimize fa-lg"></i></button><button class="btn" id="button-display-view-controller"><i id="display-view-controller-icon" style="color:white;" class="fas fa-external-link-square-alt fa-lg"></i></button></div>`
 		videoContainer.insertBefore(usersVideoHeader, videoContainer.firstChild)
 
 		usersVideoHeader.addEventListener("mousedown", function (e) {
@@ -482,12 +482,19 @@ const changeLayoutScreenSharing = ({ parameter, status }) => {
 		// slideUserVideoButton({ status: false })
 
 		const displayViewControllerIcon = document.getElementById("display-view-controller-icon")
-		displayViewControllerIcon.removeAttribute("click", displayViewController)
+		if (displayViewControllerIcon){
+			displayViewControllerIcon.removeAttribute("click", displayViewController)
+		}
 
 		const minMaxButtonControllerIcon = document.getElementById("min-max-display-button")
-		minMaxButtonControllerIcon.removeEventListener("click", minMaxDisplayButtonController)
+		if (minMaxButtonControllerIcon){
+			minMaxButtonControllerIcon.removeEventListener("click", minMaxDisplayButtonController)
+		}
 
-		document.getElementById("video-screen-sharing-header").remove()
+		if (document.getElementById("video-screen-sharing-header")){
+			document.getElementById("video-screen-sharing-header").remove()
+		}
+
 		document.removeEventListener("mouseup", mouseUpHandler)
 		document.removeEventListener("mousemove", mouseMoveHandler)
 
@@ -685,7 +692,7 @@ const recordVideo = async ({ parameter }) => {
 			// recordButton.classList.remove("button-small-custom")
 			// recordButton.classList.add("button-small-custom-clicked")
 			recordButton.innerHTML = "Stop Record Video"
-			recordButton.style.backgroundColor = "red"
+			recordButton.style.backgroundColor = "#00ff11b2"
 			recordButton.style.borderRadius = "10px"
 			const videoStream = await navigator.mediaDevices.getDisplayMedia({
 				video: {
