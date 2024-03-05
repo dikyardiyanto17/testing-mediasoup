@@ -294,6 +294,9 @@ io.on("connection", async (socket) => {
 				mediasoupParameter.consumers = [...mediasoupParameter.consumers, { consumer, roomName, socketId: socket.id, username: producerData.username }]
 
 				callback({ params })
+				// console.log(
+				// 	`- Consumer : ${mediasoupParameter.consumers.length} - Producer : ${mediasoupParameter.producers.length} - Transport : ${mediasoupParameter.transports.length}`
+				// )
 			}
 		} catch (error) {
 			console.log("- Error Consuming : ", error)
@@ -348,6 +351,22 @@ io.on("connection", async (socket) => {
 	socket.on("change-app-data", ({ data, remoteProducerId }) => {
 		let producerData = mediasoupParameter.producers.find((producer) => producer.producer.id == remoteProducerId)
 		producerData.producer.appData = { ...producerData.producer.appData, ...data }
+	})
+
+	socket.on("manually-turn-off-video", ({ socketId }) => {
+		// console.log(`- Socket Manual Turn Off : ${socketId}`)
+		// console.log("- Server Parameter : ", serverParameter.allUsers)
+		if (serverParameter?.allUsers[socketId]) {
+			console.log("- Closing Reconnect Network")
+			serverParameter?.allUsers[socketId]?.socket?.disconnect()
+		}
+		// setTimeout(() => {
+		// 	// console.log(serverParameter.allUsers[socketId], "<<<<<<<<<<<")
+		// 	if (serverParameter.allUsers[socketId]) {
+		// 		serverParameter.allUsers[socketId].socket.close()
+		// 		console.log(" ->>>>>>>>>>>>>>",serverParameter.allUsers[socketId].socket.id)
+		// 	}
+		// }, 1000)
 	})
 })
 

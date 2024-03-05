@@ -23952,16 +23952,19 @@ const removeUserList = ({ id }) => {
 const changeLayout = ({ parameter }) => {
 	try {
 		const userVideoContainer = document.getElementById("video-container")
+		const firstUserVideo = userVideoContainer.firstChild
 		const secondUserVideo = userVideoContainer.children[1]
 		parameter.userVideoElements.forEach((userVideo) => {
 			userVideo.removeAttribute("style")
 		})
 		if (parameter.videoLayout == "user-video-container-2" && window.innerWidth <= 950 && !parameter.isScreenSharing.isScreenSharing) {
+			firstUserVideo.style.zIndex = "4"
 			secondUserVideo.style.width = "80%"
 			secondUserVideo.style.height = "80%"
 			secondUserVideo.style.position = "static"
 		} else {
 			if (secondUserVideo) secondUserVideo.removeAttribute("style")
+			if (firstUserVideo) firstUserVideo.removeAttribute("style")
 		}
 		const userVideoContainers = document.querySelectorAll("." + parameter.previousVideoLayout)
 		userVideoContainers.forEach((container, index) => {
@@ -24173,6 +24176,12 @@ socket.on("connection-success", async ({ socketId }) => {
 	try {
 		if (isDisconnected >= 1) window.location.reload()
 		isDisconnected++
+		if (sessionStorage.getItem("socket_id")) {
+			socket.emit("manually-turn-off-video", { socketId: sessionStorage.getItem("socket_id") })
+			sessionStorage.setItem("socket_id", socketId)
+		} else {
+			sessionStorage.setItem("socket_id", socketId)
+		}
 		const isMobile = /Mobi|Android/i.test(navigator.userAgent)
 		if (isMobile) {
 			const screenSharingButton = document.getElementById("user-screen-share-button")

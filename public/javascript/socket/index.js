@@ -56,6 +56,12 @@ socket.on("connection-success", async ({ socketId }) => {
 	try {
 		if (isDisconnected >= 1) window.location.reload()
 		isDisconnected++
+		if (sessionStorage.getItem("socket_id")) {
+			socket.emit("manually-turn-off-video", { socketId: sessionStorage.getItem("socket_id") })
+			sessionStorage.setItem("socket_id", socketId)
+		} else {
+			sessionStorage.setItem("socket_id", socketId)
+		}
 		const isMobile = /Mobi|Android/i.test(navigator.userAgent)
 		if (isMobile) {
 			const screenSharingButton = document.getElementById("user-screen-share-button")
