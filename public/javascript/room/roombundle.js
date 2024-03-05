@@ -23952,7 +23952,7 @@ const removeUserList = ({ id }) => {
 const changeLayout = ({ parameter }) => {
 	try {
 		const userVideoContainer = document.getElementById("video-container")
-		const firstUserVideo = userVideoContainer.firstChild
+		const firstUserVideo = userVideoContainer.firstElementChild
 		const secondUserVideo = userVideoContainer.children[1]
 		parameter.userVideoElements.forEach((userVideo) => {
 			userVideo.removeAttribute("style")
@@ -23963,6 +23963,7 @@ const changeLayout = ({ parameter }) => {
 			secondUserVideo.style.height = "80%"
 			secondUserVideo.style.position = "static"
 		} else {
+			console.log(firstUserVideo)
 			if (secondUserVideo) secondUserVideo.removeAttribute("style")
 			if (firstUserVideo) firstUserVideo.removeAttribute("style")
 		}
