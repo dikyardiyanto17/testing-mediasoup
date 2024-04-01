@@ -95,7 +95,7 @@ const listenInfo = {
 			announcedIp: publicIp,
 			// announcedIp: privateIp,
 			// announcedIp: "192.168.205.229",
-			// port: 1028
+			// port: 1028,
 		},
 		{
 			protocol: "tcp",
@@ -106,7 +106,7 @@ const listenInfo = {
 			announcedIp: publicIp,
 			// announcedIp: privateIp,
 			// announcedIp: "192.168.205.229",
-			// port: 1028
+			// port: 1028,
 		},
 	],
 }

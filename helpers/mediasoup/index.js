@@ -8,19 +8,23 @@ class Mediasoup_Parameter {
 }
 
 const createWorker = async () => {
-	let worker = await mediasoup.createWorker({
-		// rtcMinPort: 9500,
-		// rtcMaxPort: 10000,
-		// logLevel: "debug",
-		// logTags: ['ice', 'dtls']
-	})
+	try {
+		let worker = await mediasoup.createWorker({
+			// rtcMinPort: 9500,
+			// rtcMaxPort: 10000,
+			// logLevel: "debug",
+			// logTags: ['ice', 'dtls']
+		})
 
-	worker.on("died", (error) => {
-		console.log(error)
-		setTimeout(() => process.exit(1), 2000)
-	})
+		worker.on("died", (error) => {
+			console.log(error)
+			setTimeout(() => process.exit(1), 2000)
+		})
 
-	return worker
+		return worker
+	} catch (error) {
+		console.log("- Error Creating Worker : ", error)
+	}
 }
 
 const createWebRtcTransport = async ({ router, serverParameter }) => {
@@ -56,8 +60,12 @@ const createWebRtcTransport = async ({ router, serverParameter }) => {
 }
 
 const getTransport = ({ socketId, mediasoupParameter }) => {
-	const [producerTransport] = mediasoupParameter.transports.filter((transport) => transport.socketId === socketId && !transport.consumer)
-	return producerTransport.transport
+	try {
+		const [producerTransport] = mediasoupParameter.transports.filter((transport) => transport.socketId === socketId && !transport.consumer)
+		return producerTransport.transport
+	} catch (error) {
+		console.log("- Error Get Transport : ", error)
+	}
 }
 
 const informConsumer = ({ roomName, socketId, producerId, mediasoupParameter, serverParameter }) => {

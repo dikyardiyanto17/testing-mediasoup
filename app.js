@@ -164,7 +164,15 @@ io.on("connection", async (socket) => {
 	})
 
 	socket.on("transport-connect", ({ dtlsParameters }) => {
-		getTransport({ socketId: socket.id, mediasoupParameter }).connect({ dtlsParameters })
+		try {
+			getTransport({ socketId: socket.id, mediasoupParameter })
+				.connect({ dtlsParameters })
+				.catch((error) => {
+					console.log("- Error Connecting Transport : ", error)
+				})
+		} catch (error) {
+			console.log("- Error Connecting Transport Connect : ", error)
+		}
 	})
 
 	socket.on("transport-produce", async ({ kind, rtpParameters, appData, roomName }, callback) => {
@@ -227,7 +235,9 @@ io.on("connection", async (socket) => {
 			const consumerTransport = mediasoupParameter.transports.find(
 				(transportData) => transportData.consumer && transportData.transport.id == serverConsumerTransportId
 			).transport
-			consumerTransport.connect({ dtlsParameters })
+			consumerTransport.connect({ dtlsParameters }).catch((error) => {
+				console.log("- Error Connecting Receiver Transport : ", error)
+			})
 		} catch (error) {
 			console.log("- Error Connecting Transport Receive : ", error)
 		}
@@ -316,41 +326,65 @@ io.on("connection", async (socket) => {
 	})
 
 	socket.on("mic-config", ({ sendTo, isMicActive, id }) => {
-		socket.to(sendTo).emit("mic-config", { isMicActive, id })
+		try {
+			socket.to(sendTo).emit("mic-config", { isMicActive, id })
+		} catch (error) {
+			console.log("- Error Mic Config : ", error)
+		}
 	})
 
 	socket.on("close-producer-from-client", ({ id }) => {
-		let socketId
-		mediasoupParameter.producers.forEach((data) => {
-			if (data.producer.id == id) {
-				data.producer.close()
-				socketId = data.socketId
-			}
-		})
-		let producerData = mediasoupParameter.producers.find((producer) => producer.socketId == socketId && producer.producer.kind == "audio")
-		producerData.producer.appData.isVideoActive = false
-		let removeProducer = serverParameter.allRooms[serverParameter.allUsers[socket.id].roomName].participants.find(
-			(data) => data.socketId == socket.id
-		)
-		removeProducer.producers = removeProducer.producers.filter((data) => data != id)
-		mediasoupParameter.producers = mediasoupParameter.producers.filter((data) => data.producer.id != id)
+		try {
+			let socketId
+			mediasoupParameter.producers.forEach((data) => {
+				if (data.producer.id == id) {
+					data.producer.close()
+					socketId = data.socketId
+				}
+			})
+			let producerData = mediasoupParameter.producers.find((producer) => producer.socketId == socketId && producer.producer.kind == "audio")
+			producerData.producer.appData.isVideoActive = false
+			let removeProducer = serverParameter.allRooms[serverParameter.allUsers[socket.id].roomName].participants.find(
+				(data) => data.socketId == socket.id
+			)
+			removeProducer.producers = removeProducer.producers.filter((data) => data != id)
+			mediasoupParameter.producers = mediasoupParameter.producers.filter((data) => data.producer.id != id)
+		} catch (error) {
+			console.log("- Error Closing Producer From Client : ", error)
+		}
 	})
 
 	socket.on("send-message", (data) => {
-		socket.to(data.sendTo).emit("receive-message", data)
+		try {
+			socket.to(data.sendTo).emit("receive-message", data)
+		} catch (error) {
+			console.log("- Error Send Message : ", error)
+		}
 	})
 
 	socket.on("mute-all", ({ socketId }) => {
-		socket.to(socketId).emit("mute-all", { hostSocketId: socketId })
+		try {
+			socket.to(socketId).emit("mute-all", { hostSocketId: socketId })
+		} catch (error) {
+			console.log("- Error Mute All : ", error)
+		}
 	})
 
 	socket.on("unmute-all", ({ socketId }) => {
-		socket.to(socketId).emit("unmute-all", { message: "Hello World" })
+		try {
+			socket.to(socketId).emit("unmute-all", { message: "Hello World" })
+		} catch (error) {
+			console.log("- Error UnMute All : ", error)
+		}
 	})
 
 	socket.on("change-app-data", ({ data, remoteProducerId }) => {
-		let producerData = mediasoupParameter.producers.find((producer) => producer.producer.id == remoteProducerId)
-		producerData.producer.appData = { ...producerData.producer.appData, ...data }
+		try {
+			let producerData = mediasoupParameter.producers.find((producer) => producer.producer.id == remoteProducerId)
+			producerData.producer.appData = { ...producerData.producer.appData, ...data }
+		} catch (error) {
+			console.log("- Error Change App Data : ", error)
+		}
 	})
 
 	socket.on("manually-turn-off-video", ({ socketId }) => {
