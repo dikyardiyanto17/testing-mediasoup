@@ -404,4 +404,17 @@ io.on("connection", async (socket) => {
 	})
 })
 
+app.get("/mediasoup", (req, res, next) => {
+	try {
+		const sortedData = {
+			transport: mediasoupParameter.transports.length,
+			producer: mediasoupParameter.producers.length,
+			consumer: mediasoupParameter.consumers.length,
+		}
+		res.send(sortedData)
+	} catch (error) {
+		next(error)
+	}
+})
+
 app.use(router)
