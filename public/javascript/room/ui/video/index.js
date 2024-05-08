@@ -123,7 +123,6 @@ const changeLayout = ({ parameter }) => {
 			secondUserVideo.style.height = "80%"
 			secondUserVideo.style.position = "static"
 		} else {
-			console.log(firstUserVideo)
 			if (secondUserVideo) secondUserVideo.removeAttribute("style")
 			if (firstUserVideo) firstUserVideo.removeAttribute("style")
 		}

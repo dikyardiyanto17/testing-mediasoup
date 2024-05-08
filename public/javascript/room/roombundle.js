@@ -21920,9 +21920,9 @@ let params = {
 let encodingsVP9 = [{ scalabilityMode: "S3T3" }]
 
 let encodingVP8 = [
-	{ scaleResolutionDownBy: 4, maxBitRate: 1250000, maxFramerate: 60 },
-	{ scaleResolutionDownBy: 2, maxBitRate: 1500000, maxFramerate: 60 },
-	{ scaleResolutionDownBy: 1, maxBitRate: 2000000, maxFramerate: 60 },
+	{ scaleResolutionDownBy: 4, maxBitRate: 125000, maxFramerate: 60 },
+	{ scaleResolutionDownBy: 2, maxBitRate: 150000, maxFramerate: 60 },
+	{ scaleResolutionDownBy: 1, maxBitRate: 200000, maxFramerate: 60 },
 ]
 
 // let encodingVP8 = [
@@ -22440,13 +22440,18 @@ const { encodingVP8, encodingsVP9 } = require("../config/mediasoup")
 
 const getEncoding = ({ parameter }) => {
 	try {
-		const firstVideoCodec = parameter.device.rtpCapabilities.codecs.find((c) => c.kind === "video")
+		// const firstVideoCodec = parameter.device.rtpCapabilities.codecs.find((c) => c.kind === "video")
+		// let mimeType = firstVideoCodec.mimeType.toLowerCase()
+		const firstVideoCodec = parameter.device.rtpCapabilities.codecs.find((c) => c.mimeType.toLowerCase() === "video/vp9")
 		let mimeType = firstVideoCodec.mimeType.toLowerCase()
 		if (mimeType.includes("vp9")) {
-			parameter.videoParams.encodings = encodingsVP9
-		} else {
+			console.log("VP9 Codec")
+			// parameter.videoParams.codec = parameter.device.rtpCapabilities.codecs.find((codec) => codec.mimeType.toLowerCase() === "video/h264")
 			parameter.videoParams.encodings = encodingVP8
-			console.log("not VP9")
+		} else {
+			console.log("VP8 Codec")
+			// parameter.videoParams.codec = parameter.device.rtpCapabilities.codecs.find((codec) => codec.mimeType.toLowerCase() === "video/vp8")
+			parameter.videoParams.encodings = encodingVP8
 		}
 		return firstVideoCodec
 	} catch (error) {
@@ -22520,6 +22525,9 @@ const createSendTransport = async ({ socket, parameter }) => {
 				parameter.consumerTransport = parameter.device.createRecvTransport(params)
 
 				parameter.consumerTransport.on("connectionstatechange", async (e) => {
+					if (e === "failed") {
+						window.location.reload()
+					}
 					console.log("- Receiver Transport State : ", e)
 				})
 
@@ -22546,6 +22554,7 @@ const connectSendTransport = async ({ parameter, socket }) => {
 
 		parameter.audioProducer = await parameter.producerTransport.produce(parameter.audioParams)
 		if (parameter.initialVideo) {
+			// const videoParameter = { ...parameter.videoParams, encodings: encodingsVP9 }
 			parameter.videoProducer = await parameter.producerTransport.produce(parameter.videoParams)
 			await parameter.videoProducer.setMaxSpatialLayer(1)
 			// console.log("- Producer : ", parameter.videoProducer)
@@ -23963,7 +23972,6 @@ const changeLayout = ({ parameter }) => {
 			secondUserVideo.style.height = "80%"
 			secondUserVideo.style.position = "static"
 		} else {
-			console.log(firstUserVideo)
 			if (secondUserVideo) secondUserVideo.removeAttribute("style")
 			if (firstUserVideo) firstUserVideo.removeAttribute("style")
 		}

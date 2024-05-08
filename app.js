@@ -387,21 +387,21 @@ io.on("connection", async (socket) => {
 		}
 	})
 
-	socket.on("manually-turn-off-video", ({ socketId }) => {
-		// console.log(`- Socket Manual Turn Off : ${socketId}`)
-		// console.log("- Server Parameter : ", serverParameter.allUsers)
-		if (serverParameter?.allUsers[socketId]) {
-			console.log("- Closing Reconnect Network")
-			serverParameter?.allUsers[socketId]?.socket?.disconnect()
-		}
-		// setTimeout(() => {
-		// 	// console.log(serverParameter.allUsers[socketId], "<<<<<<<<<<<")
-		// 	if (serverParameter.allUsers[socketId]) {
-		// 		serverParameter.allUsers[socketId].socket.close()
-		// 		console.log(" ->>>>>>>>>>>>>>",serverParameter.allUsers[socketId].socket.id)
-		// 	}
-		// }, 1000)
-	})
+	// socket.on("manually-turn-off-video", ({ socketId }) => {
+	// 	// console.log(`- Socket Manual Turn Off : ${socketId}`)
+	// 	// console.log("- Server Parameter : ", serverParameter.allUsers)
+	// 	if (serverParameter?.allUsers[socketId]) {
+	// 		console.log("- Closing Reconnect Network")
+	// 		serverParameter?.allUsers[socketId]?.socket?.disconnect()
+	// 	}
+	// 	// setTimeout(() => {
+	// 	// 	// console.log(serverParameter.allUsers[socketId], "<<<<<<<<<<<")
+	// 	// 	if (serverParameter.allUsers[socketId]) {
+	// 	// 		serverParameter.allUsers[socketId].socket.close()
+	// 	// 		console.log(" ->>>>>>>>>>>>>>",serverParameter.allUsers[socketId].socket.id)
+	// 	// 	}
+	// 	// }, 1000)
+	// })
 })
 
 app.get("/mediasoup", (req, res, next) => {
