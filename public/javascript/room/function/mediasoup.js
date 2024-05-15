@@ -14,16 +14,14 @@ const { encodingVP8, encodingsVP9 } = require("../config/mediasoup")
 const getEncoding = ({ parameter }) => {
 	try {
 		// const firstVideoCodec = parameter.device.rtpCapabilities.codecs.find((c) => c.kind === "video")
-		// let mimeType = firstVideoCodec.mimeType.toLowerCase()
 		const firstVideoCodec = parameter.device.rtpCapabilities.codecs.find((c) => c.mimeType.toLowerCase() === "video/vp9")
-		let mimeType = firstVideoCodec.mimeType.toLowerCase()
+		let mimeType = firstVideoCodec?.mimeType?.toLowerCase()
 		if (mimeType.includes("vp9")) {
-			console.log("VP9 Codec")
-			// parameter.videoParams.codec = parameter.device.rtpCapabilities.codecs.find((codec) => codec.mimeType.toLowerCase() === "video/h264")
-			parameter.videoParams.encodings = encodingVP8
+			console.log("- Encoding VP 9")
+			parameter.videoParams.codec = firstVideoCodec
+			parameter.videoParams.encodings = encodingsVP9
 		} else {
-			console.log("VP8 Codec")
-			// parameter.videoParams.codec = parameter.device.rtpCapabilities.codecs.find((codec) => codec.mimeType.toLowerCase() === "video/vp8")
+			console.log("- Encoding VP 8")
 			parameter.videoParams.encodings = encodingVP8
 		}
 		return firstVideoCodec
@@ -98,9 +96,6 @@ const createSendTransport = async ({ socket, parameter }) => {
 				parameter.consumerTransport = parameter.device.createRecvTransport(params)
 
 				parameter.consumerTransport.on("connectionstatechange", async (e) => {
-					if (e === "failed") {
-						window.location.reload()
-					}
 					console.log("- Receiver Transport State : ", e)
 				})
 
@@ -127,7 +122,6 @@ const connectSendTransport = async ({ parameter, socket }) => {
 
 		parameter.audioProducer = await parameter.producerTransport.produce(parameter.audioParams)
 		if (parameter.initialVideo) {
-			// const videoParameter = { ...parameter.videoParams, encodings: encodingsVP9 }
 			parameter.videoProducer = await parameter.producerTransport.produce(parameter.videoParams)
 			await parameter.videoProducer.setMaxSpatialLayer(1)
 			// console.log("- Producer : ", parameter.videoProducer)
@@ -261,6 +255,7 @@ const connectRecvTransport = async ({ parameter, consumerTransport, socket, remo
 							username: params.username,
 							socketId: params.producerSocketOwner,
 							picture: params.appData.picture,
+							frInterval: null,
 						}
 						data[params.appData.label] = {
 							track,
@@ -280,7 +275,7 @@ const connectRecvTransport = async ({ parameter, consumerTransport, socket, remo
 							parameter,
 						})
 						changeLayout({ parameter })
-						turnOffOnCamera({ id: params.producerSocketOwner, status: false })
+						turnOffOnCamera({ id: params.producerSocketOwner, status: false, parameter })
 						createUserList({
 							username: params.username,
 							socketId: params.producerSocketOwner,
@@ -295,7 +290,7 @@ const connectRecvTransport = async ({ parameter, consumerTransport, socket, remo
 					}
 					if (params.kind == "video" && params.appData.label == "video") {
 						insertVideo({ id: params.producerSocketOwner, track, pictures: "/assets/pictures/unknown.jpg" })
-						turnOffOnCamera({ id: params.producerSocketOwner, status: true })
+						turnOffOnCamera({ id: params.producerSocketOwner, status: true, parameter })
 					}
 					if (params.appData.label == "screensharing") {
 						changeLayoutScreenSharingClient({ track, id: params.producerSocketOwner, parameter, status: true })
@@ -326,6 +321,13 @@ const connectRecvTransport = async ({ parameter, consumerTransport, socket, remo
 					]
 
 					socket.emit("consumer-resume", { serverConsumerId: params.serverConsumerId })
+					console.log(parameter.consumerTransports)
+					parameter.consumerTransports.forEach((data) => {
+						if (data.consumer.track.kind == "video"){
+							console.log(parameter)
+							console.log(data, "<<")
+						}
+					})
 				} catch (error) {
 					console.log("- Error Consuming : ", error)
 				}

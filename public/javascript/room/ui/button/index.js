@@ -1,6 +1,7 @@
 const RecordRTC = require("recordrtc")
 const { timerLayout, muteAllParticipants, unlockAllMic, changeAppData, changeUserListMicIcon } = require("../../function")
 const { updatingLayout, changeLayout, createAudioVisualizer } = require("../video")
+const { stopFR, startFR } = require("../../function/face-recognition")
 
 const changeMic = ({ parameter, socket, status }) => {
 	parameter.allUsers.forEach((data) => {
@@ -10,13 +11,22 @@ const changeMic = ({ parameter, socket, status }) => {
 	})
 }
 
-const turnOffOnCamera = ({ id, status }) => {
-	let videoId = document.getElementById(`user-picture-container-${id}`)
-	let cameraIconsUserList = document.getElementById("ulic-" + id)
-	if (!status && videoId) {
-		videoId.className = "video-off"
-	} else videoId.className = "video-on"
-	if (cameraIconsUserList) cameraIconsUserList.className = `${status ? "fas fa-video" : "fas fa-video-slash"}`
+const turnOffOnCamera = ({ id, status, parameter }) => {
+	try {
+		let user = parameter.allUsers.find((data) => data.socketId == id)
+		let videoId = document.getElementById(`user-picture-container-${id}`)
+		let cameraIconsUserList = document.getElementById("ulic-" + id)
+		if (!status && videoId) {
+			videoId.className = "video-off"
+			stopFR({ id, parameter })
+		} else {
+			videoId.className = "video-on"
+			// startFR({ picture: user.picture, name: user.username, id: user.socketId, parameter })
+		}
+		if (cameraIconsUserList) cameraIconsUserList.className = `${status ? "fas fa-video" : "fas fa-video-slash"}`
+	} catch (error) {
+		console.log("- Error : ", error)
+	}
 }
 
 const switchCamera = async ({ parameter }) => {
@@ -482,16 +492,16 @@ const changeLayoutScreenSharing = ({ parameter, status }) => {
 		// slideUserVideoButton({ status: false })
 
 		const displayViewControllerIcon = document.getElementById("display-view-controller-icon")
-		if (displayViewControllerIcon){
+		if (displayViewControllerIcon) {
 			displayViewControllerIcon.removeAttribute("click", displayViewController)
 		}
 
 		const minMaxButtonControllerIcon = document.getElementById("min-max-display-button")
-		if (minMaxButtonControllerIcon){
+		if (minMaxButtonControllerIcon) {
 			minMaxButtonControllerIcon.removeEventListener("click", minMaxDisplayButtonController)
 		}
 
-		if (document.getElementById("video-screen-sharing-header")){
+		if (document.getElementById("video-screen-sharing-header")) {
 			document.getElementById("video-screen-sharing-header").remove()
 		}
 

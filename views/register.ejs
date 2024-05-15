@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <title>Telepati</title>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+        }
+
+        .full-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            background-color: #004C91;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .card {
+            border-radius: 15px;
+            padding: 20px;
+            width: 500px;
+        }
+
+        .form-custom {
+            width: 100%;
+            height: 100%;
+        }
+
+        .input-custom {
+            background-color: #F0F0F0;
+        }
+
+        .submit-button-container {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+
+        .submit-button {
+            width: 100%;
+        }
+
+        .camera-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-color: #ffffff;
+            top: 100%;
+            transition: 1s;
+            border-top-left-radius: 50px;
+            border-top-right-radius: 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .camera-box {
+            background-color: black;
+            height: 80%;
+            width: 70%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .user-video {
+            width: 100%;
+            height: 100%;
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: 10px;
+        }
+
+        .capture-box {
+            width: 100%;
+            height: 10%;
+            display: flex;
+            justify-content: space-evenly;
+            align-items: center;
+        }
+
+
+        .modal-dialog-custom {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+
+        .face-recognition {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .loading {
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.222);
+            position: absolute;
+            z-index: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .loading-hide {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="full-container">
+        <div class="loading" id="loading-id">
+            <img src="/assets/pictures/loader.svg" alt="loader" />
+        </div>
+        <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-dialog-custom" role="document">
+                <div class="modal-content">
+                    <div id="snapshot" style="display: none;"></div>
+                    <img id="image--output" alt="verifikasi wajah" class="mw-100 my-3">
+                    <canvas id="canvas-element" style="display: none;"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <form class="form-custom" id="register-form">
+                <div class="form-group">
+                    <label for="fullname" class="font-weight-bold">Full Name</label>
+                    <input type="text" autocomplete="off" class="form-control input-custom" id="fullname-id"
+                        aria-describedby="fullname" placeholder="Enter Your Full Name...">
+                </div>
+                <div class="form-group">
+                    <label for="nik" class="font-weight-bold">NIK</label>
+                    <input autocomplete="off" type="text" class="form-control input-custom" id="nik-id"
+                        placeholder="Enter Your NIK...">
+                </div>
+                <div class="submit-button-container">
+                    <button type="submit" class="btn btn-primary button-custom">Register</button>
+                </div>
+            </form>
+        </div>
+        <div class="camera-container" id="camera-container-id">
+            <div class="camera-box" id="camera-box-id">
+                <video id="local-video" poster="/assets/pictures/spinner.svg" preload="auto" autoplay class="user-video"
+                    muted>
+                </video>
+                <canvas id="face-matcher-box" style="position: absolute;"></canvas>
+                <!-- <img src="/assets/pictures/face-match-box.png" style="position: absolute;" /> -->
+                <div class="face-recognition" id="face-recognition-id"></div>
+            </div>
+            <div class="capture-box">
+                <!-- <button class="btn btn-primary" id="capture-button-id">Capture</button> -->
+                <button class="btn btn-primary" id="recapture-button-id" disabled>Retake Photo</button>
+                <button disabled type="button" id="preview-button-id" class="btn btn-primary" data-toggle="modal"
+                    data-target="#exampleModal">
+                    Preview
+                </button>
+                <button disabled class="btn btn-primary" id="confirm-button-id">Confirm</button>
+            </div>
+        </div>
+    </div>
+    <script src="/javascript/room/face-api/face-api.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.js"></script>
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+    <script src="/javascript/register/registerbundle.js"></script>
+</body>
+
+</html>

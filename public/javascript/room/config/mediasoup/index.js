@@ -65,9 +65,9 @@ let params = {
 let encodingsVP9 = [{ scalabilityMode: "S3T3" }]
 
 let encodingVP8 = [
-	{ scaleResolutionDownBy: 4, maxBitRate: 125000, maxFramerate: 60 },
-	{ scaleResolutionDownBy: 2, maxBitRate: 150000, maxFramerate: 60 },
-	{ scaleResolutionDownBy: 1, maxBitRate: 200000, maxFramerate: 60 },
+	{ scaleResolutionDownBy: 4, maxBitRate: 1250000, maxFramerate: 60 },
+	{ scaleResolutionDownBy: 2, maxBitRate: 1500000, maxFramerate: 60 },
+	{ scaleResolutionDownBy: 1, maxBitRate: 2000000, maxFramerate: 60 },
 ]
 
 // let encodingVP8 = [
@@ -83,4 +83,4 @@ let audioParams = {
 	zeroRtpOnPause: true,
 }
 
-module.exports = { params, audioParams, encodingVP8, encodingsVP9 }
+module.exports = { params, audioParams, encodingVP8, encodingsVP9, VIDEO_KSVC_ENCODINGS, VIDEO_SVC_ENCODINGS }

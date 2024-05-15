@@ -19,6 +19,14 @@ class Controller {
 		}
 	}
 
+	static register(req, res) {
+		try {
+			res.render("register")
+		} catch (error) {
+			console.log(error)
+		}
+	}
+
 	static lobby(req, res) {
 		try {
 			res.render("lobby")
@@ -26,6 +34,8 @@ class Controller {
 			console.log(error)
 		}
 	}
+
+
 
 	static async googleAuth(req, res) {
 		try {
@@ -39,5 +49,6 @@ class Controller {
 			console.log(error)
 		}
 	}
+
 }
 module.exports = Controller

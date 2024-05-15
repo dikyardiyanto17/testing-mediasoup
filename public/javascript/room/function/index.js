@@ -1,10 +1,12 @@
+let intervalId
+
 const startTimer = () => {
 	try {
 		let startTime = Date.now()
 		let timerElement = document.getElementById("realtime-timer")
 
 		// Update the timer every second
-		let intervalId = setInterval(function () {
+		intervalId = setInterval(function () {
 			let currentTime = Date.now()
 			let elapsedTime = currentTime - startTime
 			let hours = Math.floor(elapsedTime / 3600000)
@@ -40,6 +42,7 @@ const timerLayout = ({ status }) => {
 			let recordButton = document.getElementById("record-video")
 			recordButton.innerHTML = "Record Video"
 			recordButton.removeAttribute("style")
+			clearInterval(intervalId)
 		}
 	} catch (error) {
 		console.log("- Error At Timer Layout : ", error)
@@ -290,14 +293,7 @@ const checkLocalStorage = ({ parameter }) => {
 		// Set Room Id
 		localStorage.setItem("room_id", parameter.roomName)
 		// Check Config For Audio Devices, Selected Audio Device, Video Devices, Selected Video Devices, Room Id, Username
-		if (
-			!localStorage.getItem("audioDevices") ||
-			!localStorage.getItem("room_id") ||
-			!localStorage.getItem("selectedVideoDevices") ||
-			!localStorage.getItem("videoDevices") ||
-			!localStorage.getItem("username") ||
-			!localStorage.getItem("selectedAudioDevices")
-		) {
+		if (!localStorage.getItem("username") || !localStorage.getItem("nik")) {
 			goToLobby()
 		}
 	} catch (error) {

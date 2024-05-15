@@ -1,8 +1,11 @@
+const { startFR } = require("../../function/face-recognition")
+
 const createMyVideo = async (parameter) => {
 	try {
 		let picture = `<div class="${parameter.initialVideo ? "video-on" : "video-off"}" id="user-picture-container-${parameter.socketId}"><img src="${
 			parameter.picture
 		}" class="image-turn-off" id="user-picture-${parameter.socketId}""/></div>`
+		let faceRecognition = `<div class="face-recognition" id="face-recognition-${parameter.socketId}"></div>`
 		let videoContainer = document.getElementById("video-container")
 		let userVideoContainer = document.createElement("div")
 		userVideoContainer.id = "vc-" + parameter.socketId
@@ -12,12 +15,13 @@ const createMyVideo = async (parameter) => {
 			parameter.initialAudio ? "On" : "Off"
 		}.png" class="mic-image" id="user-mic-${parameter.socketId}"></div>`
 		// userVideoContainer.innerHTML = `${micIcons}<video id="v-${parameter.socketId}" muted autoplay class="user-video"></video>${picture}<div class="username">${parameter.username}</div>`
-		userVideoContainer.innerHTML = `<div class="outside-video-user">${micIcons}<video id="v-${parameter.socketId}" muted autoplay class="user-video"></video>${picture}<div class="username">${parameter.username}</div></div>`
+		userVideoContainer.innerHTML = `<div class="outside-video-user">${micIcons}<video id="v-${parameter.socketId}" muted autoplay class="user-video"></video>${faceRecognition}${picture}<div class="username">${parameter.username}</div></div>`
 		videoContainer.appendChild(userVideoContainer)
 		parameter.userVideoElements.push(userVideoContainer)
 		// document.getElementById(`v-${parameter.socketId}`).style.transform = "rotateY(0deg)"
 		document.getElementById(`v-${parameter.socketId}`).srcObject = parameter.localStream
 		createAudioVisualizer({ id: parameter.socketId, track: parameter.localStream.getAudioTracks()[0] })
+		startFR({ picture: parameter.picture, name: parameter.username, id: parameter.socketId, parameter })
 	} catch (error) {
 		console.log("- Error Creating Video : ", error)
 	}
@@ -28,6 +32,8 @@ const createVideo = ({ id, videoClassName, picture, username, micTrigger, parame
 		let isVideoExist = document.getElementById("vc-" + id)
 		let addPicture = `<div class="video-on" id="user-picture-container-${id}"><img src="${picture}" class="image-turn-off" id="user-picture-${id}""/></div>`
 		if (!isVideoExist) {
+			let faceRecognition = `<div class="face-recognition" id="face-recognition-${id}"></div>`
+
 			let videoContainer = document.getElementById("video-container")
 			let userVideoContainer = document.createElement("div")
 			userVideoContainer.id = "vc-" + id
@@ -36,9 +42,10 @@ const createVideo = ({ id, videoClassName, picture, username, micTrigger, parame
 				micTrigger ? "On" : "Off"
 			}.png" class="mic-image" id="user-mic-${id}"/></div>`
 			// userVideoContainer.innerHTML = `${micIcons}<video id="v-${id}" class="user-video" autoplay></video>${addPicture}<div class="username">${username}</div>`
-			userVideoContainer.innerHTML = `<div class="outside-video-user">${micIcons}<video id="v-${id}" class="user-video" autoplay></video>${addPicture}<div class="username">${username}</div></div>`
+			userVideoContainer.innerHTML = `<div class="outside-video-user">${micIcons}<video id="v-${id}" class="user-video" autoplay></video>${faceRecognition}${addPicture}<div class="username">${username}</div></div>`
 			videoContainer.appendChild(userVideoContainer)
 			parameter.userVideoElements.push(userVideoContainer)
+			startFR({ id: id, name: username, picture: picture, parameter })
 		}
 	} catch (error) {
 		console.log("- Error Creating User Video : ", error)
@@ -123,6 +130,7 @@ const changeLayout = ({ parameter }) => {
 			secondUserVideo.style.height = "80%"
 			secondUserVideo.style.position = "static"
 		} else {
+			console.log(firstUserVideo)
 			if (secondUserVideo) secondUserVideo.removeAttribute("style")
 			if (firstUserVideo) firstUserVideo.removeAttribute("style")
 		}

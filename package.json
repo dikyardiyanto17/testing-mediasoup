@@ -6,6 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "watch": "watchify public/javascript//room/room.js -o public/javascript/room/roombundle.js -v",
+    "watch2": "watchify public/javascript//lobby/lobby.js -o public/javascript/lobby/lobbybundle.js -v",
+    "watch3": "watchify public/javascript//register/register.js -o public/javascript/register/registerbundle.js -v",
     "debug_warn": "DEBUG='mediasoup:WARN:* mediasoup:ERROR:*' nodemon app.js",
     "debug_mode": "DEBUG='mediasoup*' nodemon app.js"
   },
@@ -20,8 +22,10 @@
     "httpolyglot": "^0.1.2",
     "mediasoup": "^3.12.13",
     "mediasoup-client": "^3.6.101",
+    "multer": "^1.4.5-lts.1",
     "recordrtc": "^5.6.2",
     "socket.io": "^4.7.2",
-    "socket.io-client": "^4.7.2"
+    "socket.io-client": "^4.7.2",
+    "sweetalert2": "^11.10.8"
   }
 }
