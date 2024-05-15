@@ -45,7 +45,7 @@ const createVideo = ({ id, videoClassName, picture, username, micTrigger, parame
 	}
 }
 
-const createAudio = ({ id, track }) => {
+const createAudio = ({ id, track, parameter }) => {
 	try {
 		let checkAudio = document.getElementById(`ac-${id}`)
 		if (!checkAudio) {
@@ -62,6 +62,23 @@ const createAudio = ({ id, track }) => {
 			audioContainer.appendChild(newElem)
 			// console.log("- A", document.getElementById("a-" + id))
 			document.getElementById("a-" + id).srcObject = new MediaStream([track])
+			if (document.getElementById("a-" + id) && typeof document.getElementById("a-" + id).sinkId !== "undefined") {
+				document
+					.getElementById("a-" + id)
+					.setSinkId(parameter.devices.speaker.id)
+					.then(() => {
+						console.log(`Success, audio output device attached: ${parameter.devices.speaker.id}`)
+					})
+					.catch((error) => {
+						let errorMessage = error
+						if (error.name === "SecurityError") {
+							errorMessage = `You need to use HTTPS for selecting audio output device: ${error}`
+						}
+						console.error(errorMessage)
+					})
+			} else {
+				console.warn("Browser does not support output device selection.")
+			}
 		}
 	} catch (error) {
 		console.log("- Error Creating Audio : ", error)
@@ -95,16 +112,19 @@ const removeUserList = ({ id }) => {
 const changeLayout = ({ parameter }) => {
 	try {
 		const userVideoContainer = document.getElementById("video-container")
+		const firstUserVideo = userVideoContainer.firstElementChild
 		const secondUserVideo = userVideoContainer.children[1]
 		parameter.userVideoElements.forEach((userVideo) => {
 			userVideo.removeAttribute("style")
 		})
 		if (parameter.videoLayout == "user-video-container-2" && window.innerWidth <= 950 && !parameter.isScreenSharing.isScreenSharing) {
+			firstUserVideo.style.zIndex = "4"
 			secondUserVideo.style.width = "80%"
 			secondUserVideo.style.height = "80%"
 			secondUserVideo.style.position = "static"
 		} else {
 			if (secondUserVideo) secondUserVideo.removeAttribute("style")
+			if (firstUserVideo) firstUserVideo.removeAttribute("style")
 		}
 		const userVideoContainers = document.querySelectorAll("." + parameter.previousVideoLayout)
 		userVideoContainers.forEach((container, index) => {

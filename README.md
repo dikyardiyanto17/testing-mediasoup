@@ -191,3 +191,23 @@ parameter = {
 ```
 
 
+## Perhitungan Total User Mediasoup Secara Teori
+- rumus total user (video dan audio) = ```n x ((n-1)*2)```
+- rumus total user (video dan audio) = jumlah user x (setiap user menerima audio dan video (2*) dari user lain (n-1))
+
+25 user = 25 x (24*2) = 1200 consumer 
+20 user = 20 x (19*2) = 760 consumer 
+15 user = 15 x (14*2) = 420 consumer
+10 user = 10 x (9*2) = 180 consumer
+
+*1 core normal cpu bisa menampung 500 consumer
+
+Data Developer lain menggunakan AWS instance g4dn.8xlarge 32 Core
+- 1 Core = 15 Orang (audio) = 15 x 14 = 210 Consumer = 20%
+- Menurut spek server ini, 1 Core bisa menampung sekitar 1000 consumer
+
+VPS 1 Core Rumah Web (vps pribadi)
+- 1 Core = 6 Orang (video & audio) = 15-20% = 6 x (5*2) = 60 consumer
+- jika 60 consumer = 20%
+- maka 240 consumer = 80% == 11 user / core (*diatur untuk tidak melebihi kenaikan cpu 90%)
+- jika 32 core => 342 user online secara bersamaan

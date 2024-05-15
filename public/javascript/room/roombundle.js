@@ -21920,9 +21920,9 @@ let params = {
 let encodingsVP9 = [{ scalabilityMode: "S3T3" }]
 
 let encodingVP8 = [
-	{ scaleResolutionDownBy: 4, maxBitRate: 1250000, maxFramerate: 60 },
-	{ scaleResolutionDownBy: 2, maxBitRate: 1500000, maxFramerate: 60 },
-	{ scaleResolutionDownBy: 1, maxBitRate: 2000000, maxFramerate: 60 },
+	{ scaleResolutionDownBy: 4, maxBitRate: 125000, maxFramerate: 60 },
+	{ scaleResolutionDownBy: 2, maxBitRate: 150000, maxFramerate: 60 },
+	{ scaleResolutionDownBy: 1, maxBitRate: 200000, maxFramerate: 60 },
 ]
 
 // let encodingVP8 = [
@@ -21938,7 +21938,7 @@ let audioParams = {
 	zeroRtpOnPause: true,
 }
 
-module.exports = { params, audioParams, encodingVP8, encodingsVP9 }
+module.exports = { params, audioParams, encodingVP8, encodingsVP9, VIDEO_KSVC_ENCODINGS, VIDEO_SVC_ENCODINGS }
 
 },{}],58:[function(require,module,exports){
 const startTimer = () => {
@@ -21980,8 +21980,9 @@ const timerLayout = ({ status }) => {
 		} else {
 			let timerElement = document.getElementById("timer")
 			if (timerElement) timerElement.remove()
-			let recordButton = document.getElementById("user-record-button")
-			recordButton.className = "btn button-small-custom"
+			let recordButton = document.getElementById("record-video")
+			recordButton.innerHTML = "Record Video"
+			recordButton.removeAttribute("style")
 		}
 	} catch (error) {
 		console.log("- Error At Timer Layout : ", error)
@@ -22201,6 +22202,15 @@ const hideMicOptionsMenu = () => {
 	}
 }
 
+const hideVideoOptionsMenu = () => {
+	try {
+		const videoOptions = document.getElementById("video-options")
+		videoOptions.className = "invisible"
+	} catch (error) {
+		console.log("- Error Hiding Options Menu")
+	}
+}
+
 const muteAllParticipants = ({ parameter, socket }) => {
 	parameter.allUsers.forEach((data) => {
 		if (data.socketId != socket.id) {
@@ -22274,6 +22284,7 @@ module.exports = {
 	newUserNotification,
 	showMicOptionsMenu,
 	hideMicOptionsMenu,
+	hideVideoOptionsMenu,
 }
 
 },{}],59:[function(require,module,exports){
@@ -22365,6 +22376,9 @@ const getMyStream = async (parameter) => {
 		parameter.allUsers = [...parameter.allUsers, user]
 		parameter.localStream = stream
 		parameter.audioParams.track = stream.getAudioTracks()[0]
+
+		parameter.devices.audio.id = localStorage.getItem("selectedAudioDevices")
+		parameter.devices.video.id = localStorage.getItem("selectedVideoDevices")
 		createUserList({ username: parameter.username, socketId: parameter.socketId, cameraTrigger: videoCondition, picture, micTrigger: audioCondition })
 	} catch (error) {
 		console.log("- Error Getting My Stream : ", error)
@@ -22398,7 +22412,9 @@ const joinRoom = async ({ parameter, socket }) => {
 		parameter.videoLayout = "user-video-container-1"
 		socket.emit("joinRoom", { roomName: parameter.roomName, username: parameter.username }, (data) => {
 			parameter.rtpCapabilities = data.rtpCapabilities
-			parameter.rtpCapabilities.headerExtensions = parameter.rtpCapabilities.headerExtensions.filter((ext) => ext.uri !== 'urn:3gpp:video-orientation');
+			parameter.rtpCapabilities.headerExtensions = parameter.rtpCapabilities.headerExtensions.filter(
+				(ext) => ext.uri !== "urn:3gpp:video-orientation"
+			)
 			createDevice({ parameter, socket })
 		})
 	} catch (error) {
@@ -22411,19 +22427,31 @@ module.exports = { getMyStream, getRoomId, joinRoom }
 },{".":58,"../../socket":65,"./mediasoup":60}],60:[function(require,module,exports){
 const mediasoupClient = require("mediasoup-client")
 const { createVideo, createAudio, insertVideo, updatingLayout, changeLayout, createAudioVisualizer } = require("../ui/video")
-const { turnOffOnCamera, changeLayoutScreenSharingClient, addMuteAllButton, getMicOptions, videoDisplayModeScreenSharing } = require("../ui/button")
+const {
+	turnOffOnCamera,
+	changeLayoutScreenSharingClient,
+	addMuteAllButton,
+	getMicOptions,
+	videoDisplayModeScreenSharing,
+	getCameraOptions,
+} = require("../ui/button")
 const { createUserList, muteAllParticipants, goToLobby } = require(".")
-const { encodingVP8, encodingsVP9 } = require("../config/mediasoup")
+const { encodingVP8, encodingsVP9, VIDEO_SVC_ENCODINGS } = require("../config/mediasoup")
 
 const getEncoding = ({ parameter }) => {
 	try {
-		const firstVideoCodec = parameter.device.rtpCapabilities.codecs.find((c) => c.kind === "video")
+		// const firstVideoCodec = parameter.device.rtpCapabilities.codecs.find((c) => c.kind === "video")
+		// let mimeType = firstVideoCodec.mimeType.toLowerCase()
+		const firstVideoCodec = parameter.device.rtpCapabilities.codecs.find((c) => c.mimeType.toLowerCase() === "video/vp9")
 		let mimeType = firstVideoCodec.mimeType.toLowerCase()
 		if (mimeType.includes("vp9")) {
-			parameter.videoParams.encodings = encodingsVP9
+			console.log("VP9 Codec")
+			parameter.videoParams.codec = firstVideoCodec
+			parameter.videoParams.encodings = VIDEO_SVC_ENCODINGS
 		} else {
+			console.log("VP8 Codec")
+			// parameter.videoParams.codec = parameter.device.rtpCapabilities.codecs.find((codec) => codec.mimeType.toLowerCase() === "video/vp8")
 			parameter.videoParams.encodings = encodingVP8
-			console.log("not VP9")
 		}
 		return firstVideoCodec
 	} catch (error) {
@@ -22497,6 +22525,9 @@ const createSendTransport = async ({ socket, parameter }) => {
 				parameter.consumerTransport = parameter.device.createRecvTransport(params)
 
 				parameter.consumerTransport.on("connectionstatechange", async (e) => {
+					if (e === "failed") {
+						window.location.reload()
+					}
 					console.log("- Receiver Transport State : ", e)
 				})
 
@@ -22523,6 +22554,7 @@ const connectSendTransport = async ({ parameter, socket }) => {
 
 		parameter.audioProducer = await parameter.producerTransport.produce(parameter.audioParams)
 		if (parameter.initialVideo) {
+			// const videoParameter = { ...parameter.videoParams, encodings: encodingsVP9 }
 			parameter.videoProducer = await parameter.producerTransport.produce(parameter.videoParams)
 			await parameter.videoProducer.setMaxSpatialLayer(1)
 			// console.log("- Producer : ", parameter.videoProducer)
@@ -22541,6 +22573,7 @@ const connectSendTransport = async ({ parameter, socket }) => {
 		}
 
 		await getMicOptions({ parameter, socket })
+		await getCameraOptions({ parameter })
 
 		myData.audio.producerId = parameter.audioProducer.id
 		myData.audio.transportId = parameter.producerTransport.id
@@ -22648,7 +22681,9 @@ const connectRecvTransport = async ({ parameter, consumerTransport, socket, remo
 						}
 					} else {
 						parameter.totalUsers++
-						parameter.isScreenSharing.screenSharingUserViewTotalPage = Math.ceil(parameter.totalUsers / parameter.isScreenSharing.screenSharingUserViewCurrentDisplay)
+						parameter.isScreenSharing.screenSharingUserViewTotalPage = Math.ceil(
+							parameter.totalUsers / parameter.isScreenSharing.screenSharingUserViewCurrentDisplay
+						)
 						let data = {
 							username: params.username,
 							socketId: params.producerSocketOwner,
@@ -22682,7 +22717,7 @@ const connectRecvTransport = async ({ parameter, consumerTransport, socket, remo
 						})
 					}
 					if (params.kind == "audio" && params.appData.label == "audio") {
-						createAudio({ id: params.producerSocketOwner, track })
+						createAudio({ id: params.producerSocketOwner, track, parameter })
 						createAudioVisualizer({ id: params.producerSocketOwner, track })
 					}
 					if (params.kind == "video" && params.appData.label == "video") {
@@ -22695,7 +22730,7 @@ const connectRecvTransport = async ({ parameter, consumerTransport, socket, remo
 						changeLayout({ parameter })
 					}
 					if (params.kind == "audio" && params.appData.label == "screensharingaudio") {
-						createAudio({ id: params.producerSocketOwner + "screensharingaudio", track })
+						createAudio({ id: params.producerSocketOwner + "screensharingaudio", track, parameter })
 					}
 
 					if (parameter.record.isRecording && params.kind == "audio") {
@@ -22753,6 +22788,10 @@ class Parameters {
 		video: {
 			iteration: 0,
 			id: undefined,
+		},
+		speaker: {
+			iteration: 0,
+			id: "default",
 		},
 	}
 	screensharing = {
@@ -22820,11 +22859,11 @@ const switchCamera = async ({ parameter }) => {
 		const myVideo = document.getElementById(`v-${parameter.socketId}`)
 		// console.log(myVideo.srcObject.getVideoTracks()[0])
 		let myData = parameter.allUsers.find((data) => data.socketId == parameter.socketId)
-		let videoDevices = (await navigator.mediaDevices.enumerateDevices()).filter((device) => device.kind === "videoinput")
+		// let videoDevices = (await navigator.mediaDevices.enumerateDevices()).filter((device) => device.kind === "videoinput")
 		// console.log("- Parameter : ", parameter.devices)
-		parameter.devices.video.iteration++
-		if (parameter.devices.video.iteration >= videoDevices?.length) parameter.devices.video.iteration = 0
-		parameter.devices.video.id = videoDevices[parameter.devices.video.iteration].deviceId
+		// parameter.devices.video.iteration++
+		// if (parameter.devices.video.iteration >= videoDevices?.length) parameter.devices.video.iteration = 0
+		// parameter.devices.video.id = videoDevices[parameter.devices.video.iteration].deviceId
 		// let mode = await videoDevices[parameter.devices.video.iteration].getCapabilities().facingMode
 		// console.log("- Mode : ", mode[0])
 		// mode.length === 0 ? "environment" : mode[0]
@@ -22848,16 +22887,16 @@ const switchCamera = async ({ parameter }) => {
 		}
 		parameter.localStream.addTrack(newStream.getVideoTracks()[0])
 
-		if (!parameter.videoProducer) {
-			parameter.videoParams.appData.isActive = true
-			parameter.videoParams.appData.isVideoActive = true
-			parameter.videoParams.track = newStream.getVideoTracks()[0]
-			parameter.videoProducer = await parameter.producerTransport.produce(parameter.videoParams)
-			myData.video.producerId = parameter.videoProducer.id
-			myData.video.isActive = true
-		} else {
-			parameter.videoProducer.replaceTrack({ track: newStream.getVideoTracks()[0] })
-		}
+		// if (!parameter.videoProducer) {
+		// 	parameter.videoParams.appData.isActive = true
+		// 	parameter.videoParams.appData.isVideoActive = true
+		// 	parameter.videoParams.track = newStream.getVideoTracks()[0]
+		// 	parameter.videoProducer = await parameter.producerTransport.produce(parameter.videoParams)
+		// 	myData.video.producerId = parameter.videoProducer.id
+		// 	myData.video.isActive = true
+		// } else {
+		parameter.videoProducer.replaceTrack({ track: newStream.getVideoTracks()[0] })
+		// }
 	} catch (error) {
 		console.log("- Error Switching Camera : ", error)
 	}
@@ -22865,17 +22904,11 @@ const switchCamera = async ({ parameter }) => {
 
 const switchMicrophone = async ({ parameter, deviceId, socket }) => {
 	try {
-		if (parameter.micCondition.isLocked) {
-			let ae = document.getElementById("alert-error")
-			ae.className = "show"
-			ae.innerHTML = `Mic is Locked By Host`
-			// Show Warning
-			setTimeout(() => {
-				ae.className = ae.className.replace("show", "")
-				ae.innerHTML = ``
-			}, 3000)
-			return
-		}
+		let previousIcon = document.getElementById(`${parameter.devices.audio.id}-audio-input`).firstChild.firstChild
+		previousIcon.className = `fa-regular fa-square`
+		let iconCheckListMicrophone = document.getElementById(`${deviceId}-audio-input`).firstChild.firstChild
+		iconCheckListMicrophone.className = `fa-regular fa-square-check`
+		parameter.devices.audio.id = deviceId
 		const myVideo = document.getElementById(`v-${parameter.socketId}`)
 		let myData = parameter.allUsers.find((data) => data.socketId == parameter.socketId)
 
@@ -22891,14 +22924,15 @@ const switchMicrophone = async ({ parameter, deviceId, socket }) => {
 		myVideo.srcObject.getAudioTracks()[0].stop()
 
 		let newStream = await navigator.mediaDevices.getUserMedia(config)
+		newStream.getAudioTracks()[0].enabled = myData.audio.isActive
 		parameter.localStream.getAudioTracks()[0].stop()
 		parameter.localStream.removeTrack(parameter.localStream.getAudioTracks()[0])
 		parameter.localStream.addTrack(newStream.getAudioTracks()[0])
-		parameter.audioParams.appData.isActive = true
-		parameter.audioParams.appData.isAudioActive = true
-		myData.audio.isActive = true
+		// parameter.audioParams.appData.isActive = true
+		// parameter.audioParams.appData.isAudioActive = true
+		// myData.audio.isActive = true
 		parameter.audioProducer.replaceTrack({ track: newStream.getAudioTracks()[0] })
-		changeMicCondition({ parameter, socket, status: true })
+		// changeMicCondition({ parameter, socket, status: true })
 		document.getElementById(`audio-visualizer-${parameter.socketId}`).remove()
 		createAudioVisualizer({ id: parameter.socketId, track: newStream.getAudioTracks()[0] })
 	} catch (error) {
@@ -22908,7 +22942,7 @@ const switchMicrophone = async ({ parameter, deviceId, socket }) => {
 
 const changeMicCondition = ({ parameter, socket, status }) => {
 	try {
-		console.log("- Condition : ", parameter.localStream.getAudioTracks()[0])
+		console.log("- Mic Condition : ", parameter.audioParams.appData.isActive, " - ", parameter.audioParams.appData.isActive)
 		const micButton = document.getElementById("user-mic-button")
 		let myIconMic = document.getElementById(`user-mic-${socket.id}`)
 		let user = parameter.allUsers.find((data) => data.socketId == socket.id)
@@ -23082,12 +23116,27 @@ const changeLayoutScreenSharingClient = ({ track, status, parameter, id }) => {
 		}
 	}
 
+	const minMaxDisplayButtonController = () => {
+		const minMaxButton = document.getElementById("min-max-display-button")
+		if (minMaxButton.className === "fa-solid fa-minimize fa-lg") {
+			minMaxButton.className = "fa-solid fa-maximize fa-lg"
+			parameter.userVideoElements.forEach((userVideo) => {
+				userVideo.style.display = "none"
+			})
+			addPreviousButtonScreenSharingView({ parameter, status: false })
+			addNextButtonScreenSharingView({ status: false, parameter })
+		} else {
+			minMaxButton.className = "fa-solid fa-minimize fa-lg"
+			videoDisplayModeScreenSharing({ parameter, status: true })
+		}
+	}
+
 	if (status) {
 		let userListButton = document.getElementById("user-list-button")
 
 		const usersVideoHeader = document.createElement("div")
 		usersVideoHeader.id = "video-screen-sharing-header"
-		usersVideoHeader.innerHTML = `<span>Users</span><button class="btn" id="display-view-controller"><i id="display-view-controller-icon" class="fas fa-external-link-square-alt fa-lg"></i></button>`
+		usersVideoHeader.innerHTML = `<span>Users</span><div id="display-view-controller"><button class="btn"><i style="color:white;" id="min-max-display-button" class="fa-solid fa-minimize fa-lg"></i></button><button class="btn" id="button-display-view-controller"><i id="display-view-controller-icon" style="color:white;" class="fas fa-external-link-square-alt fa-lg"></i></button></div>`
 		videoContainer.insertBefore(usersVideoHeader, videoContainer.firstChild)
 
 		usersVideoHeader.addEventListener("mousedown", function (e) {
@@ -23116,6 +23165,9 @@ const changeLayoutScreenSharingClient = ({ track, status, parameter, id }) => {
 		const displayViewControllerIcon = document.getElementById("display-view-controller-icon")
 		displayViewControllerIcon.addEventListener("click", displayViewController)
 
+		const minMaxButtonControllerIcon = document.getElementById("min-max-display-button")
+		minMaxButtonControllerIcon.addEventListener("click", minMaxDisplayButtonController)
+
 		videoDisplayModeScreenSharing({ parameter, status: true })
 		if (window.innerWidth <= 950) {
 			slideUserVideoButton({ status: true })
@@ -23129,6 +23181,9 @@ const changeLayoutScreenSharingClient = ({ track, status, parameter, id }) => {
 
 		const displayViewControllerIcon = document.getElementById("display-view-controller-icon")
 		displayViewControllerIcon.removeAttribute("click", displayViewController)
+
+		const minMaxButtonControllerIcon = document.getElementById("min-max-display-button")
+		minMaxButtonControllerIcon.removeEventListener("click", minMaxDisplayButtonController)
 
 		document.getElementById("video-screen-sharing-header").remove()
 		document.removeEventListener("mouseup", mouseUpHandler)
@@ -23196,10 +23251,25 @@ const changeLayoutScreenSharing = ({ parameter, status }) => {
 		}
 	}
 
+	const minMaxDisplayButtonController = () => {
+		const minMaxButton = document.getElementById("min-max-display-button")
+		if (minMaxButton.className === "fa-solid fa-minimize fa-lg") {
+			minMaxButton.className = "fa-solid fa-maximize fa-lg"
+			parameter.userVideoElements.forEach((userVideo) => {
+				userVideo.style.display = "none"
+			})
+			addPreviousButtonScreenSharingView({ parameter, status: false })
+			addNextButtonScreenSharingView({ status: false, parameter })
+		} else {
+			minMaxButton.className = "fa-solid fa-minimize fa-lg"
+			videoDisplayModeScreenSharing({ parameter, status: true })
+		}
+	}
+
 	if (status) {
 		const usersVideoHeader = document.createElement("div")
 		usersVideoHeader.id = "video-screen-sharing-header"
-		usersVideoHeader.innerHTML = `<span>Users</span><button class="btn" id="display-view-controller"><i id="display-view-controller-icon" class="fas fa-external-link-square-alt fa-lg"></i></button>`
+		usersVideoHeader.innerHTML = `<span>Users</span><div id="display-view-controller"><button class="btn"><i id="min-max-display-button" style="color:white;" class="fa-solid fa-minimize fa-lg"></i></button><button class="btn" id="button-display-view-controller"><i id="display-view-controller-icon" style="color:white;" class="fas fa-external-link-square-alt fa-lg"></i></button></div>`
 		videoContainer.insertBefore(usersVideoHeader, videoContainer.firstChild)
 
 		usersVideoHeader.addEventListener("mousedown", function (e) {
@@ -23230,6 +23300,9 @@ const changeLayoutScreenSharing = ({ parameter, status }) => {
 		const displayViewControllerIcon = document.getElementById("display-view-controller-icon")
 		displayViewControllerIcon.addEventListener("click", displayViewController)
 
+		const minMaxButtonControllerIcon = document.getElementById("min-max-display-button")
+		minMaxButtonControllerIcon.addEventListener("click", minMaxDisplayButtonController)
+
 		videoDisplayModeScreenSharing({ parameter, status: true })
 	} else {
 		if (parameter.screensharing.stream) {
@@ -23244,9 +23317,19 @@ const changeLayoutScreenSharing = ({ parameter, status }) => {
 		// slideUserVideoButton({ status: false })
 
 		const displayViewControllerIcon = document.getElementById("display-view-controller-icon")
-		displayViewControllerIcon.removeAttribute("click", displayViewController)
+		if (displayViewControllerIcon){
+			displayViewControllerIcon.removeAttribute("click", displayViewController)
+		}
 
-		document.getElementById("video-screen-sharing-header").remove()
+		const minMaxButtonControllerIcon = document.getElementById("min-max-display-button")
+		if (minMaxButtonControllerIcon){
+			minMaxButtonControllerIcon.removeEventListener("click", minMaxDisplayButtonController)
+		}
+
+		if (document.getElementById("video-screen-sharing-header")){
+			document.getElementById("video-screen-sharing-header").remove()
+		}
+
 		document.removeEventListener("mouseup", mouseUpHandler)
 		document.removeEventListener("mousemove", mouseMoveHandler)
 
@@ -23356,6 +23439,10 @@ const addPreviousButtonScreenSharingView = ({ status, parameter }) => {
 
 const videoDisplayModeScreenSharing = ({ parameter, status }) => {
 	try {
+		const minMaxButton = document.getElementById("min-max-display-button")
+		if (minMaxButton) {
+			minMaxButton.className = "fa-solid fa-minimize fa-lg"
+		}
 		addPreviousButtonScreenSharingView({ parameter, status: false })
 		addNextButtonScreenSharingView({ status: false, parameter })
 
@@ -23434,11 +23521,14 @@ const videoDisplayModeScreenSharing = ({ parameter, status }) => {
 
 const recordVideo = async ({ parameter }) => {
 	try {
-		let recordButton = document.getElementById("user-record-button")
+		let recordButton = document.getElementById("record-video")
 
-		if (recordButton.classList[1] == "button-small-custom") {
-			recordButton.classList.remove("button-small-custom")
-			recordButton.classList.add("button-small-custom-clicked")
+		if (recordButton.innerHTML === "Record Video") {
+			// recordButton.classList.remove("button-small-custom")
+			// recordButton.classList.add("button-small-custom-clicked")
+			recordButton.innerHTML = "Stop Record Video"
+			recordButton.style.backgroundColor = "#00ff11b2"
+			recordButton.style.borderRadius = "10px"
 			const videoStream = await navigator.mediaDevices.getDisplayMedia({
 				video: {
 					cursor: "always",
@@ -23525,8 +23615,10 @@ const recordVideo = async ({ parameter }) => {
 
 			timerLayout({ status: true })
 		} else {
-			recordButton.classList.remove("button-small-custom-clicked")
-			recordButton.classList.add("button-small-custom")
+			// recordButton.classList.remove("button-small-custom-clicked")
+			// recordButton.classList.add("button-small-custom")
+			recordButton.innerHTML = "Record Video"
+			recordButton.removeAttribute("style")
 			parameter.record.recordedMedia.stopRecording(() => {
 				// socket.send({ type: 'uploading' })
 				timerLayout({ status: false })
@@ -23632,21 +23724,106 @@ const addMuteAllButton = ({ parameter, socket }) => {
 	}
 }
 
+const getCameraOptions = async ({ parameter }) => {
+	try {
+		const listCameraContainer = document.getElementById("video-options")
+		let videoDevices = (await navigator.mediaDevices.enumerateDevices()).filter((device) => device.kind === "videoinput")
+		videoDevices.forEach((videoList) => {
+			let currentCameraIcons = '<i class="fa-regular fa-square"></i>'
+			if (videoList.deviceId === parameter.devices.video.id) {
+				currentCameraIcons = '<i class="fa-regular fa-square-check"></i>'
+			}
+			const cameraLabel = document.createElement("li")
+			cameraLabel.innerHTML = `<span class="mic-options-icons">${currentCameraIcons}</span><span>${videoList.label}</span>`
+			cameraLabel.id = videoList.deviceId
+			cameraLabel.addEventListener("click", (e) => {
+				e.stopPropagation()
+				const currentActiveCameraIcon = document.getElementById(parameter.devices.video.id).firstChild.firstChild
+				currentActiveCameraIcon.className = "fa-regular fa-square"
+				parameter.devices.video.id = videoList.deviceId
+				document.getElementById(parameter.devices.video.id).firstChild.firstChild.className = "fa-regular fa-square-check"
+				if (parameter.videoProducer) {
+					switchCamera({ parameter })
+				}
+			})
+			listCameraContainer.appendChild(cameraLabel)
+		})
+	} catch (error) {
+		console.log("- Error Showing Camera Options : ", error)
+	}
+}
+
 const getMicOptions = async ({ parameter, socket }) => {
 	try {
 		let audioDevices = (await navigator.mediaDevices.enumerateDevices()).filter((device) => device.kind === "audioinput")
+		let audioDevicesOutput = (await navigator.mediaDevices.enumerateDevices()).filter((device) => device.kind === "audiooutput")
 		const micOptionsContainer = document.getElementById("mic-options")
+		const audioOutputOptions = document.getElementById("audio-output")
 		audioDevices.forEach((audio, index) => {
 			let newElement = document.createElement("li")
-			newElement.id = audio.deviceId
-			newElement.innerHTML = audio.label
-			micOptionsContainer.appendChild(newElement)
-			newElement.addEventListener("click", () => {
+			newElement.id = audio.deviceId + "-audio-input"
+			let currentAudio = '<i class="fa-regular fa-square"></i>'
+			if (audio.deviceId === parameter.devices.audio.id) {
+				currentAudio = `<i class="fa-regular fa-square-check"></i>`
+			}
+
+			newElement.innerHTML = `<span class="mic-options-icons">${currentAudio}</span><span>${audio.label}</span>`
+			micOptionsContainer.insertBefore(newElement, audioOutputOptions)
+			newElement.addEventListener("click", (e) => {
 				try {
+					e.stopPropagation()
 					switchMicrophone({ parameter, deviceId: audio.deviceId, socket })
 				} catch (error) {
 					console.log("- Error Switching Microphone : ", error)
 				}
+			})
+		})
+		audioDevicesOutput.forEach((audioDevices, index) => {
+			let currentAudio = '<i class="fa-regular fa-square"></i>'
+			if (index === 0) {
+				currentAudio = `<i class="fa-regular fa-square-check"></i>`
+				parameter.devices.speaker.id = audioDevices.deviceId
+			}
+			let newElement = document.createElement("li")
+			newElement.id = audioDevices.deviceId + "-audio-output"
+			newElement.innerHTML = `<span class="mic-options-icons">${currentAudio}</span><span>${audioDevices.label}</span>`
+			micOptionsContainer.appendChild(newElement)
+			newElement.addEventListener("click", (e) => {
+				e.stopPropagation()
+				const iconSpeaker = document.getElementById(`${parameter.devices.speaker.id}-audio-output`).firstChild.firstChild
+				iconSpeaker.className = "fa-regular fa-square"
+				parameter.devices.speaker.id = audioDevices.deviceId
+				const currentSpeaker = document.getElementById(`${parameter.devices.speaker.id}-audio-output`).firstChild.firstChild
+				currentSpeaker.className = "fa-regular fa-square-check"
+				parameter.userVideoElements.forEach((videoElement) => {
+					let videoId = videoElement.id.slice(3)
+					let theAudio = document.getElementById(`a-${videoId}`)
+
+					if (theAudio && typeof theAudio.sinkId !== "undefined") {
+						console.log("- Sink Id Is Exist")
+						theAudio
+							.setSinkId(audioDevices.deviceId)
+							.then(() => {
+								console.log(`Success, audio output device attached: ${audioDevices.deviceId}`)
+							})
+							.catch((error) => {
+								let errorMessage = error
+								if (error.name === "SecurityError") {
+									errorMessage = `You need to use HTTPS for selecting audio output device: ${error}`
+								}
+								console.error(errorMessage)
+							})
+					} else {
+						console.warn("Browser does not support output device selection.")
+					}
+				})
+				// console.log(myVideo)
+				// console.log("- Sink Id", myVideo.sinkId)
+				// // Get the prototype of the element
+				// const proto = Object.getPrototypeOf(myVideo)
+
+				// // Log the functions
+				// console.log(proto)
 			})
 		})
 	} catch (error) {
@@ -23666,6 +23843,7 @@ module.exports = {
 	getMicOptions,
 	changeMicCondition,
 	videoDisplayModeScreenSharing,
+	getCameraOptions,
 }
 
 },{"../../function":58,"../video":64,"recordrtc":51}],64:[function(require,module,exports){
@@ -23716,7 +23894,7 @@ const createVideo = ({ id, videoClassName, picture, username, micTrigger, parame
 	}
 }
 
-const createAudio = ({ id, track }) => {
+const createAudio = ({ id, track, parameter }) => {
 	try {
 		let checkAudio = document.getElementById(`ac-${id}`)
 		if (!checkAudio) {
@@ -23733,6 +23911,23 @@ const createAudio = ({ id, track }) => {
 			audioContainer.appendChild(newElem)
 			// console.log("- A", document.getElementById("a-" + id))
 			document.getElementById("a-" + id).srcObject = new MediaStream([track])
+			if (document.getElementById("a-" + id) && typeof document.getElementById("a-" + id).sinkId !== "undefined") {
+				document
+					.getElementById("a-" + id)
+					.setSinkId(parameter.devices.speaker.id)
+					.then(() => {
+						console.log(`Success, audio output device attached: ${parameter.devices.speaker.id}`)
+					})
+					.catch((error) => {
+						let errorMessage = error
+						if (error.name === "SecurityError") {
+							errorMessage = `You need to use HTTPS for selecting audio output device: ${error}`
+						}
+						console.error(errorMessage)
+					})
+			} else {
+				console.warn("Browser does not support output device selection.")
+			}
 		}
 	} catch (error) {
 		console.log("- Error Creating Audio : ", error)
@@ -23766,16 +23961,19 @@ const removeUserList = ({ id }) => {
 const changeLayout = ({ parameter }) => {
 	try {
 		const userVideoContainer = document.getElementById("video-container")
+		const firstUserVideo = userVideoContainer.firstElementChild
 		const secondUserVideo = userVideoContainer.children[1]
 		parameter.userVideoElements.forEach((userVideo) => {
 			userVideo.removeAttribute("style")
 		})
 		if (parameter.videoLayout == "user-video-container-2" && window.innerWidth <= 950 && !parameter.isScreenSharing.isScreenSharing) {
+			firstUserVideo.style.zIndex = "4"
 			secondUserVideo.style.width = "80%"
 			secondUserVideo.style.height = "80%"
 			secondUserVideo.style.position = "static"
 		} else {
 			if (secondUserVideo) secondUserVideo.removeAttribute("style")
+			if (firstUserVideo) firstUserVideo.removeAttribute("style")
 		}
 		const userVideoContainers = document.querySelectorAll("." + parameter.previousVideoLayout)
 		userVideoContainers.forEach((container, index) => {
@@ -23941,6 +24139,8 @@ const {
 	newUserNotification,
 	showMicOptionsMenu,
 	hideMicOptionsMenu,
+	hideVideoOptionsMenu,
+	timerLayout,
 } = require("../room/function")
 const { getMyStream, getRoomId, joinRoom } = require("../room/function/initialization")
 const { signalNewConsumerTransport } = require("../room/function/mediasoup")
@@ -23985,17 +24185,23 @@ socket.on("connection-success", async ({ socketId }) => {
 	try {
 		if (isDisconnected >= 1) window.location.reload()
 		isDisconnected++
+		if (sessionStorage.getItem("socket_id")) {
+			socket.emit("manually-turn-off-video", { socketId: sessionStorage.getItem("socket_id") })
+			sessionStorage.setItem("socket_id", socketId)
+		} else {
+			sessionStorage.setItem("socket_id", socketId)
+		}
 		const isMobile = /Mobi|Android/i.test(navigator.userAgent)
 		if (isMobile) {
 			const screenSharingButton = document.getElementById("user-screen-share-button")
-			const recordButton = document.getElementById("user-record-button")
+			const recordButton = document.getElementById("record-video")
 			const optionalMenu = document.getElementById("optional-button-id")
 			screenSharingButton.style.display = "none"
 			recordButton.style.display = "none"
 
-			const switchCameraButton = document.getElementById("user-switch-camera-button")
-			switchCameraButton.style.marginLeft = "30px"
-			switchCameraButton.style.marginRight = "30px"
+			// const switchCameraButton = document.getElementById("user-switch-camera-button")
+			// switchCameraButton.style.marginLeft = "30px"
+			// switchCameraButton.style.marginRight = "30px"
 			const userListButton = document.getElementById("user-list-button")
 			userListButton.style.marginLeft = "30px"
 			userListButton.style.marginRight = "30px"
@@ -24084,7 +24290,6 @@ socket.on("producer-closed", ({ remoteProducerId, socketId }) => {
 			parameter.isScreenSharing.screenSharingUserViewTotalPage = Math.ceil(
 				parameter.totalUsers / parameter.isScreenSharing.screenSharingUserViewCurrentDisplay
 			)
-			console.log(parameter.isScreenSharing.screenSharingUserViewCurrentDisplay, " <<<")
 			updatingLayout({ parameter })
 			changeLayout({ parameter })
 			removeVideoAndAudio({ socketId })
@@ -24150,7 +24355,29 @@ socket.on("unmute-all", (data) => {
 
 let micButton = document.getElementById("user-mic-button")
 micButton.addEventListener("click", (e) => {
-	e.stopPropagation() // Prevent the click event from propagating to the document
+	e.stopPropagation()
+	if (micButton.className === "btn button-small-custom") {
+		changeMicCondition({ parameter, socket, status: false })
+		micButton.className = "btn button-small-custom-clicked"
+	} else {
+		changeMicCondition({ parameter, socket, status: true })
+		micButton.className = "btn button-small-custom"
+	}
+	// let micOptionsIcon = document.getElementById("audio-button-options")
+
+	// const micOptionsContainer = document.getElementById("mic-options")
+	// if (micOptionsContainer.className == "invisible") {
+	// 	showMicOptionsMenu()
+	// } else {
+	// 	hideMicOptionsMenu()
+	// }
+})
+
+let micOptionsIcon = document.getElementById("audio-button-options")
+micOptionsIcon.addEventListener("click", (e) => {
+	e.stopPropagation()
+	// let micOptionsIcon = document.getElementById("audio-button-options")
+	console.log("Icon Mic Clicked")
 
 	const micOptionsContainer = document.getElementById("mic-options")
 	if (micOptionsContainer.className == "invisible") {
@@ -24160,22 +24387,15 @@ micButton.addEventListener("click", (e) => {
 	}
 })
 
-let turnOffMicOption = document.getElementById("turn-off-microphone-option")
-turnOffMicOption.addEventListener("click", () => {
-	try {
-		changeMicCondition({ parameter, socket, status: false })
-	} catch (error) {
-		console.log("- Error Turning Off Microphone : ", error)
-	}
+const audioInputDecoration = document.getElementById("audio-input")
+const audioOutputDecoration = document.getElementById("audio-output")
+
+audioInputDecoration.addEventListener("click", (e) => {
+	e.stopPropagation()
 })
 
-let turnOnMicOption = document.getElementById("turn-on-microphone-option")
-turnOnMicOption.addEventListener("click", () => {
-	try {
-		changeMicCondition({ parameter, socket, status: true })
-	} catch (error) {
-		console.log("- Error Turning Off Microphone : ", error)
-	}
+audioOutputDecoration.addEventListener("click", (e) => {
+	e.stopPropagation()
 })
 
 let cameraButton = document.getElementById("user-turn-on-off-camera-button")
@@ -24195,8 +24415,10 @@ cameraButton.addEventListener("click", async () => {
 			parameter.videoProducer = null
 			myData.video.producerId = undefined
 			myData.video.isActive = false
+			parameter.videoParams.appData.isActive = false
+			parameter.videoParams.appData.isVideoActive = false
 		} else {
-			let newStream = await navigator.mediaDevices.getUserMedia({ video: true })
+			let newStream = await navigator.mediaDevices.getUserMedia({ video: { deviceId: { exact: parameter.devices.video.id } } })
 			cameraButton.classList.replace("button-small-custom-clicked", "button-small-custom")
 			if (parameter.localStream.getVideoTracks()[0]) {
 				parameter.localStream.removeTrack(parameter.localStream.getVideoTracks()[0])
@@ -24226,18 +24448,34 @@ cameraButton.addEventListener("click", async () => {
 	}
 })
 
-let switchCameraButton = document.getElementById("user-switch-camera-button")
-switchCameraButton.addEventListener("click", async () => {
-	parameter.videoParams.appData.isMicActive = parameter.isAudio
-	let isActive = document.getElementById("turn-on-off-camera-icons").classList
-	await switchCamera({ parameter })
-	if (isActive[1] == "fa-video-slash") {
-		cameraButton.classList.replace("button-small-custom-clicked", "button-small-custom")
-		isActive.add("fa-video")
-		isActive.remove("fa-video-slash")
-		turnOffOnCamera({ id: socket.id, status: true })
+let cameraOptionIcon = document.getElementById("video-button-options")
+cameraOptionIcon.addEventListener("click", (e) => {
+	e.stopPropagation()
+	const videoOptions = document.getElementById("video-options")
+	if (videoOptions.className === "invisible") {
+		videoOptions.className = "visible"
+	} else {
+		videoOptions.className = "invisible"
 	}
 })
+
+const videoInputDecoration = document.getElementById("video-input")
+videoInputDecoration.addEventListener("click", (e) => {
+	e.stopPropagation()
+})
+
+// let switchCameraButton = document.getElementById("user-switch-camera-button")
+// switchCameraButton.addEventListener("click", async () => {
+// 	parameter.videoParams.appData.isMicActive = parameter.isAudio
+// 	let isActive = document.getElementById("turn-on-off-camera-icons").classList
+// 	await switchCamera({ parameter })
+// 	if (isActive[1] == "fa-video-slash") {
+// 		cameraButton.classList.replace("button-small-custom-clicked", "button-small-custom")
+// 		isActive.add("fa-video")
+// 		isActive.remove("fa-video-slash")
+// 		turnOffOnCamera({ id: socket.id, status: true })
+// 	}
+// })
 
 let screenSharingButton = document.getElementById("user-screen-share-button")
 screenSharingButton.addEventListener("click", () => {
@@ -24273,7 +24511,12 @@ screenSharingButton.addEventListener("click", () => {
 	}
 })
 
-let recordButton = document.getElementById("user-record-button")
+// let recordButton = document.getElementById("user-record-button")
+// recordButton.addEventListener("click", () => {
+// 	recordVideo({ parameter })
+// })
+
+let recordButton = document.getElementById("record-video")
 recordButton.addEventListener("click", () => {
 	recordVideo({ parameter })
 })
@@ -24692,8 +24935,47 @@ hangUpButton.addEventListener("click", () => {
 })
 
 window.addEventListener("beforeunload", function (event) {
-	window.location.href = window.location.origin
-	socket.close()
+	try {
+		if (parameter.record.recordedStream) {
+			parameter.record.recordedMedia.stopRecording(() => {
+				// socket.send({ type: 'uploading' })
+				timerLayout({ status: false })
+				parameter.record.isRecording = false
+				let blob = parameter.record.recordedMedia.getBlob()
+
+				// require('recordrtc').getSeekableBlob(recordedMediaRef.current.getBlob(), (seekable) => {
+				//     console.log("- SeekableBlob : ", seekable)
+				//     downloadRTC(seekable)
+				// })
+				// downloadRTC(blob)
+				const currentDate = new Date()
+				const formattedDate = currentDate
+					.toLocaleDateString("en-GB", {
+						day: "2-digit",
+						month: "2-digit",
+						year: "numeric",
+					})
+					.replace(/\//g, "") // Remove slashes from the formatted date
+
+				const file = new File([blob], formattedDate, {
+					type: "video/mp4",
+				})
+				require("recordrtc").invokeSaveAsDialog(file, file.name)
+				parameter.record.recordedStream.getTracks().forEach((track) => track.stop())
+				parameter.record.recordedStream = null
+				parameter.record.recordedMedia.reset()
+				parameter.record.recordedMedia = null
+			})
+			let confirmationMessage = "Anda yakin ingin menutup tab ini?"
+			// (Standar) For modern browsers
+			event.returnValue = confirmationMessage
+
+			// (IE) For Internet Explorer
+			return confirmationMessage
+		}
+		window.location.href = window.location.origin
+		socket.close()
+	} catch (error) {}
 })
 
 window.addEventListener("online", function () {
@@ -24722,6 +25004,7 @@ const hideOptionalMenu = () => {
 document.addEventListener("click", function (e) {
 	hideOptionMenu()
 	hideMicOptionsMenu()
+	hideVideoOptionsMenu()
 	const optionalMenus = document.getElementById("optional-button-id")
 	// const micOptionsMenus = this.doctype.getElementById("mic-options")
 	if (window.innerWidth <= 950 && optionalMenuId.className == "optional-button-menu-show" && !optionalMenus.contains(e.target)) {
@@ -24733,4 +25016,4 @@ document.addEventListener("click", function (e) {
 
 module.exports = { socket, parameter }
 
-},{"../room/function":58,"../room/function/initialization":59,"../room/function/mediasoup":60,"../room/function/parameter":61,"../room/ui/button":63,"../room/ui/video":64}]},{},[62]);
+},{"../room/function":58,"../room/function/initialization":59,"../room/function/mediasoup":60,"../room/function/parameter":61,"../room/ui/button":63,"../room/ui/video":64,"recordrtc":51}]},{},[62]);

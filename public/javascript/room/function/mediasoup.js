@@ -1,18 +1,30 @@
 const mediasoupClient = require("mediasoup-client")
 const { createVideo, createAudio, insertVideo, updatingLayout, changeLayout, createAudioVisualizer } = require("../ui/video")
-const { turnOffOnCamera, changeLayoutScreenSharingClient, addMuteAllButton, getMicOptions, videoDisplayModeScreenSharing } = require("../ui/button")
+const {
+	turnOffOnCamera,
+	changeLayoutScreenSharingClient,
+	addMuteAllButton,
+	getMicOptions,
+	videoDisplayModeScreenSharing,
+	getCameraOptions,
+} = require("../ui/button")
 const { createUserList, muteAllParticipants, goToLobby } = require(".")
-const { encodingVP8, encodingsVP9 } = require("../config/mediasoup")
+const { encodingVP8, encodingsVP9, VIDEO_SVC_ENCODINGS } = require("../config/mediasoup")
 
 const getEncoding = ({ parameter }) => {
 	try {
-		const firstVideoCodec = parameter.device.rtpCapabilities.codecs.find((c) => c.kind === "video")
+		// const firstVideoCodec = parameter.device.rtpCapabilities.codecs.find((c) => c.kind === "video")
+		// let mimeType = firstVideoCodec.mimeType.toLowerCase()
+		const firstVideoCodec = parameter.device.rtpCapabilities.codecs.find((c) => c.mimeType.toLowerCase() === "video/vp9")
 		let mimeType = firstVideoCodec.mimeType.toLowerCase()
 		if (mimeType.includes("vp9")) {
-			parameter.videoParams.encodings = encodingsVP9
+			console.log("VP9 Codec")
+			parameter.videoParams.codec = firstVideoCodec
+			parameter.videoParams.encodings = VIDEO_SVC_ENCODINGS
 		} else {
+			console.log("VP8 Codec")
+			// parameter.videoParams.codec = parameter.device.rtpCapabilities.codecs.find((codec) => codec.mimeType.toLowerCase() === "video/vp8")
 			parameter.videoParams.encodings = encodingVP8
-			console.log("not VP9")
 		}
 		return firstVideoCodec
 	} catch (error) {
@@ -86,6 +98,9 @@ const createSendTransport = async ({ socket, parameter }) => {
 				parameter.consumerTransport = parameter.device.createRecvTransport(params)
 
 				parameter.consumerTransport.on("connectionstatechange", async (e) => {
+					if (e === "failed") {
+						window.location.reload()
+					}
 					console.log("- Receiver Transport State : ", e)
 				})
 
@@ -112,6 +127,7 @@ const connectSendTransport = async ({ parameter, socket }) => {
 
 		parameter.audioProducer = await parameter.producerTransport.produce(parameter.audioParams)
 		if (parameter.initialVideo) {
+			// const videoParameter = { ...parameter.videoParams, encodings: encodingsVP9 }
 			parameter.videoProducer = await parameter.producerTransport.produce(parameter.videoParams)
 			await parameter.videoProducer.setMaxSpatialLayer(1)
 			// console.log("- Producer : ", parameter.videoProducer)
@@ -130,6 +146,7 @@ const connectSendTransport = async ({ parameter, socket }) => {
 		}
 
 		await getMicOptions({ parameter, socket })
+		await getCameraOptions({ parameter })
 
 		myData.audio.producerId = parameter.audioProducer.id
 		myData.audio.transportId = parameter.producerTransport.id
@@ -237,7 +254,9 @@ const connectRecvTransport = async ({ parameter, consumerTransport, socket, remo
 						}
 					} else {
 						parameter.totalUsers++
-						parameter.isScreenSharing.screenSharingUserViewTotalPage = Math.ceil(parameter.totalUsers / parameter.isScreenSharing.screenSharingUserViewCurrentDisplay)
+						parameter.isScreenSharing.screenSharingUserViewTotalPage = Math.ceil(
+							parameter.totalUsers / parameter.isScreenSharing.screenSharingUserViewCurrentDisplay
+						)
 						let data = {
 							username: params.username,
 							socketId: params.producerSocketOwner,
@@ -271,7 +290,7 @@ const connectRecvTransport = async ({ parameter, consumerTransport, socket, remo
 						})
 					}
 					if (params.kind == "audio" && params.appData.label == "audio") {
-						createAudio({ id: params.producerSocketOwner, track })
+						createAudio({ id: params.producerSocketOwner, track, parameter })
 						createAudioVisualizer({ id: params.producerSocketOwner, track })
 					}
 					if (params.kind == "video" && params.appData.label == "video") {
@@ -284,7 +303,7 @@ const connectRecvTransport = async ({ parameter, consumerTransport, socket, remo
 						changeLayout({ parameter })
 					}
 					if (params.kind == "audio" && params.appData.label == "screensharingaudio") {
-						createAudio({ id: params.producerSocketOwner + "screensharingaudio", track })
+						createAudio({ id: params.producerSocketOwner + "screensharingaudio", track, parameter })
 					}
 
 					if (parameter.record.isRecording && params.kind == "audio") {

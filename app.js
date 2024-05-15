@@ -4,9 +4,9 @@ const router = require("./routes/index.js")
 const app = express()
 // const port = 3001
 // const port = 1028
-const port = 9188
+// const port = 9188
 // const port = 1028
-// const port = 80
+const port = 80
 const http = require("http")
 const path = require("path")
 const https = require("httpolyglot")
@@ -28,23 +28,23 @@ app.use(express.json())
 app.use(express.static("public"))
 app.use(express.static(path.join(__dirname, "public")))
 
-const httpsServer = https.createServer(options, app)
-httpsServer.listen(port, () => {
-	console.log("App On : " + port)
-})
-const io = new Server(httpsServer, {
-	pingInterval: 5000,
-	pingTimeout: 6000,
-})
-
-// const httpServer = http.createServer(app)
-// httpServer.listen(port, () => {
+// const httpsServer = https.createServer(options, app)
+// httpsServer.listen(port, () => {
 // 	console.log("App On : " + port)
 // })
-// const io = new Server(httpServer, {
+// const io = new Server(httpsServer, {
 // 	pingInterval: 5000,
 // 	pingTimeout: 6000,
 // })
+
+const httpServer = http.createServer(app)
+httpServer.listen(port, () => {
+	console.log("App On : " + port)
+})
+const io = new Server(httpServer, {
+	pingInterval: 7000,
+	pingTimeout: 8000,
+})
 
 let serverParameter = new Server_Parameter()
 let mediasoupParameter = new Mediasoup_Parameter()
@@ -164,7 +164,15 @@ io.on("connection", async (socket) => {
 	})
 
 	socket.on("transport-connect", ({ dtlsParameters }) => {
-		getTransport({ socketId: socket.id, mediasoupParameter }).connect({ dtlsParameters })
+		try {
+			getTransport({ socketId: socket.id, mediasoupParameter })
+				.connect({ dtlsParameters })
+				.catch((error) => {
+					console.log("- Error Connecting Transport : ", error)
+				})
+		} catch (error) {
+			console.log("- Error Connecting Transport Connect : ", error)
+		}
 	})
 
 	socket.on("transport-produce", async ({ kind, rtpParameters, appData, roomName }, callback) => {
@@ -227,7 +235,9 @@ io.on("connection", async (socket) => {
 			const consumerTransport = mediasoupParameter.transports.find(
 				(transportData) => transportData.consumer && transportData.transport.id == serverConsumerTransportId
 			).transport
-			consumerTransport.connect({ dtlsParameters })
+			consumerTransport.connect({ dtlsParameters }).catch((error) => {
+				console.log("- Error Connecting Receiver Transport : ", error)
+			})
 		} catch (error) {
 			console.log("- Error Connecting Transport Receive : ", error)
 		}
@@ -294,6 +304,9 @@ io.on("connection", async (socket) => {
 				mediasoupParameter.consumers = [...mediasoupParameter.consumers, { consumer, roomName, socketId: socket.id, username: producerData.username }]
 
 				callback({ params })
+				// console.log(
+				// 	`- Consumer : ${mediasoupParameter.consumers.length} - Producer : ${mediasoupParameter.producers.length} - Transport : ${mediasoupParameter.transports.length}`
+				// )
 			}
 		} catch (error) {
 			console.log("- Error Consuming : ", error)
@@ -313,42 +326,95 @@ io.on("connection", async (socket) => {
 	})
 
 	socket.on("mic-config", ({ sendTo, isMicActive, id }) => {
-		socket.to(sendTo).emit("mic-config", { isMicActive, id })
+		try {
+			socket.to(sendTo).emit("mic-config", { isMicActive, id })
+		} catch (error) {
+			console.log("- Error Mic Config : ", error)
+		}
 	})
 
 	socket.on("close-producer-from-client", ({ id }) => {
-		let socketId
-		mediasoupParameter.producers.forEach((data) => {
-			if (data.producer.id == id) {
-				data.producer.close()
-				socketId = data.socketId
-			}
-		})
-		let producerData = mediasoupParameter.producers.find((producer) => producer.socketId == socketId && producer.producer.kind == "audio")
-		producerData.producer.appData.isVideoActive = false
-		let removeProducer = serverParameter.allRooms[serverParameter.allUsers[socket.id].roomName].participants.find(
-			(data) => data.socketId == socket.id
-		)
-		removeProducer.producers = removeProducer.producers.filter((data) => data != id)
-		mediasoupParameter.producers = mediasoupParameter.producers.filter((data) => data.producer.id != id)
+		try {
+			let socketId
+			mediasoupParameter.producers.forEach((data) => {
+				if (data.producer.id == id) {
+					data.producer.close()
+					socketId = data.socketId
+				}
+			})
+			let producerData = mediasoupParameter.producers.find((producer) => producer.socketId == socketId && producer.producer.kind == "audio")
+			producerData.producer.appData.isVideoActive = false
+			let removeProducer = serverParameter.allRooms[serverParameter.allUsers[socket.id].roomName].participants.find(
+				(data) => data.socketId == socket.id
+			)
+			removeProducer.producers = removeProducer.producers.filter((data) => data != id)
+			mediasoupParameter.producers = mediasoupParameter.producers.filter((data) => data.producer.id != id)
+		} catch (error) {
+			console.log("- Error Closing Producer From Client : ", error)
+		}
 	})
 
 	socket.on("send-message", (data) => {
-		socket.to(data.sendTo).emit("receive-message", data)
+		try {
+			socket.to(data.sendTo).emit("receive-message", data)
+		} catch (error) {
+			console.log("- Error Send Message : ", error)
+		}
 	})
 
 	socket.on("mute-all", ({ socketId }) => {
-		socket.to(socketId).emit("mute-all", { hostSocketId: socketId })
+		try {
+			socket.to(socketId).emit("mute-all", { hostSocketId: socketId })
+		} catch (error) {
+			console.log("- Error Mute All : ", error)
+		}
 	})
 
 	socket.on("unmute-all", ({ socketId }) => {
-		socket.to(socketId).emit("unmute-all", { message: "Hello World" })
+		try {
+			socket.to(socketId).emit("unmute-all", { message: "Hello World" })
+		} catch (error) {
+			console.log("- Error UnMute All : ", error)
+		}
 	})
 
 	socket.on("change-app-data", ({ data, remoteProducerId }) => {
-		let producerData = mediasoupParameter.producers.find((producer) => producer.producer.id == remoteProducerId)
-		producerData.producer.appData = { ...producerData.producer.appData, ...data }
+		try {
+			let producerData = mediasoupParameter.producers.find((producer) => producer.producer.id == remoteProducerId)
+			producerData.producer.appData = { ...producerData.producer.appData, ...data }
+		} catch (error) {
+			console.log("- Error Change App Data : ", error)
+		}
 	})
+
+	// socket.on("manually-turn-off-video", ({ socketId }) => {
+	// 	// console.log(`- Socket Manual Turn Off : ${socketId}`)
+	// 	// console.log("- Server Parameter : ", serverParameter.allUsers)
+	// 	if (serverParameter?.allUsers[socketId]) {
+	// 		console.log("- Closing Reconnect Network")
+	// 		serverParameter?.allUsers[socketId]?.socket?.disconnect()
+	// 	}
+	// 	// setTimeout(() => {
+	// 	// 	// console.log(serverParameter.allUsers[socketId], "<<<<<<<<<<<")
+	// 	// 	if (serverParameter.allUsers[socketId]) {
+	// 	// 		serverParameter.allUsers[socketId].socket.close()
+	// 	// 		console.log(" ->>>>>>>>>>>>>>",serverParameter.allUsers[socketId].socket.id)
+	// 	// 	}
+	// 	// }, 1000)
+	// })
+})
+
+app.get("/mediasoup", (req, res, next) => {
+	try {
+		const sortedData = {
+			transport: mediasoupParameter.transports.length,
+			producer: mediasoupParameter.producers.length,
+			consumer: mediasoupParameter.consumers.length,
+		}
+		res.send(sortedData)
+	} catch (error) {
+		next(error)
+	}
 })
 
 app.use(router)
