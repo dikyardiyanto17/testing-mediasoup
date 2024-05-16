@@ -22442,18 +22442,21 @@ const getEncoding = ({ parameter }) => {
 	try {
 		// const firstVideoCodec = parameter.device.rtpCapabilities.codecs.find((c) => c.kind === "video")
 		// let mimeType = firstVideoCodec.mimeType.toLowerCase()
-		const firstVideoCodec = parameter.device.rtpCapabilities.codecs.find((c) => c.mimeType.toLowerCase() === "video/vp9")
-		let mimeType = firstVideoCodec.mimeType.toLowerCase()
-		if (mimeType.includes("vp9")) {
+		let supportedCodec = parameter?.device?.rtpCapabilities?.codecs?.find((c) => c.mimeType.toLowerCase() === "video/vp9")
+		let mimeType = supportedCodec?.mimeType?.toLowerCase()
+		// console.log(parameter.device.rtpCapabilities.codecs)
+		// console.log(parameter?.device?.rtpCapabilities?.codecs)
+		if (mimeType?.includes("vp9")) {
 			console.log("VP9 Codec")
-			parameter.videoParams.codec = firstVideoCodec
+			parameter.videoParams.codec = supportedCodec
 			parameter.videoParams.encodings = VIDEO_SVC_ENCODINGS
 		} else {
 			console.log("VP8 Codec")
-			// parameter.videoParams.codec = parameter.device.rtpCapabilities.codecs.find((codec) => codec.mimeType.toLowerCase() === "video/vp8")
+			supportedCodec = parameter.device.rtpCapabilities.codecs.find((c) => c.mimeType.toLowerCase() === "video/vp8")
+			parameter.videoParams.codec = supportedCodec
 			parameter.videoParams.encodings = encodingVP8
 		}
-		return firstVideoCodec
+		return supportedCodec
 	} catch (error) {
 		console.log("- Error Get Encoding : ", error)
 	}
@@ -22465,7 +22468,7 @@ const createDevice = async ({ parameter, socket }) => {
 		await parameter.device.load({
 			routerRtpCapabilities: parameter.rtpCapabilities,
 		})
-		getEncoding({ parameter })
+		await getEncoding({ parameter })
 		await createSendTransport({ socket, parameter })
 	} catch (error) {
 		console.log("- Error Creating Device : ", error)

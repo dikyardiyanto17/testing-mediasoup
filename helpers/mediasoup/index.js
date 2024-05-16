@@ -7,6 +7,14 @@ class Mediasoup_Parameter {
 	consumers = []
 }
 
+const getMediasoupSupportedRTPCapabilities = async () => {
+	try {
+		return await mediasoup.getSupportedRtpCapabilities()
+	} catch (error) {
+		console.log("- Error Getting Mediasoup Supported RTP Capabilities : ", error)
+	}
+}
+
 const createWorker = async () => {
 	try {
 		let worker = await mediasoup.createWorker({
@@ -80,4 +88,4 @@ const informConsumer = ({ roomName, socketId, producerId, mediasoupParameter, se
 		console.log("- Error Informing New Consumer : ", error)
 	}
 }
-module.exports = { createWorker, Mediasoup_Parameter, createWebRtcTransport, getTransport, informConsumer }
+module.exports = { createWorker, Mediasoup_Parameter, createWebRtcTransport, getTransport, informConsumer, getMediasoupSupportedRTPCapabilities }

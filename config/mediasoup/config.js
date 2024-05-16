@@ -90,11 +90,13 @@ const listenInfo = {
 			protocol: "udp",
 			ip: privateIp,
 			announcedIp: publicIp,
+			// port: 1028,
 		},
 		{
 			protocol: "tcp",
 			ip: privateIp,
 			announcedIp: publicIp,
+			// port: 1028,
 		},
 	],
 }

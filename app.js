@@ -17,7 +17,14 @@ const { mediaCodecs, listenInfo } = require("./config/mediasoup/config")
 const { Server_Parameter } = require("./helpers/server_parameters.js")
 const { Room } = require("./helpers/rooms.js")
 const { Users } = require("./helpers/users.js")
-const { createWorker, Mediasoup_Parameter, createWebRtcTransport, getTransport, informConsumer } = require("./helpers/mediasoup/index.js")
+const {
+	createWorker,
+	Mediasoup_Parameter,
+	createWebRtcTransport,
+	getTransport,
+	informConsumer,
+	getMediasoupSupportedRTPCapabilities,
+} = require("./helpers/mediasoup/index.js")
 
 app.use(cors())
 app.set("view engine", "ejs")
@@ -304,9 +311,6 @@ io.on("connection", async (socket) => {
 				mediasoupParameter.consumers = [...mediasoupParameter.consumers, { consumer, roomName, socketId: socket.id, username: producerData.username }]
 
 				callback({ params })
-				// console.log(
-				// 	`- Consumer : ${mediasoupParameter.consumers.length} - Producer : ${mediasoupParameter.producers.length} - Transport : ${mediasoupParameter.transports.length}`
-				// )
 			}
 		} catch (error) {
 			console.log("- Error Consuming : ", error)
