@@ -64,4 +64,9 @@ function startCarousel() {
 	setInterval(nextSlide, 5000) // Change slide every 5 seconds (adjust the interval as needed)
 }
 
+document.addEventListener('DOMContentLoaded', (e) => {
+	document.getElementById("loading-id").className = "loading-hide"
+})
+
+
 startCarousel()

@@ -177,7 +177,7 @@
             background-color: black;
             position: relative;
             transition: 1s;
-            border: 1px solid white ;
+            border: 1px solid white;
         }
 
         .user-video-container-1 {
@@ -1237,6 +1237,7 @@
             bottom: 40px;
             color: #fff;
             border-radius: 10px;
+            border: 1px solid white;
         }
 
         #option-menu>ul {
@@ -1254,6 +1255,7 @@
         #option-menu>ul>li:hover {
             background-color: rgba(68, 71, 74, 1);
             border-radius: 10px;
+            border: 1px solid white;
         }
 
         #alert-error {
@@ -1474,12 +1476,117 @@
         .option-menus-font-size {
             font-size: 13px;
         }
+
+        .performance-setting {
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.664);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: absolute;
+            z-index: 2;
+        }
+
+        .performance-box {
+            border-radius: 20px;
+            background-color: rgba(0, 0, 0, 0.653);
+            width: 50%;
+            border: 1px solid white;
+            display: flex;
+            justify-content: space-around;
+            flex-direction: column;
+            align-items: center;
+            color: white;
+            padding: 40px;
+            transition: 1s;
+        }
+
+        .performance-box-hide {
+            display: none;
+            transition: 1s;
+        }
+
+        .video-quality-text {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            padding: 20px;
+        }
+
+        .video-quality-control {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .quality-title {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+
+        .video-quality-box-input {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .video-quality-confirm-button {
+            width: 100%;
+            display: flex;
+            flex-direction: row-reverse;
+        }
     </style>
 </head>
 
 <body>
     <div id="full-container">
         <section id="new-user-join-notification-container">
+        </section>
+        <section id="performance-setting-id" class="performance-box-hide">
+            <div class="performance-box">
+                <div class="quality-title">
+                    <h1>Performance Quality</h1>
+                </div>
+                <br />
+                <div class="quality-title">
+                    <h3>Up Stream</h3>
+                </div>
+                <div class="video-quality-control">
+                    <div class="video-quality-text">
+                        <h4>Low</h4>
+                        <h4>High</h4>
+                    </div>
+                    <div class="video-quality-box-input">
+                        <input type="range" class="form-range" value="1" min="0" max="2" id="video-quality-input-up-stream"
+                            style="width: 80%;" />
+                    </div>
+                </div>
+                <br />
+                <div class="quality-title">
+                    <h3>Down Stream</h3>
+                </div>
+                <div class="video-quality-control">
+                    <div class="video-quality-text">
+                        <h4>Low</h4>
+                        <h4>High</h4>
+                    </div>
+                    <div class="video-quality-box-input">
+                        <input type="range" class="form-range" value="1" min="0" max="2" id="video-quality-input-down-stream"
+                            style="width: 80%;" />
+                    </div>
+                </div>
+                <br />
+                <br />
+                <div class="video-quality-confirm-button">
+                    <button class="btn btn-primary" id="video-quality-confirm-button-id">Confirm</button>
+                </div>
+            </div>
         </section>
         <span id="alert-error"></span>
         <section id="upper-container">
@@ -1572,6 +1679,7 @@
                     <ul id="all-option-menu">
                         <li id="stay-tuned" class="option-menus-font-size">Stay Tuned For New Feature</li>
                         <li id="record-video" class="option-menus-font-size">Record Video</li>
+                        <li id="video-quality" class="option-menus-font-size">Video Quality</li>
                     </ul>
                 </div>
                 <span id="option-button-tooltip">Settings</span>

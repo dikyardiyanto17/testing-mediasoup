@@ -301,6 +301,7 @@ cameraButton.addEventListener("click", async () => {
 			isActive.add("fa-video")
 			isActive.remove("fa-video-slash")
 			parameter.videoProducer = await parameter.producerTransport.produce(parameter.videoParams)
+			await parameter.videoProducer.setMaxSpatialLayer(parameter.upStreamQuality)
 			if (!myData.video) {
 				myData.video = {
 					isActive: true,
@@ -390,6 +391,12 @@ screenSharingButton.addEventListener("click", () => {
 let recordButton = document.getElementById("record-video")
 recordButton.addEventListener("click", () => {
 	recordVideo({ parameter })
+})
+
+let videoQualityButton = document.getElementById("video-quality")
+
+videoQualityButton.addEventListener("click", () => {
+	document.getElementById("performance-setting-id").className = "performance-setting"
 })
 
 let shareButton = document.getElementById("share-link-button")
@@ -802,6 +809,63 @@ hangUpButton.addEventListener("click", () => {
 		window.location.href = window.location.origin
 	} catch (error) {
 		console.log("- Error At Hang Up Button : ", error)
+	}
+})
+
+const videoUpStreamSettingInput = document.getElementById("video-quality-input-up-stream")
+const videoDownStreamSettingInput = document.getElementById("video-quality-input-down-stream")
+const videoQualityConfirmButton = document.getElementById("video-quality-confirm-button-id")
+videoQualityConfirmButton.addEventListener("click", () => {
+	try {
+		document.getElementById("performance-setting-id").className = "performance-box-hide"
+	} catch (error) {
+		console.log("- Error Closing Video Quality Settings : ", error)
+	}
+})
+
+videoUpStreamSettingInput.addEventListener("input", async () => {
+	try {
+		if (typeof videoUpStreamSettingInput.value == "string") {
+			const inputStringToNumber = Number(videoUpStreamSettingInput.value)
+			parameter.upStreamQuality = inputStringToNumber
+			if (parameter.videoProducer) {
+				await parameter.videoProducer.setMaxSpatialLayer(parameter.upStreamQuality)
+			}
+		} else if (typeof videoUpStreamSettingInput.value == "number") {
+			parameter.upStreamQuality = videoUpStreamSettingInput.value
+			if (parameter.videoProducer) {
+				await parameter.videoProducer.setMaxSpatialLayer(parameter.upStreamQuality)
+			}
+		} else {
+			throw { name: "Invalid Input", message: "Input is not number" }
+		}
+	} catch (error) {
+		console.log("- Error Changing Up Stream : ", error)
+	}
+})
+
+videoDownStreamSettingInput.addEventListener("input", async () => {
+	try {
+		if (typeof videoDownStreamSettingInput.value == "string") {
+			const inputStringToNumber = Number(videoDownStreamSettingInput.value)
+			parameter.downStreamQuality = inputStringToNumber
+			parameter.allUsers.forEach((user) => {
+				if (user.socketId != socket.id) {
+					socket.emit("set-consumer-quality", { consumerId: user.video.consumerId, SL: parameter.downStreamQuality, TL: 2 })
+				}
+			})
+		} else if (typeof videoDownStreamSettingInput.value == "number") {
+			parameter.downStreamQuality = videoDownStreamSettingInput.value
+			parameter.allUsers.forEach((user) => {
+				if (user.socketId != socket.id) {
+					socket.emit("set-consumer-quality", { consumerId: user.video.consumerId, SL: parameter.downStreamQuality, TL: 2 })
+				}
+			})
+		} else {
+			throw { name: "Invalid Input", message: "Input is not number" }
+		}
+	} catch (error) {
+		console.log("- Error : ", error)
 	}
 })
 

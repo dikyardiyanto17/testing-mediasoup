@@ -64,17 +64,32 @@ let params = {
 
 let encodingsVP9 = [{ scalabilityMode: "S3T3" }]
 
-let encodingVP8 = [
-	{ scaleResolutionDownBy: 4, maxBitRate: 125000, maxFramerate: 60 },
-	{ scaleResolutionDownBy: 2, maxBitRate: 150000, maxFramerate: 60 },
-	{ scaleResolutionDownBy: 1, maxBitRate: 200000, maxFramerate: 60 },
-]
-
 // let encodingVP8 = [
-// 	{ rid: "r0", active: true, maxBitrate: 100000 },
-// 	{ rid: "r1", active: true, maxBitrate: 300000 },
-// 	{ rid: "r2", active: true, maxBitrate: 900000 },
+// 	{
+// 		scaleResolutionDownBy: 4,
+// 		maxBitrate: 100000,
+// 		rid: "r0",
+
+// 	},
+// 	{
+// 		scaleResolutionDownBy: 2,
+// 		maxBitrate: 300000,
+// 		rid: "r1",
+
+// 	},
+// 	{
+// 		scaleResolutionDownBy: 1,
+// 		maxBitrate: 500000,
+// 		rid: "r2",
+
+// 	},
 // ]
+
+let encodingVP8 = [
+	{ scaleResolutionDownBy: 4, scalabilityMode: "L1T3", maxBitrate: 100000 },
+	{ scaleResolutionDownBy: 2, scalabilityMode: "L1T3", maxBitrate: 300000 },
+	{ scaleResolutionDownBy: 1, scalabilityMode: "L1T3", maxBitrate: 600000 },
+]
 
 let audioParams = {
 	codecOptions: {

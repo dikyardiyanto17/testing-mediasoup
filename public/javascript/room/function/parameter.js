@@ -58,6 +58,8 @@ class Parameters {
 	offsetY
 	isDragging = false
 	userVideoElements = []
+	upStreamQuality = 1
+	downStreamQuality = 1
 }
 
 module.exports = { Parameters }

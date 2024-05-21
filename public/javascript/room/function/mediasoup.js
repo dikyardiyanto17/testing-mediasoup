@@ -10,24 +10,25 @@ const {
 } = require("../ui/button")
 const { createUserList, muteAllParticipants, goToLobby } = require(".")
 const { encodingVP8, encodingsVP9, VIDEO_SVC_ENCODINGS } = require("../config/mediasoup")
-
+const UrlParse = require("url-parse")
 const getEncoding = ({ parameter }) => {
 	try {
+		const urlParser = new UrlParse(window.location.href, true)
 		// const firstVideoCodec = parameter.device.rtpCapabilities.codecs.find((c) => c.kind === "video")
 		// let mimeType = firstVideoCodec.mimeType.toLowerCase()
-		let supportedCodec = parameter?.device?.rtpCapabilities?.codecs?.find((c) => c.mimeType.toLowerCase() === "video/vp9")
+		let supportedCodec = parameter?.device?.rtpCapabilities?.codecs?.find((c) => c.mimeType.toLowerCase() === "video/vp8")
 		let mimeType = supportedCodec?.mimeType?.toLowerCase()
 		// console.log(parameter.device.rtpCapabilities.codecs)
 		// console.log(parameter?.device?.rtpCapabilities?.codecs)
-		if (mimeType?.includes("vp9")) {
+		if (mimeType?.includes("vp8")) {
+			console.log("VP8 Codec")
+			parameter.videoParams.codec = undefined
+			parameter.videoParams.encodings = encodingVP8
+		} else {
 			console.log("VP9 Codec")
+			supportedCodec = parameter.device.rtpCapabilities.codecs.find((c) => c.mimeType.toLowerCase() === "video/vp9")
 			parameter.videoParams.codec = supportedCodec
 			parameter.videoParams.encodings = VIDEO_SVC_ENCODINGS
-		} else {
-			console.log("VP8 Codec")
-			supportedCodec = parameter.device.rtpCapabilities.codecs.find((c) => c.mimeType.toLowerCase() === "video/vp8")
-			parameter.videoParams.codec = supportedCodec
-			parameter.videoParams.encodings = encodingVP8
 		}
 		return supportedCodec
 	} catch (error) {
@@ -132,7 +133,6 @@ const connectSendTransport = async ({ parameter, socket }) => {
 		if (parameter.initialVideo) {
 			// const videoParameter = { ...parameter.videoParams, encodings: encodingsVP9 }
 			parameter.videoProducer = await parameter.producerTransport.produce(parameter.videoParams)
-			await parameter.videoProducer.setMaxSpatialLayer(1)
 			// console.log("- Producer : ", parameter.videoProducer)
 			myData.video.producerId = parameter.videoProducer.id
 			myData.video.transportId = parameter.producerTransport.id
@@ -146,6 +146,8 @@ const connectSendTransport = async ({ parameter, socket }) => {
 				window.location.reload()
 				console.log("video transport ended")
 			})
+
+			await parameter.videoProducer.setMaxSpatialLayer(parameter.upStreamQuality)
 		}
 
 		await getMicOptions({ parameter, socket })
@@ -251,7 +253,7 @@ const connectRecvTransport = async ({ parameter, consumerTransport, socket, remo
 						isUserExist[params.appData.label] = {
 							track,
 							isActive: params?.appData?.isActive,
-							consumserId: consumer.id,
+							consumerId: consumer.id,
 							producerId: remoteProducerId,
 							transportId: consumerTransport.id,
 						}
@@ -268,7 +270,7 @@ const connectRecvTransport = async ({ parameter, consumerTransport, socket, remo
 						data[params.appData.label] = {
 							track,
 							isActive: params.appData.isActive,
-							consumserId: consumer.id,
+							consumerId: consumer.id,
 							producerId: remoteProducerId,
 							transportId: consumerTransport.id,
 						}
@@ -328,7 +330,7 @@ const connectRecvTransport = async ({ parameter, consumerTransport, socket, remo
 						},
 					]
 
-					socket.emit("consumer-resume", { serverConsumerId: params.serverConsumerId })
+					socket.emit("consumer-resume", { serverConsumerId: params.serverConsumerId, SL: parameter.downStreamQuality, TL: 2 })
 				} catch (error) {
 					console.log("- Error Consuming : ", error)
 				}

@@ -1,10 +1,9 @@
 let localVideo = document.getElementById("local-video")
 let localStream
 
-// let baseUrl = "https://modotz.net/"
-// let baseUrl = 'https://meet.dikyardiyanto.site/'
-// let baseUrl = "https://localhost:3001/"
 const baseUrl = `${window.location.origin}/`
+
+const Swal = require("sweetalert2")
 
 const joinRoom = document.getElementById("join-room")
 const url = window.location.pathname
@@ -44,13 +43,11 @@ const init = async () => {
 		localStream = stream
 		localVideo.srcObject = stream
 	} catch (error) {
-		let ae = document.getElementById("alert-error")
-		ae.className = "show"
-		ae.innerHTML = `Error : ${error.message}`
-		setTimeout(() => {
-			ae.className = ae.className.replace("show", "")
-			ae.innerHTML = ``
-		}, 3000)
+		Swal.fire({
+			icon: "error",
+			title: "Oops...",
+			text: error.message,
+		})
 		console.log(error.message)
 	}
 }
@@ -81,14 +78,11 @@ const getMyMic = async () => {
 		localStorage.setItem("audioDevices", audioDevices)
 		localStorage.setItem("selectedAudioDevices", audioDevices[0].deviceId)
 	} catch (error) {
-		let ae = document.getElementById("alert-error")
-		ae.className = "show"
-		ae.innerHTML = `Error : ${error.message}`
-		// Show Warning
-		setTimeout(() => {
-			ae.className = ae.className.replace("show", "")
-			ae.innerHTML = ``
-		}, 3000)
+		Swal.fire({
+			icon: "error",
+			title: "Oops...",
+			text: error.message,
+		})
 		console.log(error.message)
 	}
 }
@@ -149,14 +143,11 @@ const getMyDevices = async (config) => {
 		localStorage.setItem("videoDevices", videoDevices)
 		localStorage.setItem("selectedVideoDevices", videoDevices[0].deviceId)
 	} catch (error) {
-		let ae = document.getElementById("alert-error")
-		ae.className = "show"
-		ae.innerHTML = `Error : ${error.message}`
-		// Show Warning
-		setTimeout(() => {
-			ae.className = ae.className.replace("show", "")
-			ae.innerHTML = ``
-		}, 3000)
+		Swal.fire({
+			icon: "error",
+			title: "Oops...",
+			text: error.message,
+		})
 		console.log(error.message)
 	}
 }
@@ -210,12 +201,11 @@ joinRoom.addEventListener("submit", (e) => {
 	const userName = document.getElementById("username").value
 
 	if (!userName) {
-		let au = document.getElementById("alert-username")
-		au.className = "show"
-		// Show Warning
-		setTimeout(() => {
-			au.className = au.className.replace("show", "")
-		}, 3000)
+		Swal.fire({
+			icon: "error",
+			title: "Oops...",
+			text: "Your username is empty",
+		})
 		return
 	}
 
@@ -403,14 +393,11 @@ init()
 const handleCredentialResponse = async (response) => {
 	try {
 		if (!isReady.video || !isReady.audio) {
-			let ae = document.getElementById("alert-error")
-			ae.className = "show"
-			ae.innerHTML = `Your stream is not ready`
-			// Show Warning
-			setTimeout(() => {
-				ae.className = ae.className.replace("show", "")
-				ae.innerHTML = ``
-			}, 3000)
+			Swal.fire({
+				icon: "error",
+				title: "Oops...",
+				text: "Your stream is not ready!",
+			})
 			return
 		}
 		const result = await fetch(baseUrl + "google-auth", {
@@ -441,6 +428,7 @@ window.onload = () => {
 		callback: handleCredentialResponse,
 	})
 	google.accounts.id.prompt() // also display the One Tap dialog
+	// document.getElementById("loading-id").className = "loading-hide"
 }
 
 window.handleCredentialResponse = async (response) => {

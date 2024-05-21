@@ -21,7 +21,7 @@
             width: 100vw;
             height: 100vh;
             display: flex;
-            flex-wrap: wrap ;
+            flex-wrap: wrap;
         }
 
         .left-bar {
@@ -92,30 +92,47 @@
             font-size: 20px;
             font-weight: bold;
         }
+
         .text-content-2 {
             font-size: 15px;
             margin: 0;
         }
+
         .carousel {
             display: none;
         }
+
         .hide {
             animation-name: slideleft;
             animation-duration: 5s;
         }
+
         .active {
             display: block;
             animation-name: slideleft2;
             animation-duration: 5s;
         }
+
         @keyframes slideleft {
-            0% {left: 0%;}
-            25% {left: -100%;}
+            0% {
+                left: 0%;
+            }
+
+            25% {
+                left: -100%;
+            }
         }
+
         @keyframes slideleft2 {
-            0% {left: 100%;}
-            25% {left: 0%;}
+            0% {
+                left: 100%;
+            }
+
+            25% {
+                left: 0%;
+            }
         }
+
         #left-button {
             position: absolute;
             left: 30px;
@@ -124,6 +141,7 @@
             border: none;
             background: none;
         }
+
         #right-button {
             position: absolute;
             right: 30px;
@@ -132,7 +150,8 @@
             border: none;
             background: none;
         }
-        .carousel-image{
+
+        .carousel-image {
             margin-left: auto;
             margin-right: auto;
             width: 50%;
@@ -151,34 +170,59 @@
         .button-custom-new-meeting {
             height: 40px;
         }
+
+        .loading-show {
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(3, 3, 3, 0.299);
+            position: absolute;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .loading-hide {
+            display: none;
+        }
     </style>
 </head>
 
 <body>
     <div class="full-container">
+        <div id="loading-id" class="loading-show">
+            <img src="/assets/pictures/loading.svg" alt="loading-bar"/>
+        </div>
         <section class="left-bar text-center">
-            <img class="icons-meet" src="/assets/pictures/icons-meeting.png"/>
+            <img class="icons-meet" src="/assets/pictures/icons-meeting.png" />
             <div>
                 <p class="text-title">Free Video Meeting For Everyone!</p>
-                <p class="text-content">Welcome to the future of virtual collaboration! Our Conference Video Meeting platform is your gateway to seamless, face-to-face interactions no matter where you are in the world.</p>
+                <p class="text-content">Welcome to the future of virtual collaboration! Our Conference Video Meeting
+                    platform is your gateway to seamless, face-to-face interactions no matter where you are in the
+                    world.</p>
                 <!-- <p class="text-content">Our mission is to redefine the way we connect, learn, and work by providing a user-friendly, secure, and dynamic virtual meeting experience.</p> -->
                 <form id="join-form" class="join-form-container">
                     <button id="new-meeting" type="button" class="btn btn-primary">New Meeting</button>
-                    <input id="room-id" type='text' class='m-1 form-control join-form'/>
+                    <input id="room-id" type='text' class='m-1 form-control join-form' />
                     <button disabled type='submit' class='btn btn-info m-1' id="button-submit-room-id">JOIN</button>
                 </form>
             </div>
         </section>
         <section class="right-bar" id="right-bar-id">
             <div class="carousel active">
-                <lottie-player class="carousel-image" src="https://lottie.host/09a64aad-0838-455d-9698-7da751338c41/Vqt0kRofgZ.json" background="transparent" speed="1" style="width: 300px; height: 300px;" loop autoplay></lottie-player>
+                <lottie-player class="carousel-image"
+                    src="https://lottie.host/09a64aad-0838-455d-9698-7da751338c41/Vqt0kRofgZ.json"
+                    background="transparent" speed="1" style="width: 300px; height: 300px;" loop
+                    autoplay></lottie-player>
                 <!-- <img class="join-image" src="/assets/pictures/Join.png" /> -->
                 <p class="text-content-1">Join Meeting Room For Free</p>
                 <p class="text-content-2">You can meet everyone for free!</p>
                 <p class="text-content-2">Enter your room id to meet your family, friends and colleagues</p>
             </div>
             <div class="carousel">
-                <lottie-player class="carousel-image" src="https://lottie.host/f27d41d1-223d-47e8-9dea-97bd1204accc/NHd7LZi2Hk.json" background="transparent" speed="1" style="width: 300px; height: 300px;" loop autoplay></lottie-player>
+                <lottie-player class="carousel-image"
+                    src="https://lottie.host/f27d41d1-223d-47e8-9dea-97bd1204accc/NHd7LZi2Hk.json"
+                    background="transparent" speed="1" style="width: 300px; height: 300px;" loop
+                    autoplay></lottie-player>
                 <p class="text-content-1">Reunite with your family, friends and colleagues</p>
                 <p class="text-content-2">Distance is no longer problem to continue your activities</p>
             </div>

@@ -184,6 +184,7 @@ io.on("connection", async (socket) => {
 
 	socket.on("transport-produce", async ({ kind, rtpParameters, appData, roomName }, callback) => {
 		try {
+			rtpParameters.rtcp = { reducedSize: true }
 			const producer = await getTransport({ socketId: socket.id, mediasoupParameter }).produce({
 				kind,
 				rtpParameters,
@@ -317,12 +318,13 @@ io.on("connection", async (socket) => {
 		}
 	})
 
-	socket.on("consumer-resume", async ({ serverConsumerId }) => {
+	socket.on("consumer-resume", async ({ serverConsumerId, SL, TL }) => {
 		try {
 			const getConsumer = mediasoupParameter.consumers.find((consumerData) => consumerData.consumer.id === serverConsumerId)
 			if (getConsumer) {
 				const { consumer } = getConsumer
 				await consumer.resume()
+				await consumer.setPreferredLayers({ spatialLayer: SL, temporalLayer: TL })
 			}
 		} catch (error) {
 			console.log("- Error Resuming Consumer : ", error)
@@ -388,6 +390,20 @@ io.on("connection", async (socket) => {
 			producerData.producer.appData = { ...producerData.producer.appData, ...data }
 		} catch (error) {
 			console.log("- Error Change App Data : ", error)
+		}
+	})
+
+	socket.on("set-consumer-quality", async ({ consumerId, SL, TL }) => {
+		try {
+			mediasoupParameter.consumers.forEach((consumer) => {
+				if (consumer.consumer.id == consumerId) {
+					const { spatialLayer, temporalLayer } = consumer.consumer.currentLayers
+					console.log(spatialLayer, temporalLayer)
+					consumer.consumer.setPreferredLayers({ spatialLayer: SL, temporalLayer: TL })
+				}
+			})
+		} catch (error) {
+			console.log("- Error Set Consumer Quality : ", error)
 		}
 	})
 
