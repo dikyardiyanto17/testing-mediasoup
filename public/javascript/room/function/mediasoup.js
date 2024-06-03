@@ -10,7 +10,6 @@ const {
 } = require("../ui/button")
 const { createUserList, muteAllParticipants, goToLobby } = require(".")
 const { encodingVP8, encodingsVP9, VIDEO_SVC_ENCODINGS } = require("../config/mediasoup")
-const UrlParse = require("url-parse")
 const getEncoding = ({ parameter }) => {
 	try {
 		// const firstVideoCodec = parameter.device.rtpCapabilities.codecs.find((c) => c.kind === "video")
