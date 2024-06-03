@@ -13,24 +13,18 @@ const { encodingVP8, encodingsVP9, VIDEO_SVC_ENCODINGS } = require("../config/me
 const UrlParse = require("url-parse")
 const getEncoding = ({ parameter }) => {
 	try {
-		const urlParser = new UrlParse(window.location.href, true)
 		// const firstVideoCodec = parameter.device.rtpCapabilities.codecs.find((c) => c.kind === "video")
-		// let mimeType = firstVideoCodec.mimeType.toLowerCase()
-		let supportedCodec = parameter?.device?.rtpCapabilities?.codecs?.find((c) => c.mimeType.toLowerCase() === "video/vp8")
-		let mimeType = supportedCodec?.mimeType?.toLowerCase()
-		// console.log(parameter.device.rtpCapabilities.codecs)
-		// console.log(parameter?.device?.rtpCapabilities?.codecs)
-		if (mimeType?.includes("vp8")) {
-			console.log("VP8 Codec")
-			parameter.videoParams.codec = undefined
-			parameter.videoParams.encodings = encodingVP8
+		const firstVideoCodec = parameter.device.rtpCapabilities.codecs.find((c) => c.mimeType.toLowerCase() === "video/vp9")
+		let mimeType = firstVideoCodec?.mimeType?.toLowerCase()
+		if (mimeType.includes("vp9")) {
+			console.log("- Encoding VP 9")
+			parameter.videoParams.codec = firstVideoCodec
+			parameter.videoParams.encodings = encodingsVP9
 		} else {
-			console.log("VP9 Codec")
-			supportedCodec = parameter.device.rtpCapabilities.codecs.find((c) => c.mimeType.toLowerCase() === "video/vp9")
-			parameter.videoParams.codec = supportedCodec
-			parameter.videoParams.encodings = VIDEO_SVC_ENCODINGS
+			console.log("- Encoding VP 8")
+			parameter.videoParams.encodings = encodingVP8
 		}
-		return supportedCodec
+		return firstVideoCodec
 	} catch (error) {
 		console.log("- Error Get Encoding : ", error)
 	}
