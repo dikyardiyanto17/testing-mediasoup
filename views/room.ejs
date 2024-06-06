@@ -1541,6 +1541,22 @@
             display: flex;
             flex-direction: row-reverse;
         }
+
+        .text-to-speech {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1;
+            width: 80%;
+            min-height: 50px;
+            height: 50px;
+            background-color: #0000006a;
+        }
+
+        .text-to-speech-hide {
+            display: none;
+        }
     </style>
 </head>
 
@@ -1563,8 +1579,8 @@
                         <h4>High</h4>
                     </div>
                     <div class="video-quality-box-input">
-                        <input type="range" class="form-range" value="1" min="0" max="2" id="video-quality-input-up-stream"
-                            style="width: 80%;" />
+                        <input type="range" class="form-range" value="1" min="0" max="2"
+                            id="video-quality-input-up-stream" style="width: 80%;" />
                     </div>
                 </div>
                 <br />
@@ -1577,8 +1593,8 @@
                         <h4>High</h4>
                     </div>
                     <div class="video-quality-box-input">
-                        <input type="range" class="form-range" value="1" min="0" max="2" id="video-quality-input-down-stream"
-                            style="width: 80%;" />
+                        <input type="range" class="form-range" value="1" min="0" max="2"
+                            id="video-quality-input-down-stream" style="width: 80%;" />
                     </div>
                 </div>
                 <br />
@@ -1590,6 +1606,9 @@
         </section>
         <span id="alert-error"></span>
         <section id="upper-container">
+            <section id="text-to-speech-id" class="text-to-speech">
+                <p id="text-to-speech-result" style="color: white; cursor: pointer; white-space: pre-line;"></p>
+            </section>
             <div id="audio-collection"></div>
             <div id="video-container">
             </div>
@@ -1680,6 +1699,11 @@
                         <li id="stay-tuned" class="option-menus-font-size">Stay Tuned For New Feature</li>
                         <li id="record-video" class="option-menus-font-size">Record Video</li>
                         <li id="video-quality" class="option-menus-font-size">Video Quality</li>
+                        <li id="display-cc" class="option-menus-font-size">Hide CC</li>
+                        <li id="rename" class="option-menus-font-size" style="display: flex; align-items: center;">
+                            Rename: &nbsp;<span><input id="rename-input"
+                                    style="max-width: 100px; background-color: transparent; border: none; color: white;"
+                                    type="text" />&nbsp;<i id="submit-rename" class="fas fa-edit fa-lg"></i></span></li>
                     </ul>
                 </div>
                 <span id="option-button-tooltip">Settings</span>

@@ -1,5 +1,6 @@
 let localVideo = document.getElementById("local-video")
 let localStream
+const loading = document.getElementById("loading-id")
 
 const baseUrl = `${window.location.origin}/`
 
@@ -22,6 +23,7 @@ const everythingIsReady = () => {
 		const videoButton = document.getElementById("select-video-button")
 		const videoDropdownButton = document.getElementById("dropdownMenuButton-video")
 		const audioDropdownButton = document.getElementById("dropdownMenuButton-audio")
+		loading.className = "loading-hide"
 		googleButton.removeAttribute("style")
 		videoDropdownButton.removeAttribute("disabled")
 		audioDropdownButton.removeAttribute("disabled")
@@ -211,7 +213,10 @@ joinRoom.addEventListener("submit", (e) => {
 
 	const newURL = window.location.origin + "/" + goTo
 
+	loading.className = "loading-show"
+
 	setTimeout(() => {
+		loading.className = "loading-hide"
 		window.location.href = newURL
 	}, 1000)
 })
@@ -400,6 +405,7 @@ const handleCredentialResponse = async (response) => {
 			})
 			return
 		}
+		loading.className = "loading-show"
 		const result = await fetch(baseUrl + "google-auth", {
 			method: "POST",
 			headers: {
@@ -414,7 +420,9 @@ const handleCredentialResponse = async (response) => {
 		localStorage.setItem("picture", resultData.picture)
 
 		const newURL = window.location.origin + "/" + goTo
+		loading.className = "loading-show"
 		setTimeout(() => {
+			loading.className = "loading-hide"
 			window.location.href = newURL
 		}, 1000)
 	} catch (error) {
@@ -433,6 +441,7 @@ window.onload = () => {
 
 window.handleCredentialResponse = async (response) => {
 	try {
+		loading.className = "loading-show"
 		const result = await fetch(baseUrl + "google-auth", {
 			method: "POST",
 			headers: {
@@ -448,6 +457,7 @@ window.handleCredentialResponse = async (response) => {
 
 		const newURL = window.location.origin + "/" + goTo
 		setTimeout(() => {
+			loading.className = "loading-hide"
 			window.location.href = newURL
 		}, 1000)
 	} catch (error) {

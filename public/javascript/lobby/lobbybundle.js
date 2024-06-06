@@ -1,6 +1,6 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 /*!
-* sweetalert2 v11.11.0
+* sweetalert2 v11.10.8
 * Released under the MIT License.
 */
 (function (global, factory) {
@@ -4600,7 +4600,7 @@
     };
   });
   SweetAlert.DismissReason = DismissReason;
-  SweetAlert.version = '11.11.0';
+  SweetAlert.version = '11.10.8';
 
   var Swal = SweetAlert;
   // @ts-ignore
@@ -4614,6 +4614,7 @@ if (typeof this !== 'undefined' && this.Sweetalert2){this.swal = this.sweetAlert
 },{}],2:[function(require,module,exports){
 let localVideo = document.getElementById("local-video")
 let localStream
+const loading = document.getElementById("loading-id")
 
 const baseUrl = `${window.location.origin}/`
 
@@ -4636,6 +4637,7 @@ const everythingIsReady = () => {
 		const videoButton = document.getElementById("select-video-button")
 		const videoDropdownButton = document.getElementById("dropdownMenuButton-video")
 		const audioDropdownButton = document.getElementById("dropdownMenuButton-audio")
+		loading.className = "loading-hide"
 		googleButton.removeAttribute("style")
 		videoDropdownButton.removeAttribute("disabled")
 		audioDropdownButton.removeAttribute("disabled")
@@ -4825,7 +4827,10 @@ joinRoom.addEventListener("submit", (e) => {
 
 	const newURL = window.location.origin + "/" + goTo
 
+	loading.className = "loading-show"
+
 	setTimeout(() => {
+		loading.className = "loading-hide"
 		window.location.href = newURL
 	}, 1000)
 })
@@ -5014,6 +5019,7 @@ const handleCredentialResponse = async (response) => {
 			})
 			return
 		}
+		loading.className = "loading-show"
 		const result = await fetch(baseUrl + "google-auth", {
 			method: "POST",
 			headers: {
@@ -5028,7 +5034,9 @@ const handleCredentialResponse = async (response) => {
 		localStorage.setItem("picture", resultData.picture)
 
 		const newURL = window.location.origin + "/" + goTo
+		loading.className = "loading-show"
 		setTimeout(() => {
+			loading.className = "loading-hide"
 			window.location.href = newURL
 		}, 1000)
 	} catch (error) {
@@ -5047,6 +5055,7 @@ window.onload = () => {
 
 window.handleCredentialResponse = async (response) => {
 	try {
+		loading.className = "loading-show"
 		const result = await fetch(baseUrl + "google-auth", {
 			method: "POST",
 			headers: {
@@ -5062,6 +5071,7 @@ window.handleCredentialResponse = async (response) => {
 
 		const newURL = window.location.origin + "/" + goTo
 		setTimeout(() => {
+			loading.className = "loading-hide"
 			window.location.href = newURL
 		}, 1000)
 	} catch (error) {

@@ -1,6 +1,6 @@
 const RecordRTC = require("recordrtc")
 const { timerLayout, muteAllParticipants, unlockAllMic, changeAppData, changeUserListMicIcon } = require("../../function")
-const { updatingLayout, changeLayout, createAudioVisualizer } = require("../video")
+const { updatingLayout, changeLayout, createAudioVisualizer, startSpeechToText } = require("../video")
 
 const changeMic = ({ parameter, socket, status }) => {
 	parameter.allUsers.forEach((data) => {
@@ -107,11 +107,11 @@ const switchMicrophone = async ({ parameter, deviceId, socket }) => {
 
 const changeMicCondition = ({ parameter, socket, status }) => {
 	try {
-		console.log("- Mic Condition : ", parameter.audioParams.appData.isActive, " - ", parameter.audioParams.appData.isActive)
 		const micButton = document.getElementById("user-mic-button")
 		let myIconMic = document.getElementById(`user-mic-${socket.id}`)
 		let user = parameter.allUsers.find((data) => data.socketId == socket.id)
 		if (!status) {
+			startSpeechToText({ parameter, socket, status: false })
 			parameter.localStream.getAudioTracks()[0].enabled = false
 			parameter.isAudio = false
 			changeAppData({
@@ -138,6 +138,7 @@ const changeMicCondition = ({ parameter, socket, status }) => {
 				}, 3000)
 				return
 			}
+			startSpeechToText({ parameter, socket, status: true })
 			parameter.localStream.getAudioTracks()[0].enabled = true
 			parameter.isAudio = true
 			changeAppData({
@@ -482,16 +483,16 @@ const changeLayoutScreenSharing = ({ parameter, status }) => {
 		// slideUserVideoButton({ status: false })
 
 		const displayViewControllerIcon = document.getElementById("display-view-controller-icon")
-		if (displayViewControllerIcon){
+		if (displayViewControllerIcon) {
 			displayViewControllerIcon.removeAttribute("click", displayViewController)
 		}
 
 		const minMaxButtonControllerIcon = document.getElementById("min-max-display-button")
-		if (minMaxButtonControllerIcon){
+		if (minMaxButtonControllerIcon) {
 			minMaxButtonControllerIcon.removeEventListener("click", minMaxDisplayButtonController)
 		}
 
-		if (document.getElementById("video-screen-sharing-header")){
+		if (document.getElementById("video-screen-sharing-header")) {
 			document.getElementById("video-screen-sharing-header").remove()
 		}
 

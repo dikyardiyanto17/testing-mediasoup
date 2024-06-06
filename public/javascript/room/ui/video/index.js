@@ -12,7 +12,7 @@ const createMyVideo = async (parameter) => {
 			parameter.initialAudio ? "On" : "Off"
 		}.png" class="mic-image" id="user-mic-${parameter.socketId}"></div>`
 		// userVideoContainer.innerHTML = `${micIcons}<video id="v-${parameter.socketId}" muted autoplay class="user-video"></video>${picture}<div class="username">${parameter.username}</div>`
-		userVideoContainer.innerHTML = `<div class="outside-video-user">${micIcons}<video id="v-${parameter.socketId}" muted autoplay class="user-video"></video>${picture}<div class="username">${parameter.username}</div></div>`
+		userVideoContainer.innerHTML = `<div class="outside-video-user">${micIcons}<video id="v-${parameter.socketId}" muted autoplay class="user-video"></video>${picture}<div class="username" id="username-${parameter.socketId}">${parameter.username}</div></div>`
 		videoContainer.appendChild(userVideoContainer)
 		parameter.userVideoElements.push(userVideoContainer)
 		// document.getElementById(`v-${parameter.socketId}`).style.transform = "rotateY(0deg)"
@@ -36,7 +36,7 @@ const createVideo = ({ id, videoClassName, picture, username, micTrigger, parame
 				micTrigger ? "On" : "Off"
 			}.png" class="mic-image" id="user-mic-${id}"/></div>`
 			// userVideoContainer.innerHTML = `${micIcons}<video id="v-${id}" class="user-video" autoplay></video>${addPicture}<div class="username">${username}</div>`
-			userVideoContainer.innerHTML = `<div class="outside-video-user">${micIcons}<video id="v-${id}" class="user-video" autoplay></video>${addPicture}<div class="username">${username}</div></div>`
+			userVideoContainer.innerHTML = `<div class="outside-video-user">${micIcons}<video id="v-${id}" class="user-video" autoplay></video>${addPicture}<div class="username" id="username-${id}">${username}</div></div>`
 			videoContainer.appendChild(userVideoContainer)
 			parameter.userVideoElements.push(userVideoContainer)
 		}
@@ -250,17 +250,129 @@ const createAudioVisualizer = async ({ id, track }) => {
 	}
 }
 
-const changeUserMic = ({ parameter, isMicActive, id }) => {
+const changeUserMic = ({ parameter, isMicActive, id, socket }) => {
 	let user = parameter.allUsers.find((data) => data.socketId == id)
 	user.audio.track.enabled = isMicActive
 	user.audio.isActive = isMicActive
 	let userMicIconUserList = document.getElementById("ulim-" + id)
 	let iconMic = document.getElementById(`user-mic-${id}`)
+	if (isMicActive) {
+		startSpeechToText({ parameter, status: true, socket })
+	} else {
+		startSpeechToText({ parameter, status: true, socket })
+	}
 	if (iconMic) {
 		iconMic.src = `/assets/pictures/mic${isMicActive ? "On" : "Off"}.png`
 	}
 	if (userMicIconUserList) {
 		userMicIconUserList.src = `/assets/pictures/mic${isMicActive ? "On" : "Off"}.png`
+	}
+}
+
+const startSpeechToText = ({ parameter, socket, status }) => {
+	if (!status) {
+		parameter.speechToText.recognition.abort()
+		parameter.speechToText.recognition = null
+		parameter.speechToText.speechRecognitionList = null
+		return
+	}
+	const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
+	const SpeechGrammarList = window.SpeechGrammarList || window.webkitSpeechGrammarList
+	const SpeechRecognitionEvent = window.SpeechRecognitionEvent || window.webkitSpeechRecognitionEvent
+	parameter.speechToText.recognition = new SpeechRecognition()
+	parameter.speechToText.speechRecognitionList = new SpeechGrammarList()
+	parameter.speechToText.recognition.continuous = true
+	parameter.speechToText.recognition.lang = "id-ID"
+	parameter.speechToText.recognition.interimResults = true
+	parameter.speechToText.recognition.maxAlternatives = 1
+
+	const maxWords = 15
+	const ccDisplay = document.getElementById("text-to-speech-result")
+
+	let finalWords = ""
+
+	parameter.speechToText.recognition.onresult = (event) => {
+		let interimResults = ""
+		let checkMySpeakingHistory = parameter.speechToText.words.find((data) => data.socketId == socket.id)
+		if (!checkMySpeakingHistory) {
+			parameter.speechToText.words.push({
+				username: parameter.username,
+				message: "",
+				lastSpeaking: new Date(),
+				socketId: socket.id,
+			})
+		}
+		for (let i = event.resultIndex; i < event.results.length; i++) {
+			const transcript = event.results[i][0].transcript
+			if (event.results[i].isFinal) {
+				parameter.speechToText.word.push(transcript.trim())
+			} else {
+				interimResults += transcript
+			}
+		}
+		let finalWords = parameter.speechToText.word.join(" ") + " " + interimResults
+		let mySpeakingHistory = parameter.speechToText.words.find((data) => data.socketId == socket.id)
+		mySpeakingHistory.lastSpeaking = new Date()
+		mySpeakingHistory.message = finalWords
+
+		const formattedMessage = ({ message }) => {
+			return message.split(" ").slice(-20).join(" ")
+		}
+
+		parameter.allUsers.forEach((data) => {
+			if (data.socketId != socket.id) {
+				socket.emit("transcribe", {
+					sendTo: data.socketId,
+					id: socket.id,
+					message: {
+						socketId: socket.id,
+						message: mySpeakingHistory.message,
+						username: parameter.username,
+						lastSpeaking: mySpeakingHistory.lastSpeaking,
+					},
+				})
+			}
+		})
+
+		if (parameter.speechToText.words.length != 0) {
+			parameter.speechToText.words.sort((a, b) => new Date(b.lastSpeaking) - new Date(a.lastSpeaking))
+			if (parameter.speechToText.words.length > 1) {
+				ccDisplay.textContent = `${parameter.speechToText.words[1]?.username} : ${formattedMessage({
+					message: parameter.speechToText.words[1]?.message,
+				})}\n${parameter.speechToText.words[0]?.username} : ${formattedMessage({
+					message: parameter.speechToText.words[0]?.message,
+				})}`
+			} else {
+				ccDisplay.textContent = `${parameter.speechToText.words[0]?.username} : ${formattedMessage({
+					message: parameter.speechToText.words[0]?.message,
+				})}`
+			}
+		}
+	}
+
+	parameter.speechToText.recognition.onerror = (event) => {
+		if (event.error == "network" || event.error == "no-speech") {
+			parameter.speechToText.recognition.start()
+			console.log("Restart STT On Error")
+		}
+	}
+
+	parameter.speechToText.recognition.onend = () => {
+		parameter.speechToText.recognition.start()
+	}
+	parameter.speechToText.recognition.start()
+}
+
+const changeUsername = ({ id, newUsername, parameter }) => {
+	try {
+		document.getElementById(`ul-username-${id}`).innerHTML = newUsername
+		document.getElementById(`username-${id}`).innerHTML = newUsername
+		let checkData = parameter.allUsers.find((data) => data.socketId === id)
+		if (checkData) {
+			checkData.username = newUsername
+		}
+	} catch (error) {
+		console.log("- Error Updating Username : ", error)
 	}
 }
 
@@ -275,4 +387,6 @@ module.exports = {
 	createAudioVisualizer,
 	changeUserMic,
 	removeUserList,
+	startSpeechToText,
+	changeUsername,
 }

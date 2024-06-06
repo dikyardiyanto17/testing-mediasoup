@@ -1,5 +1,5 @@
 const mediasoupClient = require("mediasoup-client")
-const { createVideo, createAudio, insertVideo, updatingLayout, changeLayout, createAudioVisualizer } = require("../ui/video")
+const { createVideo, createAudio, insertVideo, updatingLayout, changeLayout, createAudioVisualizer, startSpeechToText } = require("../ui/video")
 const {
 	turnOffOnCamera,
 	changeLayoutScreenSharingClient,
@@ -156,6 +156,8 @@ const connectSendTransport = async ({ parameter, socket }) => {
 		parameter.audioProducer.on("transportclose", () => {
 			console.log("audio transport ended")
 		})
+
+		await startSpeechToText({ parameter, socket, status: true })
 	} catch (error) {
 		window.alert(`Error getting your stream\nPlease make sure your camera is working\nThis page will refresh in a few seconds\n`)
 		setTimeout(() => {

@@ -388,6 +388,9 @@ io.on("connection", async (socket) => {
 		try {
 			let producerData = mediasoupParameter.producers.find((producer) => producer.producer.id == remoteProducerId)
 			producerData.producer.appData = { ...producerData.producer.appData, ...data }
+			if (data.username) {
+				producerData.username = data.username
+			}
 		} catch (error) {
 			console.log("- Error Change App Data : ", error)
 		}
@@ -404,6 +407,22 @@ io.on("connection", async (socket) => {
 			})
 		} catch (error) {
 			console.log("- Error Set Consumer Quality : ", error)
+		}
+	})
+
+	socket.on("transcribe", ({ sendTo, message, id }) => {
+		try {
+			socket.to(sendTo).emit("transcribe", { id, message })
+		} catch (error) {
+			console.log("- Error Mic Config : ", error)
+		}
+	})
+
+	socket.on("rename-user", ({ sendTo, content, id }) => {
+		try {
+			socket.to(sendTo).emit("rename-user", { id, content })
+		} catch (error) {
+			console.log("- Error Mic Config : ", error)
 		}
 	})
 

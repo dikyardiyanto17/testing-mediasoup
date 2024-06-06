@@ -6,8 +6,8 @@ const getMyStream = async (parameter) => {
 	try {
 		let config = {
 			// video: localStorage.getItem("is_video_active") == "true" ? { deviceId: { exact: localStorage.getItem("selectedVideoDevices") }, frameRate: { ideal: 30, max: 35 } } : false,
-			// video: localStorage.getItem("is_video_active") == "true" ? { deviceId: { exact: localStorage.getItem("selectedVideoDevices") } } : false,
-			video: { width: 1280, height: 720 },
+			video: localStorage.getItem("is_video_active") == "true" ? { deviceId: { exact: localStorage.getItem("selectedVideoDevices") } } : false,
+			// video: { width: 1280, height: 720 },
 			audio: localStorage.getItem("selectedVideoDevices")
 				? {
 						deviceId: { exact: localStorage.getItem("selectedAudioDevices") },
@@ -24,6 +24,7 @@ const getMyStream = async (parameter) => {
 
 		let username = localStorage.getItem("username")
 		parameter.username = username
+		document.getElementById("rename-input").value = username
 
 		let stream = await navigator.mediaDevices.getUserMedia(config)
 		let picture = localStorage.getItem("picture") ? localStorage.getItem("picture") : "/assets/pictures/unknown.jpg"

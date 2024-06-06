@@ -60,6 +60,12 @@ class Parameters {
 	userVideoElements = []
 	upStreamQuality = 1
 	downStreamQuality = 1
+	speechToText = {
+		word: [],
+		words: [],
+		recognition: null,
+		speechRecognitionList: null,
+	}
 }
 
 module.exports = { Parameters }

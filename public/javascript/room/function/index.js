@@ -78,7 +78,7 @@ const createUserList = ({ username, socketId, cameraTrigger, picture, micTrigger
 			elementUser.className = "user-list-container"
 			userList.appendChild(elementUser)
 			let myUsername = document.createElement("div")
-			myUsername.innerHTML = `<img src="${picture}" class="mini-picture"/><span>${username}</span>`
+			myUsername.innerHTML = `<img src="${picture}" class="mini-picture"/><span id="ul-username-${socketId}">${username}</span>`
 			myUsername.id = "ulu-" + socketId
 			myUsername.className = "profile-list"
 			elementUser.appendChild(myUsername)
