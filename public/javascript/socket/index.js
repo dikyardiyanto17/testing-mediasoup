@@ -284,6 +284,7 @@ socket.on("rename-user", ({ id, content }) => {
 let micButton = document.getElementById("user-mic-button")
 micButton.addEventListener("click", (e) => {
 	e.stopPropagation()
+	console.log(socket.id, " != ", parameter.micCondition.socketId)
 	if (parameter.micCondition.isLocked && parameter.micCondition.socketId != socket.id) {
 		let ae = document.getElementById("alert-error")
 		ae.className = "show"

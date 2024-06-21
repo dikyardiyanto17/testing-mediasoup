@@ -23733,7 +23733,6 @@ const addMuteAllButton = ({ parameter, socket }) => {
 					muteAllParticipants({ parameter, socket })
 					parameter.micCondition.isLocked = true
 					newElement.innerHTML = "Unmute All Participants"
-					parameter.micCondition.socketId = socket.id
 				} else if (newElement.innerHTML == "Unmute All Participants") {
 					parameter.micCondition.isLocked = false
 					unlockAllMic({ parameter, socket })
@@ -24232,7 +24231,6 @@ const startSpeechToText = ({ parameter, socket, status }) => {
 		}
 		
 		parameter.speechToText.recognition.onerror = (event) => {
-			console.log(event)
 			if (event.error == "network" || event.error == "no-speech") {
 				if (parameter.speechToText.recognition){
 					parameter.speechToText.recognition.start()
@@ -24567,6 +24565,7 @@ socket.on("rename-user", ({ id, content }) => {
 let micButton = document.getElementById("user-mic-button")
 micButton.addEventListener("click", (e) => {
 	e.stopPropagation()
+	console.log(socket.id, " != ", parameter.micCondition.socketId)
 	if (parameter.micCondition.isLocked && parameter.micCondition.socketId != socket.id) {
 		let ae = document.getElementById("alert-error")
 		ae.className = "show"

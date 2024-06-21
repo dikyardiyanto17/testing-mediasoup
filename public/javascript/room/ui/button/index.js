@@ -869,7 +869,6 @@ const addMuteAllButton = ({ parameter, socket }) => {
 					muteAllParticipants({ parameter, socket })
 					parameter.micCondition.isLocked = true
 					newElement.innerHTML = "Unmute All Participants"
-					parameter.micCondition.socketId = socket.id
 				} else if (newElement.innerHTML == "Unmute All Participants") {
 					parameter.micCondition.isLocked = false
 					unlockAllMic({ parameter, socket })
