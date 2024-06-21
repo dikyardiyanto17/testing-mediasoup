@@ -1,8 +1,9 @@
 const { createUserList } = require(".")
 const { socket } = require("../../socket")
+const { startSpeechToText } = require("../ui/video")
 const { createDevice } = require("./mediasoup")
 
-const getMyStream = async (parameter) => {
+const getMyStream = async ({ parameter, socket }) => {
 	try {
 		let config = {
 			// video: localStorage.getItem("is_video_active") == "true" ? { deviceId: { exact: localStorage.getItem("selectedVideoDevices") }, frameRate: { ideal: 30, max: 35 } } : false,
@@ -33,11 +34,13 @@ const getMyStream = async (parameter) => {
 		let videoCondition
 		parameter.initialVideo = true
 		parameter.initialAudio = true
+		await startSpeechToText({ parameter, socket, status: true })
 		if (localStorage.getItem("is_mic_active") == "false") {
 			document.getElementById("mic-image").src = "/assets/pictures/micOff.png"
 			document.getElementById("user-mic-button").className = "btn button-small-custom-clicked"
 			parameter.initialAudio = false
 			audioCondition = false
+			await startSpeechToText({ parameter, socket, status: false })
 		} else audioCondition = true
 		if (localStorage.getItem("is_video_active") == "false") {
 			document.getElementById("turn-on-off-camera-icons").className = "fas fa-video-slash"

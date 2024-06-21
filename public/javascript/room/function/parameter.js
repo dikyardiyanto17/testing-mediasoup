@@ -65,6 +65,7 @@ class Parameters {
 		words: [],
 		recognition: null,
 		speechRecognitionList: null,
+		maxWords: 15
 	}
 }
 

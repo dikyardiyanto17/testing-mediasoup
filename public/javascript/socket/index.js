@@ -100,7 +100,7 @@ socket.on("connection-success", async ({ socketId }) => {
 		parameter.isAudio = true
 		await getRoomId(parameter)
 		await checkLocalStorage({ parameter })
-		await getMyStream(parameter)
+		await getMyStream({ parameter, socket })
 		await createMyVideo(parameter)
 		await joinRoom({ socket, parameter })
 	} catch (error) {
@@ -247,7 +247,7 @@ socket.on("transcribe", ({ id, message }) => {
 		speakingHistory.message = message.message
 
 		const formattedMessage = ({ message }) => {
-			return message.split(" ").slice(-20).join(" ")
+			return message.split(" ").slice(-parameter.speechToText.maxWords).join(" ")
 		}
 
 		if (parameter.speechToText.words.length != 0) {

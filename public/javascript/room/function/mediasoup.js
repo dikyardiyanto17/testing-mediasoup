@@ -157,7 +157,7 @@ const connectSendTransport = async ({ parameter, socket }) => {
 			console.log("audio transport ended")
 		})
 
-		await startSpeechToText({ parameter, socket, status: true })
+		// await startSpeechToText({ parameter, socket, status: true })
 	} catch (error) {
 		window.alert(`Error getting your stream\nPlease make sure your camera is working\nThis page will refresh in a few seconds\n`)
 		setTimeout(() => {

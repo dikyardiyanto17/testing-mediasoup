@@ -4,9 +4,9 @@ const router = require("./routes/index.js")
 const app = express()
 // const port = 3001
 // const port = 1028
-// const port = 9188
+const port = 9188
 // const port = 1028
-const port = 80
+// const port = 80
 const http = require("http")
 const path = require("path")
 const https = require("httpolyglot")
@@ -40,8 +40,8 @@ app.use(express.static(path.join(__dirname, "public")))
 // 	console.log("App On : " + port)
 // })
 // const io = new Server(httpsServer, {
-// 	pingInterval: 5000,
-// 	pingTimeout: 6000,
+// 	// pingInterval: 5000,
+// 	// pingTimeout: 6000,
 // })
 
 const httpServer = http.createServer(app)
@@ -49,8 +49,8 @@ httpServer.listen(port, () => {
 	console.log("App On : " + port)
 })
 const io = new Server(httpServer, {
-	pingInterval: 7000,
-	pingTimeout: 8000,
+	// pingInterval: 7000,
+	// pingTimeout: 8000,
 })
 
 let serverParameter = new Server_Parameter()

@@ -259,7 +259,7 @@ const changeUserMic = ({ parameter, isMicActive, id, socket }) => {
 	if (isMicActive) {
 		startSpeechToText({ parameter, status: true, socket })
 	} else {
-		startSpeechToText({ parameter, status: true, socket })
+		startSpeechToText({ parameter, status: false, socket })
 	}
 	if (iconMic) {
 		iconMic.src = `/assets/pictures/mic${isMicActive ? "On" : "Off"}.png`
@@ -270,97 +270,102 @@ const changeUserMic = ({ parameter, isMicActive, id, socket }) => {
 }
 
 const startSpeechToText = ({ parameter, socket, status }) => {
-	if (!status) {
-		parameter.speechToText.recognition.abort()
-		parameter.speechToText.recognition = null
-		parameter.speechToText.speechRecognitionList = null
-		return
-	}
-	const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
-	const SpeechGrammarList = window.SpeechGrammarList || window.webkitSpeechGrammarList
-	const SpeechRecognitionEvent = window.SpeechRecognitionEvent || window.webkitSpeechRecognitionEvent
-	parameter.speechToText.recognition = new SpeechRecognition()
-	parameter.speechToText.speechRecognitionList = new SpeechGrammarList()
-	parameter.speechToText.recognition.continuous = true
-	parameter.speechToText.recognition.lang = "id-ID"
-	parameter.speechToText.recognition.interimResults = true
-	parameter.speechToText.recognition.maxAlternatives = 1
-
-	const maxWords = 15
-	const ccDisplay = document.getElementById("text-to-speech-result")
-
-	let finalWords = ""
-
-	parameter.speechToText.recognition.onresult = (event) => {
-		let interimResults = ""
-		let checkMySpeakingHistory = parameter.speechToText.words.find((data) => data.socketId == socket.id)
-		if (!checkMySpeakingHistory) {
-			parameter.speechToText.words.push({
-				username: parameter.username,
-				message: "",
-				lastSpeaking: new Date(),
-				socketId: socket.id,
-			})
+	try {
+		if (!status) {
+			parameter.speechToText.recognition.abort()
+			parameter.speechToText.recognition = null
+			parameter.speechToText.speechRecognitionList = null
+			return
 		}
-		for (let i = event.resultIndex; i < event.results.length; i++) {
-			const transcript = event.results[i][0].transcript
-			if (event.results[i].isFinal) {
-				parameter.speechToText.word.push(transcript.trim())
-			} else {
-				interimResults += transcript
-			}
-		}
-		let finalWords = parameter.speechToText.word.join(" ") + " " + interimResults
-		let mySpeakingHistory = parameter.speechToText.words.find((data) => data.socketId == socket.id)
-		mySpeakingHistory.lastSpeaking = new Date()
-		mySpeakingHistory.message = finalWords
-
-		const formattedMessage = ({ message }) => {
-			return message.split(" ").slice(-20).join(" ")
-		}
-
-		parameter.allUsers.forEach((data) => {
-			if (data.socketId != socket.id) {
-				socket.emit("transcribe", {
-					sendTo: data.socketId,
-					id: socket.id,
-					message: {
-						socketId: socket.id,
-						message: mySpeakingHistory.message,
-						username: parameter.username,
-						lastSpeaking: mySpeakingHistory.lastSpeaking,
-					},
+		const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
+		const SpeechGrammarList = window.SpeechGrammarList || window.webkitSpeechGrammarList
+		const SpeechRecognitionEvent = window.SpeechRecognitionEvent || window.webkitSpeechRecognitionEvent
+		parameter.speechToText.recognition = new SpeechRecognition()
+		parameter.speechToText.speechRecognitionList = new SpeechGrammarList()
+		parameter.speechToText.recognition.continuous = true
+		parameter.speechToText.recognition.lang = "id-ID"
+		parameter.speechToText.recognition.interimResults = true
+		parameter.speechToText.recognition.maxAlternatives = 1
+		
+		const ccDisplay = document.getElementById("text-to-speech-result")
+		
+		let finalWords = ""
+		
+		parameter.speechToText.recognition.onresult = (event) => {
+			let interimResults = ""
+			let checkMySpeakingHistory = parameter.speechToText.words.find((data) => data.socketId == socket.id)
+			if (!checkMySpeakingHistory) {
+				parameter.speechToText.words.push({
+					username: parameter.username,
+					message: "",
+					lastSpeaking: new Date(),
+					socketId: socket.id,
 				})
 			}
-		})
-
-		if (parameter.speechToText.words.length != 0) {
-			parameter.speechToText.words.sort((a, b) => new Date(b.lastSpeaking) - new Date(a.lastSpeaking))
-			if (parameter.speechToText.words.length > 1) {
-				ccDisplay.textContent = `${parameter.speechToText.words[1]?.username} : ${formattedMessage({
-					message: parameter.speechToText.words[1]?.message,
-				})}\n${parameter.speechToText.words[0]?.username} : ${formattedMessage({
-					message: parameter.speechToText.words[0]?.message,
-				})}`
-			} else {
-				ccDisplay.textContent = `${parameter.speechToText.words[0]?.username} : ${formattedMessage({
-					message: parameter.speechToText.words[0]?.message,
-				})}`
+			for (let i = event.resultIndex; i < event.results.length; i++) {
+				const transcript = event.results[i][0].transcript
+				if (event.results[i].isFinal) {
+					parameter.speechToText.word.push(transcript.trim())
+				} else {
+					interimResults += transcript
+				}
+			}
+			let finalWords = parameter.speechToText.word.join(" ") + " " + interimResults
+			let mySpeakingHistory = parameter.speechToText.words.find((data) => data.socketId == socket.id)
+			mySpeakingHistory.lastSpeaking = new Date()
+			mySpeakingHistory.message = finalWords
+		
+			const formattedMessage = ({ message }) => {
+				return message.split(" ").slice(-parameter.speechToText.maxWords).join(" ")
+			}
+		
+			parameter.allUsers.forEach((data) => {
+				if (data.socketId != socket.id) {
+					socket.emit("transcribe", {
+						sendTo: data.socketId,
+						id: socket.id,
+						message: {
+							socketId: socket.id,
+							message: mySpeakingHistory.message,
+							username: parameter.username,
+							lastSpeaking: mySpeakingHistory.lastSpeaking,
+						},
+					})
+				}
+			})
+		
+			if (parameter.speechToText.words.length != 0) {
+				parameter.speechToText.words.sort((a, b) => new Date(b.lastSpeaking) - new Date(a.lastSpeaking))
+				if (parameter.speechToText.words.length > 1) {
+					ccDisplay.textContent = `${parameter.speechToText.words[1]?.username} : ${formattedMessage({
+						message: parameter.speechToText.words[1]?.message,
+					})}\n${parameter.speechToText.words[0]?.username} : ${formattedMessage({
+						message: parameter.speechToText.words[0]?.message,
+					})}`
+				} else {
+					ccDisplay.textContent = `${parameter.speechToText.words[0]?.username} : ${formattedMessage({
+						message: parameter.speechToText.words[0]?.message,
+					})}`
+				}
 			}
 		}
-	}
-
-	parameter.speechToText.recognition.onerror = (event) => {
-		if (event.error == "network" || event.error == "no-speech") {
-			parameter.speechToText.recognition.start()
-			console.log("Restart STT On Error")
+		
+		parameter.speechToText.recognition.onerror = (event) => {
+			if (event.error == "network" || event.error == "no-speech") {
+				parameter.speechToText.recognition.start()
+				console.log("Restart STT On Error")
+			}
 		}
-	}
-
-	parameter.speechToText.recognition.onend = () => {
+		
+		parameter.speechToText.recognition.onend = () => {
+			if (parameter.speechToText.recognition){
+				parameter.speechToText.recognition.start()
+			}
+		}
 		parameter.speechToText.recognition.start()
+	} catch (error) {
+		console.log("- Error Start Speech Recognition : ", error)		
 	}
-	parameter.speechToText.recognition.start()
 }
 
 const changeUsername = ({ id, newUsername, parameter }) => {
