@@ -370,7 +370,7 @@ io.on("connection", async (socket) => {
 
 	socket.on("mute-all", ({ socketId }) => {
 		try {
-			socket.to(socketId).emit("mute-all", { hostSocketId: socketId })
+			socket.to(socketId).emit("mute-all", { hostSocketId: socket.id })
 		} catch (error) {
 			console.log("- Error Mute All : ", error)
 		}
