@@ -24136,11 +24136,6 @@ const changeUserMic = ({ parameter, isMicActive, id, socket }) => {
 	user.audio.isActive = isMicActive
 	let userMicIconUserList = document.getElementById("ulim-" + id)
 	let iconMic = document.getElementById(`user-mic-${id}`)
-	if (isMicActive) {
-		startSpeechToText({ parameter, status: true, socket })
-	} else {
-		startSpeechToText({ parameter, status: false, socket })
-	}
 	if (iconMic) {
 		iconMic.src = `/assets/pictures/mic${isMicActive ? "On" : "Off"}.png`
 	}
@@ -24152,7 +24147,9 @@ const changeUserMic = ({ parameter, isMicActive, id, socket }) => {
 const startSpeechToText = ({ parameter, socket, status }) => {
 	try {
 		if (!status) {
-			parameter.speechToText.recognition.abort()
+			if (parameter.speechToText.recognition){
+				parameter.speechToText.recognition.abort()
+			}
 			parameter.speechToText.recognition = null
 			parameter.speechToText.speechRecognitionList = null
 			return
@@ -24565,7 +24562,6 @@ socket.on("rename-user", ({ id, content }) => {
 let micButton = document.getElementById("user-mic-button")
 micButton.addEventListener("click", (e) => {
 	e.stopPropagation()
-	console.log(socket.id, " != ", parameter.micCondition.socketId)
 	if (parameter.micCondition.isLocked && parameter.micCondition.socketId != socket.id) {
 		let ae = document.getElementById("alert-error")
 		ae.className = "show"
