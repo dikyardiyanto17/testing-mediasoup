@@ -35,6 +35,7 @@ const {
 	changeUserMic,
 	removeUserList,
 	changeUsername,
+	startSpeechToText,
 } = require("../room/ui/video")
 
 let isDisconnected = 0
@@ -201,7 +202,7 @@ socket.on("receive-message", ({ message, sender, messageDate }) => {
 })
 
 // Mute All
-socket.on("mute-all", ({ hostSocketId }) => {
+socket.on("mute-all", async ({ hostSocketId }) => {
 	try {
 		let micButton = document.getElementById("user-mic-button")
 		let micImage = document.getElementById("mic-image")
@@ -213,8 +214,9 @@ socket.on("mute-all", ({ hostSocketId }) => {
 		let user = parameter.allUsers.find((data) => data.socketId == socket.id)
 		user.audio.track.enabled = false
 		user.audio.isActive = false
-		changeMic({ parameter, status: false, socket })
-		changeUserListMicIcon({ status: true, id: socket.id })
+		startSpeechToText({ parameter, socket, status: false })
+		await changeMic({ parameter, status: false, socket })
+		await changeUserListMicIcon({ status: true, id: socket.id })
 		micImage.src = "/assets/pictures/micOff.png"
 	} catch (error) {
 		console.log("- Error Muting All Participants : ", error)
@@ -282,6 +284,17 @@ socket.on("rename-user", ({ id, content }) => {
 let micButton = document.getElementById("user-mic-button")
 micButton.addEventListener("click", (e) => {
 	e.stopPropagation()
+	if (parameter.micCondition.isLocked && parameter.micCondition.socketId != socket.id) {
+		let ae = document.getElementById("alert-error")
+		ae.className = "show"
+		ae.innerHTML = `Mic is Locked By Host`
+		// Show Warning
+		setTimeout(() => {
+			ae.className = ae.className.replace("show", "")
+			ae.innerHTML = ``
+		}, 3000)
+		return
+	}
 	if (micButton.className === "btn button-small-custom") {
 		changeMicCondition({ parameter, socket, status: false })
 		micButton.className = "btn button-small-custom-clicked"
@@ -303,7 +316,7 @@ let micOptionsIcon = document.getElementById("audio-button-options")
 micOptionsIcon.addEventListener("click", (e) => {
 	e.stopPropagation()
 	// let micOptionsIcon = document.getElementById("audio-button-options")
-	console.log("Icon Mic Clicked")
+	// console.log("Icon Mic Clicked")
 
 	const micOptionsContainer = document.getElementById("mic-options")
 	if (micOptionsContainer.className == "invisible") {
