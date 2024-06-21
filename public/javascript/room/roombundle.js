@@ -22229,7 +22229,7 @@ const hideVideoOptionsMenu = () => {
 const muteAllParticipants = ({ parameter, socket }) => {
 	parameter.allUsers.forEach((data) => {
 		if (data.socketId != socket.id) {
-			socket.emit("mute-all", { socketId: data.socketId })
+			socket.emit("mute-all", { socketId: socket.id })
 		}
 	})
 }
@@ -23737,7 +23737,7 @@ const addMuteAllButton = ({ parameter, socket }) => {
 					parameter.micCondition.isLocked = false
 					unlockAllMic({ parameter, socket })
 					newElement.innerHTML = "Mute All Participants"
-					parameter.micCondition.socketId = undefined
+					// parameter.micCondition.socketId = undefined
 				} else {
 					let ae = document.getElementById("alert-error")
 					ae.className = "show"

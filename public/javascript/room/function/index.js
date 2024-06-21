@@ -271,7 +271,7 @@ const hideVideoOptionsMenu = () => {
 const muteAllParticipants = ({ parameter, socket }) => {
 	parameter.allUsers.forEach((data) => {
 		if (data.socketId != socket.id) {
-			socket.emit("mute-all", { socketId: data.socketId })
+			socket.emit("mute-all", { socketId: socket.id })
 		}
 	})
 }

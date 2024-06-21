@@ -873,7 +873,7 @@ const addMuteAllButton = ({ parameter, socket }) => {
 					parameter.micCondition.isLocked = false
 					unlockAllMic({ parameter, socket })
 					newElement.innerHTML = "Mute All Participants"
-					parameter.micCondition.socketId = undefined
+					// parameter.micCondition.socketId = undefined
 				} else {
 					let ae = document.getElementById("alert-error")
 					ae.className = "show"
