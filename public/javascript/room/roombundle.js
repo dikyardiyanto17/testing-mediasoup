@@ -24232,6 +24232,7 @@ const startSpeechToText = ({ parameter, socket, status }) => {
 		}
 		
 		parameter.speechToText.recognition.onerror = (event) => {
+			console.log(event)
 			if (event.error == "network" || event.error == "no-speech") {
 				if (parameter.speechToText.recognition){
 					parameter.speechToText.recognition.start()
