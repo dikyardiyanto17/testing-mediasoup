@@ -143,8 +143,8 @@ io.on("connection", async (socket) => {
 		try {
 			let router = serverParameter.allRooms[roomName].router
 			const transport = await createWebRtcTransport({ router, serverParameter })
-			// transport.setMaxIncomingBitrate(1500000)
-			// transport.setMaxOutgoingBitrate(1500000)
+			transport.setMaxIncomingBitrate(1500000)
+			transport.setMaxOutgoingBitrate(1500000)
 			let username
 			const editParticipants = serverParameter.allRooms[roomName].participants.map((data) => {
 				if (data.socketId == socket.id) {
