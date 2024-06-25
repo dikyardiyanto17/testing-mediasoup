@@ -129,7 +129,7 @@ const connectSendTransport = async ({ parameter, socket }) => {
 			// console.log("- Producer : ", parameter.videoProducer)
 			myData.video.producerId = parameter.videoProducer.id
 			myData.video.transportId = parameter.producerTransport.id
-			parameter.videoProducer.setMaxIncomingBitrate(1500000)
+			// console.log(parameter.videoProducer)
 			parameter.videoProducer.on("trackended", () => {
 				window.location.reload()
 				console.log("video track ended")

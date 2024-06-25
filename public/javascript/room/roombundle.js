@@ -22576,7 +22576,7 @@ const connectSendTransport = async ({ parameter, socket }) => {
 			// console.log("- Producer : ", parameter.videoProducer)
 			myData.video.producerId = parameter.videoProducer.id
 			myData.video.transportId = parameter.producerTransport.id
-			parameter.videoProducer.setMaxIncomingBitrate(1500000)
+			// console.log(parameter.videoProducer)
 			parameter.videoProducer.on("trackended", () => {
 				window.location.reload()
 				console.log("video track ended")
@@ -24766,6 +24766,7 @@ shareButton.addEventListener("click", () => {
 let chatButton = document.getElementById("user-chat-button")
 let userListButton = document.getElementById("user-list-button")
 userListButton.addEventListener("click", () => {
+	let ccContainer = document.getElementById("text-to-speech-id")
 	let upperContainer = document.getElementById("upper-container")
 	let isInScreenSharingMode = upperContainer.querySelector("#screen-sharing-container")
 	let videoContainer = document.getElementById("video-container")
@@ -24845,6 +24846,8 @@ userListButton.addEventListener("click", () => {
 			userListContainer.className = "show-side-bar"
 			userListButton.setAttribute("disabled", true)
 			chatButton.setAttribute("disabled", true)
+			ccContainer.style.width = "60%"
+			ccContainer.style.transform = "translateX(-70%)"
 			scrollToBottom()
 			setTimeout(() => {
 				sideBarContainer.removeAttribute("style")
@@ -24859,6 +24862,7 @@ userListButton.addEventListener("click", () => {
 			userListButton.setAttribute("disabled", true)
 			chatButton.setAttribute("disabled", true)
 			setTimeout(() => {
+				ccContainer.removeAttribute("style")
 				sideBarContainer.removeAttribute("style")
 				sideBarContainer.style.display = "none"
 				chatButton.removeAttribute("disabled")
@@ -24879,6 +24883,8 @@ userListButton.addEventListener("click", () => {
 			userListContainer.className = "show-side-bar"
 			userListButton.setAttribute("disabled", true)
 			chatButton.setAttribute("disabled", true)
+			ccContainer.style.width = "60%"
+			ccContainer.style.transform = "translateX(-70%)"
 			scrollToBottom()
 			setTimeout(() => {
 				sideBarContainer.removeAttribute("style")
@@ -24896,6 +24902,7 @@ userListButton.addEventListener("click", () => {
 			userListButton.setAttribute("disabled", true)
 			chatButton.setAttribute("disabled", true)
 			setTimeout(() => {
+				ccContainer.removeAttribute("style")
 				sideBarContainer.removeAttribute("style")
 				sideBarContainer.style.display = "none"
 				chatButton.removeAttribute("disabled")
@@ -24909,6 +24916,7 @@ userListButton.addEventListener("click", () => {
 
 chatButton.addEventListener("click", () => {
 	let upperContainer = document.getElementById("upper-container")
+	let ccContainer = document.getElementById("text-to-speech-id")
 	let isInScreenSharingMode = upperContainer.querySelector("#screen-sharing-container")
 	let videoContainer = document.getElementById("video-container")
 	let userListContainer = document.getElementById("user-bar")
@@ -24998,6 +25006,8 @@ chatButton.addEventListener("click", () => {
 			chatContainer.className = "show-side-bar"
 			userListButton.setAttribute("disabled", true)
 			chatButton.setAttribute("disabled", true)
+			ccContainer.style.width = "60%"
+			ccContainer.style.transform = "translateX(-70%)"
 			iconsNotification.className = "fas fa-envelope notification invisible"
 			setTimeout(() => {
 				sideBarContainer.removeAttribute("style")
@@ -25016,6 +25026,7 @@ chatButton.addEventListener("click", () => {
 				isLineNewMessageExist.remove()
 			}
 			setTimeout(() => {
+				ccContainer.removeAttribute("style")
 				sideBarContainer.removeAttribute("style")
 				sideBarContainer.style.display = "none"
 				chatButton.removeAttribute("disabled")
@@ -25036,6 +25047,8 @@ chatButton.addEventListener("click", () => {
 			chatContainer.className = "show-side-bar"
 			userListButton.setAttribute("disabled", true)
 			chatButton.setAttribute("disabled", true)
+			ccContainer.style.width = "60%"
+			ccContainer.style.transform = "translateX(-70%)"
 			iconsNotification.className = "fas fa-envelope notification invisible"
 			setTimeout(() => {
 				sideBarContainer.removeAttribute("style")
@@ -25058,6 +25071,7 @@ chatButton.addEventListener("click", () => {
 				isLineNewMessageExist.remove()
 			}
 			setTimeout(() => {
+				ccContainer.removeAttribute("style")
 				sideBarContainer.removeAttribute("style")
 				sideBarContainer.style.display = "none"
 				chatButton.removeAttribute("disabled")
