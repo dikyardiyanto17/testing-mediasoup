@@ -332,7 +332,7 @@ const startSpeechToText = ({ parameter, socket, status }) => {
 			})
 
 			if (parameter.speechToText.words.length != 0) {
-				if (parameter.speechToText.words[0]?.socketId != socket.id || parameter.speechToText.words[1]?.socketId != socket.id) {
+				if (!(parameter.speechToText.words[0]?.socketId === socket.id || parameter.speechToText.words[1]?.socketId === socket.id)) {
 					parameter.speechToText.words.sort((a, b) => new Date(b.lastSpeaking) - new Date(a.lastSpeaking))
 					console.log("- Masuk Kondisi Sorting User ")
 				}
