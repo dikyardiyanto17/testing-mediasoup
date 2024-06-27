@@ -253,8 +253,9 @@ socket.on("transcribe", ({ id, message }) => {
 		}
 
 		if (parameter.speechToText.words.length != 0) {
-			if (parameter.speechToText.words[0].socketId != message.socketId || parameter.speechToText.words[1].socketId != message.socketId) {
+			if (parameter.speechToText.words[0]?.socketId != message.socketId || parameter.speechToText.words[1]?.socketId != message.socketId) {
 				parameter.speechToText.words.sort((a, b) => new Date(b.lastSpeaking) - new Date(a.lastSpeaking))
+				console.log("- Masuk Kondisi Sorting Client ")
 			}
 			if (parameter.speechToText.words.length > 1) {
 				ccDisplay.textContent = `${parameter.speechToText.words[1]?.username} : ${formattedMessage({
