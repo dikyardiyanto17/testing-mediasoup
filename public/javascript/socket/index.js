@@ -253,7 +253,9 @@ socket.on("transcribe", ({ id, message }) => {
 		}
 
 		if (parameter.speechToText.words.length != 0) {
-			parameter.speechToText.words.sort((a, b) => new Date(b.lastSpeaking) - new Date(a.lastSpeaking))
+			if (parameter.speechToText.words[0].socketId != message.socketId || parameter.speechToText.words[1].socketId != message.socketId) {
+				parameter.speechToText.words.sort((a, b) => new Date(b.lastSpeaking) - new Date(a.lastSpeaking))
+			}
 			if (parameter.speechToText.words.length > 1) {
 				ccDisplay.textContent = `${parameter.speechToText.words[1]?.username} : ${formattedMessage({
 					message: parameter.speechToText.words[1]?.message,
