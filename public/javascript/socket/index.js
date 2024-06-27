@@ -266,6 +266,7 @@ socket.on("transcribe", ({ id, message }) => {
 				})}`
 			}
 		}
+		console.log(parameter.speechToText.words)
 	} catch (error) {
 		console.log("- Error CC : ", error)
 	}

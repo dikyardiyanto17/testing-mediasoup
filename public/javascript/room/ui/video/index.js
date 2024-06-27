@@ -267,7 +267,7 @@ const changeUserMic = ({ parameter, isMicActive, id, socket }) => {
 const startSpeechToText = ({ parameter, socket, status }) => {
 	try {
 		if (!status) {
-			if (parameter.speechToText.recognition){
+			if (parameter.speechToText.recognition) {
 				parameter.speechToText.recognition.abort()
 			}
 			parameter.speechToText.recognition = null
@@ -283,11 +283,11 @@ const startSpeechToText = ({ parameter, socket, status }) => {
 		parameter.speechToText.recognition.lang = "id-ID"
 		parameter.speechToText.recognition.interimResults = true
 		parameter.speechToText.recognition.maxAlternatives = 1
-		
+
 		const ccDisplay = document.getElementById("text-to-speech-result")
-		
+
 		let finalWords = ""
-		
+
 		parameter.speechToText.recognition.onresult = (event) => {
 			let interimResults = ""
 			let checkMySpeakingHistory = parameter.speechToText.words.find((data) => data.socketId == socket.id)
@@ -311,11 +311,11 @@ const startSpeechToText = ({ parameter, socket, status }) => {
 			let mySpeakingHistory = parameter.speechToText.words.find((data) => data.socketId == socket.id)
 			mySpeakingHistory.lastSpeaking = new Date()
 			mySpeakingHistory.message = finalWords
-		
+
 			const formattedMessage = ({ message }) => {
 				return message.split(" ").slice(-parameter.speechToText.maxWords).join(" ")
 			}
-		
+
 			parameter.allUsers.forEach((data) => {
 				if (data.socketId != socket.id) {
 					socket.emit("transcribe", {
@@ -330,7 +330,7 @@ const startSpeechToText = ({ parameter, socket, status }) => {
 					})
 				}
 			})
-		
+
 			if (parameter.speechToText.words.length != 0) {
 				parameter.speechToText.words.sort((a, b) => new Date(b.lastSpeaking) - new Date(a.lastSpeaking))
 				if (parameter.speechToText.words.length > 1) {
@@ -345,25 +345,26 @@ const startSpeechToText = ({ parameter, socket, status }) => {
 					})}`
 				}
 			}
+			console.log(parameter.speechToText.words)
 		}
-		
+
 		parameter.speechToText.recognition.onerror = (event) => {
 			if (event.error == "network" || event.error == "no-speech") {
-				if (parameter.speechToText.recognition){
+				if (parameter.speechToText.recognition) {
 					parameter.speechToText.recognition.start()
 					console.log("Restart STT On Error")
 				}
 			}
 		}
-		
+
 		parameter.speechToText.recognition.onend = () => {
-			if (parameter.speechToText.recognition){
+			if (parameter.speechToText.recognition) {
 				parameter.speechToText.recognition.start()
 			}
 		}
 		parameter.speechToText.recognition.start()
 	} catch (error) {
-		console.log("- Error Start Speech Recognition : ", error)		
+		console.log("- Error Start Speech Recognition : ", error)
 	}
 }
 
