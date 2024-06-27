@@ -11334,7 +11334,8 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.mangleRtpParameters = exports.getCapabilities = void 0;
+exports.getCapabilities = getCapabilities;
+exports.mangleRtpParameters = mangleRtpParameters;
 const utils = __importStar(require("../../utils"));
 /**
  * Normalize ORTC based Edge's RTCRtpReceiver.getCapabilities() to produce a full
@@ -11371,7 +11372,6 @@ function getCapabilities() {
     }
     return caps;
 }
-exports.getCapabilities = getCapabilities;
 /**
  * Generate RTCRtpParameters as ORTC based Edge likes.
  */
@@ -11402,20 +11402,19 @@ function mangleRtpParameters(rtpParameters) {
     }
     return params;
 }
-exports.mangleRtpParameters = mangleRtpParameters;
 
 },{"../../utils":46}],36:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.addNackSuppportForOpus = void 0;
+exports.addNackSuppportForOpus = addNackSuppportForOpus;
 /**
  * This function adds RTCP NACK support for OPUS codec in given capabilities.
  */
 function addNackSuppportForOpus(rtpCapabilities) {
-    for (const codec of (rtpCapabilities.codecs || [])) {
+    for (const codec of rtpCapabilities.codecs || []) {
         if ((codec.mimeType.toLowerCase() === 'audio/opus' ||
             codec.mimeType.toLowerCase() === 'audio/multiopus') &&
-            !codec.rtcpFeedback?.some((fb) => fb.type === 'nack' && !fb.parameter)) {
+            !codec.rtcpFeedback?.some(fb => fb.type === 'nack' && !fb.parameter)) {
             if (!codec.rtcpFeedback) {
                 codec.rtcpFeedback = [];
             }
@@ -11423,7 +11422,6 @@ function addNackSuppportForOpus(rtpCapabilities) {
         }
     }
 }
-exports.addNackSuppportForOpus = addNackSuppportForOpus;
 
 },{}],37:[function(require,module,exports){
 "use strict";
@@ -11455,7 +11453,7 @@ exports.OfferMediaSection = exports.AnswerMediaSection = exports.MediaSection = 
 const sdpTransform = __importStar(require("sdp-transform"));
 const utils = __importStar(require("../../utils"));
 class MediaSection {
-    constructor({ iceParameters, iceCandidates, dtlsParameters, planB = false }) {
+    constructor({ iceParameters, iceCandidates, dtlsParameters, planB = false, }) {
         this._mediaObject = {};
         this._planB = planB;
         if (iceParameters) {
@@ -11469,7 +11467,9 @@ class MediaSection {
                 // RTP (1).
                 candidateObject.component = 1;
                 candidateObject.foundation = candidate.foundation;
-                candidateObject.ip = candidate.ip;
+                // Be ready for new candidate.address field in mediasoup server side
+                // field and keep backward compatibility with deprecated candidate.ip.
+                candidateObject.ip = candidate.address ?? candidate.ip;
                 candidateObject.port = candidate.port;
                 candidateObject.priority = candidate.priority;
                 candidateObject.transport = candidate.protocol;
@@ -11519,7 +11519,7 @@ class MediaSection {
 }
 exports.MediaSection = MediaSection;
 class AnswerMediaSection extends MediaSection {
-    constructor({ iceParameters, iceCandidates, dtlsParameters, sctpParameters, plainRtpParameters, planB = false, offerMediaObject, offerRtpParameters, answerRtpParameters, codecOptions, extmapAllowMixed = false }) {
+    constructor({ iceParameters, iceCandidates, dtlsParameters, sctpParameters, plainRtpParameters, planB = false, offerMediaObject, offerRtpParameters, answerRtpParameters, codecOptions, extmapAllowMixed = false, }) {
         super({ iceParameters, iceCandidates, dtlsParameters, planB });
         this._mediaObject.mid = String(offerMediaObject.mid);
         this._mediaObject.type = offerMediaObject.type;
@@ -11529,211 +11529,204 @@ class AnswerMediaSection extends MediaSection {
             this._mediaObject.port = 7;
         }
         else {
-            this._mediaObject.connection =
-                {
-                    ip: plainRtpParameters.ip,
-                    version: plainRtpParameters.ipVersion
-                };
+            this._mediaObject.connection = {
+                ip: plainRtpParameters.ip,
+                version: plainRtpParameters.ipVersion,
+            };
             this._mediaObject.port = plainRtpParameters.port;
         }
         switch (offerMediaObject.type) {
             case 'audio':
-            case 'video':
-                {
-                    this._mediaObject.direction = 'recvonly';
-                    this._mediaObject.rtp = [];
-                    this._mediaObject.rtcpFb = [];
-                    this._mediaObject.fmtp = [];
-                    for (const codec of answerRtpParameters.codecs) {
-                        const rtp = {
-                            payload: codec.payloadType,
-                            codec: getCodecName(codec),
-                            rate: codec.clockRate
-                        };
-                        if (codec.channels > 1) {
-                            rtp.encoding = codec.channels;
-                        }
-                        this._mediaObject.rtp.push(rtp);
-                        const codecParameters = utils.clone(codec.parameters) ?? {};
-                        let codecRtcpFeedback = utils.clone(codec.rtcpFeedback) ?? [];
-                        if (codecOptions) {
-                            const { opusStereo, opusFec, opusDtx, opusMaxPlaybackRate, opusMaxAverageBitrate, opusPtime, opusNack, videoGoogleStartBitrate, videoGoogleMaxBitrate, videoGoogleMinBitrate } = codecOptions;
-                            const offerCodec = offerRtpParameters.codecs
-                                .find((c) => (c.payloadType === codec.payloadType));
-                            switch (codec.mimeType.toLowerCase()) {
-                                case 'audio/opus':
-                                case 'audio/multiopus':
-                                    {
-                                        if (opusStereo !== undefined) {
-                                            offerCodec.parameters['sprop-stereo'] = opusStereo ? 1 : 0;
-                                            codecParameters.stereo = opusStereo ? 1 : 0;
-                                        }
-                                        if (opusFec !== undefined) {
-                                            offerCodec.parameters.useinbandfec = opusFec ? 1 : 0;
-                                            codecParameters.useinbandfec = opusFec ? 1 : 0;
-                                        }
-                                        if (opusDtx !== undefined) {
-                                            offerCodec.parameters.usedtx = opusDtx ? 1 : 0;
-                                            codecParameters.usedtx = opusDtx ? 1 : 0;
-                                        }
-                                        if (opusMaxPlaybackRate !== undefined) {
-                                            codecParameters.maxplaybackrate = opusMaxPlaybackRate;
-                                        }
-                                        if (opusMaxAverageBitrate !== undefined) {
-                                            codecParameters.maxaveragebitrate = opusMaxAverageBitrate;
-                                        }
-                                        if (opusPtime !== undefined) {
-                                            offerCodec.parameters.ptime = opusPtime;
-                                            codecParameters.ptime = opusPtime;
-                                        }
-                                        // If opusNack is not set, we must remove NACK support for OPUS.
-                                        // Otherwise it would be enabled for those handlers that artificially
-                                        // announce it in their RTP capabilities.
-                                        if (!opusNack) {
-                                            offerCodec.rtcpFeedback = offerCodec
-                                                .rtcpFeedback
-                                                .filter((fb) => fb.type !== 'nack' || fb.parameter);
-                                            codecRtcpFeedback = codecRtcpFeedback
-                                                .filter((fb) => fb.type !== 'nack' || fb.parameter);
-                                        }
-                                        break;
-                                    }
-                                case 'video/vp8':
-                                case 'video/vp9':
-                                case 'video/h264':
-                                case 'video/h265':
-                                    {
-                                        if (videoGoogleStartBitrate !== undefined) {
-                                            codecParameters['x-google-start-bitrate'] = videoGoogleStartBitrate;
-                                        }
-                                        if (videoGoogleMaxBitrate !== undefined) {
-                                            codecParameters['x-google-max-bitrate'] = videoGoogleMaxBitrate;
-                                        }
-                                        if (videoGoogleMinBitrate !== undefined) {
-                                            codecParameters['x-google-min-bitrate'] = videoGoogleMinBitrate;
-                                        }
-                                        break;
-                                    }
+            case 'video': {
+                this._mediaObject.direction = 'recvonly';
+                this._mediaObject.rtp = [];
+                this._mediaObject.rtcpFb = [];
+                this._mediaObject.fmtp = [];
+                for (const codec of answerRtpParameters.codecs) {
+                    const rtp = {
+                        payload: codec.payloadType,
+                        codec: getCodecName(codec),
+                        rate: codec.clockRate,
+                    };
+                    if (codec.channels > 1) {
+                        rtp.encoding = codec.channels;
+                    }
+                    this._mediaObject.rtp.push(rtp);
+                    const codecParameters = utils.clone(codec.parameters) ?? {};
+                    let codecRtcpFeedback = utils.clone(codec.rtcpFeedback) ?? [];
+                    if (codecOptions) {
+                        const { opusStereo, opusFec, opusDtx, opusMaxPlaybackRate, opusMaxAverageBitrate, opusPtime, opusNack, videoGoogleStartBitrate, videoGoogleMaxBitrate, videoGoogleMinBitrate, } = codecOptions;
+                        const offerCodec = offerRtpParameters.codecs.find((c) => c.payloadType === codec.payloadType);
+                        switch (codec.mimeType.toLowerCase()) {
+                            case 'audio/opus':
+                            case 'audio/multiopus': {
+                                if (opusStereo !== undefined) {
+                                    offerCodec.parameters['sprop-stereo'] = opusStereo ? 1 : 0;
+                                    codecParameters.stereo = opusStereo ? 1 : 0;
+                                }
+                                if (opusFec !== undefined) {
+                                    offerCodec.parameters.useinbandfec = opusFec ? 1 : 0;
+                                    codecParameters.useinbandfec = opusFec ? 1 : 0;
+                                }
+                                if (opusDtx !== undefined) {
+                                    offerCodec.parameters.usedtx = opusDtx ? 1 : 0;
+                                    codecParameters.usedtx = opusDtx ? 1 : 0;
+                                }
+                                if (opusMaxPlaybackRate !== undefined) {
+                                    codecParameters.maxplaybackrate = opusMaxPlaybackRate;
+                                }
+                                if (opusMaxAverageBitrate !== undefined) {
+                                    codecParameters.maxaveragebitrate = opusMaxAverageBitrate;
+                                }
+                                if (opusPtime !== undefined) {
+                                    offerCodec.parameters.ptime = opusPtime;
+                                    codecParameters.ptime = opusPtime;
+                                }
+                                // If opusNack is not set, we must remove NACK support for OPUS.
+                                // Otherwise it would be enabled for those handlers that artificially
+                                // announce it in their RTP capabilities.
+                                if (!opusNack) {
+                                    offerCodec.rtcpFeedback = offerCodec.rtcpFeedback.filter(fb => fb.type !== 'nack' || fb.parameter);
+                                    codecRtcpFeedback = codecRtcpFeedback.filter(fb => fb.type !== 'nack' || fb.parameter);
+                                }
+                                break;
                             }
-                        }
-                        const fmtp = {
-                            payload: codec.payloadType,
-                            config: ''
-                        };
-                        for (const key of Object.keys(codecParameters)) {
-                            if (fmtp.config) {
-                                fmtp.config += ';';
+                            case 'video/vp8':
+                            case 'video/vp9':
+                            case 'video/h264':
+                            case 'video/h265': {
+                                if (videoGoogleStartBitrate !== undefined) {
+                                    codecParameters['x-google-start-bitrate'] =
+                                        videoGoogleStartBitrate;
+                                }
+                                if (videoGoogleMaxBitrate !== undefined) {
+                                    codecParameters['x-google-max-bitrate'] =
+                                        videoGoogleMaxBitrate;
+                                }
+                                if (videoGoogleMinBitrate !== undefined) {
+                                    codecParameters['x-google-min-bitrate'] =
+                                        videoGoogleMinBitrate;
+                                }
+                                break;
                             }
-                            fmtp.config += `${key}=${codecParameters[key]}`;
-                        }
-                        if (fmtp.config) {
-                            this._mediaObject.fmtp.push(fmtp);
-                        }
-                        for (const fb of codecRtcpFeedback) {
-                            this._mediaObject.rtcpFb.push({
-                                payload: codec.payloadType,
-                                type: fb.type,
-                                subtype: fb.parameter
-                            });
                         }
                     }
-                    this._mediaObject.payloads = answerRtpParameters.codecs
-                        .map((codec) => codec.payloadType)
-                        .join(' ');
-                    this._mediaObject.ext = [];
-                    for (const ext of answerRtpParameters.headerExtensions) {
-                        // Don't add a header extension if not present in the offer.
-                        const found = (offerMediaObject.ext || [])
-                            .some((localExt) => localExt.uri === ext.uri);
-                        if (!found) {
-                            continue;
+                    const fmtp = {
+                        payload: codec.payloadType,
+                        config: '',
+                    };
+                    for (const key of Object.keys(codecParameters)) {
+                        if (fmtp.config) {
+                            fmtp.config += ';';
                         }
-                        this._mediaObject.ext.push({
-                            uri: ext.uri,
-                            value: ext.id
+                        fmtp.config += `${key}=${codecParameters[key]}`;
+                    }
+                    if (fmtp.config) {
+                        this._mediaObject.fmtp.push(fmtp);
+                    }
+                    for (const fb of codecRtcpFeedback) {
+                        this._mediaObject.rtcpFb.push({
+                            payload: codec.payloadType,
+                            type: fb.type,
+                            subtype: fb.parameter,
                         });
                     }
-                    // Allow both 1 byte and 2 bytes length header extensions.
-                    if (extmapAllowMixed &&
-                        offerMediaObject.extmapAllowMixed === 'extmap-allow-mixed') {
-                        this._mediaObject.extmapAllowMixed = 'extmap-allow-mixed';
-                    }
-                    // Simulcast.
-                    if (offerMediaObject.simulcast) {
-                        this._mediaObject.simulcast =
-                            {
-                                dir1: 'recv',
-                                list1: offerMediaObject.simulcast.list1
-                            };
-                        this._mediaObject.rids = [];
-                        for (const rid of offerMediaObject.rids || []) {
-                            if (rid.direction !== 'send') {
-                                continue;
-                            }
-                            this._mediaObject.rids.push({
-                                id: rid.id,
-                                direction: 'recv'
-                            });
-                        }
-                    }
-                    // Simulcast (draft version 03).
-                    else if (offerMediaObject.simulcast_03) {
-                        // eslint-disable-next-line camelcase
-                        this._mediaObject.simulcast_03 =
-                            {
-                                value: offerMediaObject.simulcast_03.value.replace(/send/g, 'recv')
-                            };
-                        this._mediaObject.rids = [];
-                        for (const rid of offerMediaObject.rids || []) {
-                            if (rid.direction !== 'send') {
-                                continue;
-                            }
-                            this._mediaObject.rids.push({
-                                id: rid.id,
-                                direction: 'recv'
-                            });
-                        }
-                    }
-                    this._mediaObject.rtcpMux = 'rtcp-mux';
-                    this._mediaObject.rtcpRsize = 'rtcp-rsize';
-                    if (this._planB && this._mediaObject.type === 'video') {
-                        this._mediaObject.xGoogleFlag = 'conference';
-                    }
-                    break;
                 }
-            case 'application':
-                {
-                    // New spec.
-                    if (typeof offerMediaObject.sctpPort === 'number') {
-                        this._mediaObject.payloads = 'webrtc-datachannel';
-                        this._mediaObject.sctpPort = sctpParameters.port;
-                        this._mediaObject.maxMessageSize = sctpParameters.maxMessageSize;
+                this._mediaObject.payloads = answerRtpParameters.codecs
+                    .map((codec) => codec.payloadType)
+                    .join(' ');
+                this._mediaObject.ext = [];
+                for (const ext of answerRtpParameters.headerExtensions) {
+                    // Don't add a header extension if not present in the offer.
+                    const found = (offerMediaObject.ext || []).some((localExt) => localExt.uri === ext.uri);
+                    if (!found) {
+                        continue;
                     }
-                    // Old spec.
-                    else if (offerMediaObject.sctpmap) {
-                        this._mediaObject.payloads = sctpParameters.port;
-                        this._mediaObject.sctpmap =
-                            {
-                                app: 'webrtc-datachannel',
-                                sctpmapNumber: sctpParameters.port,
-                                maxMessageSize: sctpParameters.maxMessageSize
-                            };
-                    }
-                    break;
+                    this._mediaObject.ext.push({
+                        uri: ext.uri,
+                        value: ext.id,
+                    });
                 }
+                // Allow both 1 byte and 2 bytes length header extensions.
+                if (extmapAllowMixed &&
+                    offerMediaObject.extmapAllowMixed === 'extmap-allow-mixed') {
+                    this._mediaObject.extmapAllowMixed = 'extmap-allow-mixed';
+                }
+                // Simulcast.
+                if (offerMediaObject.simulcast) {
+                    this._mediaObject.simulcast = {
+                        dir1: 'recv',
+                        list1: offerMediaObject.simulcast.list1,
+                    };
+                    this._mediaObject.rids = [];
+                    for (const rid of offerMediaObject.rids || []) {
+                        if (rid.direction !== 'send') {
+                            continue;
+                        }
+                        this._mediaObject.rids.push({
+                            id: rid.id,
+                            direction: 'recv',
+                        });
+                    }
+                }
+                // Simulcast (draft version 03).
+                else if (offerMediaObject.simulcast_03) {
+                    // eslint-disable-next-line camelcase
+                    this._mediaObject.simulcast_03 = {
+                        value: offerMediaObject.simulcast_03.value.replace(/send/g, 'recv'),
+                    };
+                    this._mediaObject.rids = [];
+                    for (const rid of offerMediaObject.rids || []) {
+                        if (rid.direction !== 'send') {
+                            continue;
+                        }
+                        this._mediaObject.rids.push({
+                            id: rid.id,
+                            direction: 'recv',
+                        });
+                    }
+                }
+                this._mediaObject.rtcpMux = 'rtcp-mux';
+                this._mediaObject.rtcpRsize = 'rtcp-rsize';
+                if (this._planB && this._mediaObject.type === 'video') {
+                    this._mediaObject.xGoogleFlag = 'conference';
+                }
+                break;
+            }
+            case 'application': {
+                // New spec.
+                if (typeof offerMediaObject.sctpPort === 'number') {
+                    this._mediaObject.payloads = 'webrtc-datachannel';
+                    this._mediaObject.sctpPort = sctpParameters.port;
+                    this._mediaObject.maxMessageSize = sctpParameters.maxMessageSize;
+                }
+                // Old spec.
+                else if (offerMediaObject.sctpmap) {
+                    this._mediaObject.payloads = sctpParameters.port;
+                    this._mediaObject.sctpmap = {
+                        app: 'webrtc-datachannel',
+                        sctpmapNumber: sctpParameters.port,
+                        maxMessageSize: sctpParameters.maxMessageSize,
+                    };
+                }
+                break;
+            }
         }
     }
     setDtlsRole(role) {
         switch (role) {
-            case 'client':
+            case 'client': {
                 this._mediaObject.setup = 'active';
                 break;
-            case 'server':
+            }
+            case 'server': {
                 this._mediaObject.setup = 'passive';
                 break;
-            case 'auto':
+            }
+            case 'auto': {
                 this._mediaObject.setup = 'actpass';
                 break;
+            }
         }
     }
     resume() {
@@ -11756,12 +11749,14 @@ class AnswerMediaSection extends MediaSection {
                 simulcastFormat.paused = !layers[simulcastFormat.scid]?.active;
             }
         }
-        this._mediaObject.simulcast.list1 = simulcastStreams.map((simulcastFormats) => simulcastFormats.map((f) => `${f.paused ? '~' : ''}${f.scid}`).join(',')).join(';');
+        this._mediaObject.simulcast.list1 = simulcastStreams
+            .map(simulcastFormats => simulcastFormats.map(f => `${f.paused ? '~' : ''}${f.scid}`).join(','))
+            .join(';');
     }
 }
 exports.AnswerMediaSection = AnswerMediaSection;
 class OfferMediaSection extends MediaSection {
-    constructor({ iceParameters, iceCandidates, dtlsParameters, sctpParameters, plainRtpParameters, planB = false, mid, kind, offerRtpParameters, streamId, trackId, oldDataChannelSpec = false }) {
+    constructor({ iceParameters, iceCandidates, dtlsParameters, sctpParameters, plainRtpParameters, planB = false, mid, kind, offerRtpParameters, streamId, trackId, oldDataChannelSpec = false, }) {
         super({ iceParameters, iceCandidates, dtlsParameters, planB });
         this._mediaObject.mid = String(mid);
         this._mediaObject.type = kind;
@@ -11776,132 +11771,126 @@ class OfferMediaSection extends MediaSection {
             this._mediaObject.port = 7;
         }
         else {
-            this._mediaObject.connection =
-                {
-                    ip: plainRtpParameters.ip,
-                    version: plainRtpParameters.ipVersion
-                };
+            this._mediaObject.connection = {
+                ip: plainRtpParameters.ip,
+                version: plainRtpParameters.ipVersion,
+            };
             this._mediaObject.protocol = 'RTP/AVP';
             this._mediaObject.port = plainRtpParameters.port;
         }
         switch (kind) {
             case 'audio':
-            case 'video':
-                {
-                    this._mediaObject.direction = 'sendonly';
-                    this._mediaObject.rtp = [];
-                    this._mediaObject.rtcpFb = [];
-                    this._mediaObject.fmtp = [];
-                    if (!this._planB) {
-                        this._mediaObject.msid = `${streamId || '-'} ${trackId}`;
+            case 'video': {
+                this._mediaObject.direction = 'sendonly';
+                this._mediaObject.rtp = [];
+                this._mediaObject.rtcpFb = [];
+                this._mediaObject.fmtp = [];
+                if (!this._planB) {
+                    this._mediaObject.msid = `${streamId || '-'} ${trackId}`;
+                }
+                for (const codec of offerRtpParameters.codecs) {
+                    const rtp = {
+                        payload: codec.payloadType,
+                        codec: getCodecName(codec),
+                        rate: codec.clockRate,
+                    };
+                    if (codec.channels > 1) {
+                        rtp.encoding = codec.channels;
                     }
-                    for (const codec of offerRtpParameters.codecs) {
-                        const rtp = {
-                            payload: codec.payloadType,
-                            codec: getCodecName(codec),
-                            rate: codec.clockRate
-                        };
-                        if (codec.channels > 1) {
-                            rtp.encoding = codec.channels;
-                        }
-                        this._mediaObject.rtp.push(rtp);
-                        const fmtp = {
-                            payload: codec.payloadType,
-                            config: ''
-                        };
-                        for (const key of Object.keys(codec.parameters)) {
-                            if (fmtp.config) {
-                                fmtp.config += ';';
-                            }
-                            fmtp.config += `${key}=${codec.parameters[key]}`;
-                        }
+                    this._mediaObject.rtp.push(rtp);
+                    const fmtp = {
+                        payload: codec.payloadType,
+                        config: '',
+                    };
+                    for (const key of Object.keys(codec.parameters)) {
                         if (fmtp.config) {
-                            this._mediaObject.fmtp.push(fmtp);
+                            fmtp.config += ';';
                         }
-                        for (const fb of codec.rtcpFeedback) {
-                            this._mediaObject.rtcpFb.push({
-                                payload: codec.payloadType,
-                                type: fb.type,
-                                subtype: fb.parameter
-                            });
-                        }
+                        fmtp.config += `${key}=${codec.parameters[key]}`;
                     }
-                    this._mediaObject.payloads = offerRtpParameters.codecs
-                        .map((codec) => codec.payloadType)
-                        .join(' ');
-                    this._mediaObject.ext = [];
-                    for (const ext of offerRtpParameters.headerExtensions) {
-                        this._mediaObject.ext.push({
-                            uri: ext.uri,
-                            value: ext.id
+                    if (fmtp.config) {
+                        this._mediaObject.fmtp.push(fmtp);
+                    }
+                    for (const fb of codec.rtcpFeedback) {
+                        this._mediaObject.rtcpFb.push({
+                            payload: codec.payloadType,
+                            type: fb.type,
+                            subtype: fb.parameter,
                         });
                     }
-                    this._mediaObject.rtcpMux = 'rtcp-mux';
-                    this._mediaObject.rtcpRsize = 'rtcp-rsize';
-                    const encoding = offerRtpParameters.encodings[0];
-                    const ssrc = encoding.ssrc;
-                    const rtxSsrc = (encoding.rtx && encoding.rtx.ssrc)
-                        ? encoding.rtx.ssrc
-                        : undefined;
-                    this._mediaObject.ssrcs = [];
-                    this._mediaObject.ssrcGroups = [];
+                }
+                this._mediaObject.payloads = offerRtpParameters.codecs
+                    .map((codec) => codec.payloadType)
+                    .join(' ');
+                this._mediaObject.ext = [];
+                for (const ext of offerRtpParameters.headerExtensions) {
+                    this._mediaObject.ext.push({
+                        uri: ext.uri,
+                        value: ext.id,
+                    });
+                }
+                this._mediaObject.rtcpMux = 'rtcp-mux';
+                this._mediaObject.rtcpRsize = 'rtcp-rsize';
+                const encoding = offerRtpParameters.encodings[0];
+                const ssrc = encoding.ssrc;
+                const rtxSsrc = encoding.rtx && encoding.rtx.ssrc ? encoding.rtx.ssrc : undefined;
+                this._mediaObject.ssrcs = [];
+                this._mediaObject.ssrcGroups = [];
+                if (offerRtpParameters.rtcp.cname) {
+                    this._mediaObject.ssrcs.push({
+                        id: ssrc,
+                        attribute: 'cname',
+                        value: offerRtpParameters.rtcp.cname,
+                    });
+                }
+                if (this._planB) {
+                    this._mediaObject.ssrcs.push({
+                        id: ssrc,
+                        attribute: 'msid',
+                        value: `${streamId || '-'} ${trackId}`,
+                    });
+                }
+                if (rtxSsrc) {
                     if (offerRtpParameters.rtcp.cname) {
                         this._mediaObject.ssrcs.push({
-                            id: ssrc,
+                            id: rtxSsrc,
                             attribute: 'cname',
-                            value: offerRtpParameters.rtcp.cname
+                            value: offerRtpParameters.rtcp.cname,
                         });
                     }
                     if (this._planB) {
                         this._mediaObject.ssrcs.push({
-                            id: ssrc,
+                            id: rtxSsrc,
                             attribute: 'msid',
-                            value: `${streamId || '-'} ${trackId}`
+                            value: `${streamId || '-'} ${trackId}`,
                         });
                     }
-                    if (rtxSsrc) {
-                        if (offerRtpParameters.rtcp.cname) {
-                            this._mediaObject.ssrcs.push({
-                                id: rtxSsrc,
-                                attribute: 'cname',
-                                value: offerRtpParameters.rtcp.cname
-                            });
-                        }
-                        if (this._planB) {
-                            this._mediaObject.ssrcs.push({
-                                id: rtxSsrc,
-                                attribute: 'msid',
-                                value: `${streamId || '-'} ${trackId}`
-                            });
-                        }
-                        // Associate original and retransmission SSRCs.
-                        this._mediaObject.ssrcGroups.push({
-                            semantics: 'FID',
-                            ssrcs: `${ssrc} ${rtxSsrc}`
-                        });
-                    }
-                    break;
+                    // Associate original and retransmission SSRCs.
+                    this._mediaObject.ssrcGroups.push({
+                        semantics: 'FID',
+                        ssrcs: `${ssrc} ${rtxSsrc}`,
+                    });
                 }
-            case 'application':
-                {
-                    // New spec.
-                    if (!oldDataChannelSpec) {
-                        this._mediaObject.payloads = 'webrtc-datachannel';
-                        this._mediaObject.sctpPort = sctpParameters.port;
-                        this._mediaObject.maxMessageSize = sctpParameters.maxMessageSize;
-                    }
-                    // Old spec.
-                    else {
-                        this._mediaObject.payloads = sctpParameters.port;
-                        this._mediaObject.sctpmap =
-                            {
-                                app: 'webrtc-datachannel',
-                                sctpmapNumber: sctpParameters.port,
-                                maxMessageSize: sctpParameters.maxMessageSize
-                            };
-                    }
-                    break;
+                break;
+            }
+            case 'application': {
+                // New spec.
+                if (!oldDataChannelSpec) {
+                    this._mediaObject.payloads = 'webrtc-datachannel';
+                    this._mediaObject.sctpPort = sctpParameters.port;
+                    this._mediaObject.maxMessageSize = sctpParameters.maxMessageSize;
                 }
+                // Old spec.
+                else {
+                    this._mediaObject.payloads = sctpParameters.port;
+                    this._mediaObject.sctpmap = {
+                        app: 'webrtc-datachannel',
+                        sctpmapNumber: sctpParameters.port,
+                        maxMessageSize: sctpParameters.maxMessageSize,
+                    };
+                }
+                break;
+            }
         }
     }
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -11912,12 +11901,10 @@ class OfferMediaSection extends MediaSection {
     resume() {
         this._mediaObject.direction = 'sendonly';
     }
-    planBReceive({ offerRtpParameters, streamId, trackId }) {
+    planBReceive({ offerRtpParameters, streamId, trackId, }) {
         const encoding = offerRtpParameters.encodings[0];
         const ssrc = encoding.ssrc;
-        const rtxSsrc = (encoding.rtx && encoding.rtx.ssrc)
-            ? encoding.rtx.ssrc
-            : undefined;
+        const rtxSsrc = encoding.rtx && encoding.rtx.ssrc ? encoding.rtx.ssrc : undefined;
         const payloads = this._mediaObject.payloads.split(' ');
         for (const codec of offerRtpParameters.codecs) {
             if (payloads.includes(String(codec.payloadType))) {
@@ -11926,7 +11913,7 @@ class OfferMediaSection extends MediaSection {
             const rtp = {
                 payload: codec.payloadType,
                 codec: getCodecName(codec),
-                rate: codec.clockRate
+                rate: codec.clockRate,
             };
             if (codec.channels > 1) {
                 rtp.encoding = codec.channels;
@@ -11934,7 +11921,7 @@ class OfferMediaSection extends MediaSection {
             this._mediaObject.rtp.push(rtp);
             const fmtp = {
                 payload: codec.payloadType,
-                config: ''
+                config: '',
             };
             for (const key of Object.keys(codec.parameters)) {
                 if (fmtp.config) {
@@ -11949,12 +11936,11 @@ class OfferMediaSection extends MediaSection {
                 this._mediaObject.rtcpFb.push({
                     payload: codec.payloadType,
                     type: fb.type,
-                    subtype: fb.parameter
+                    subtype: fb.parameter,
                 });
             }
         }
-        this._mediaObject.payloads += ` ${offerRtpParameters
-            .codecs
+        this._mediaObject.payloads += ` ${offerRtpParameters.codecs
             .filter((codec) => !this._mediaObject.payloads.includes(codec.payloadType))
             .map((codec) => codec.payloadType)
             .join(' ')}`;
@@ -11963,45 +11949,41 @@ class OfferMediaSection extends MediaSection {
             this._mediaObject.ssrcs.push({
                 id: ssrc,
                 attribute: 'cname',
-                value: offerRtpParameters.rtcp.cname
+                value: offerRtpParameters.rtcp.cname,
             });
         }
         this._mediaObject.ssrcs.push({
             id: ssrc,
             attribute: 'msid',
-            value: `${streamId || '-'} ${trackId}`
+            value: `${streamId || '-'} ${trackId}`,
         });
         if (rtxSsrc) {
             if (offerRtpParameters.rtcp.cname) {
                 this._mediaObject.ssrcs.push({
                     id: rtxSsrc,
                     attribute: 'cname',
-                    value: offerRtpParameters.rtcp.cname
+                    value: offerRtpParameters.rtcp.cname,
                 });
             }
             this._mediaObject.ssrcs.push({
                 id: rtxSsrc,
                 attribute: 'msid',
-                value: `${streamId || '-'} ${trackId}`
+                value: `${streamId || '-'} ${trackId}`,
             });
             // Associate original and retransmission SSRCs.
             this._mediaObject.ssrcGroups.push({
                 semantics: 'FID',
-                ssrcs: `${ssrc} ${rtxSsrc}`
+                ssrcs: `${ssrc} ${rtxSsrc}`,
             });
         }
     }
-    planBStopReceiving({ offerRtpParameters }) {
+    planBStopReceiving({ offerRtpParameters, }) {
         const encoding = offerRtpParameters.encodings[0];
         const ssrc = encoding.ssrc;
-        const rtxSsrc = (encoding.rtx && encoding.rtx.ssrc)
-            ? encoding.rtx.ssrc
-            : undefined;
-        this._mediaObject.ssrcs = this._mediaObject.ssrcs
-            .filter((s) => s.id !== ssrc && s.id !== rtxSsrc);
+        const rtxSsrc = encoding.rtx && encoding.rtx.ssrc ? encoding.rtx.ssrc : undefined;
+        this._mediaObject.ssrcs = this._mediaObject.ssrcs.filter((s) => s.id !== ssrc && s.id !== rtxSsrc);
         if (rtxSsrc) {
-            this._mediaObject.ssrcGroups = this._mediaObject.ssrcGroups
-                .filter((group) => group.ssrcs !== `${ssrc} ${rtxSsrc}`);
+            this._mediaObject.ssrcGroups = this._mediaObject.ssrcGroups.filter((group) => group.ssrcs !== `${ssrc} ${rtxSsrc}`);
         }
     }
 }
@@ -12047,7 +12029,7 @@ const Logger_1 = require("../../Logger");
 const MediaSection_1 = require("./MediaSection");
 const logger = new Logger_1.Logger('RemoteSdp');
 class RemoteSdp {
-    constructor({ iceParameters, iceCandidates, dtlsParameters, sctpParameters, plainRtpParameters, planB = false }) {
+    constructor({ iceParameters, iceCandidates, dtlsParameters, sctpParameters, plainRtpParameters, planB = false, }) {
         // MediaSection instances with same order as in the SDP.
         this._mediaSections = [];
         // MediaSection indices indexed by MID.
@@ -12058,21 +12040,20 @@ class RemoteSdp {
         this._sctpParameters = sctpParameters;
         this._plainRtpParameters = plainRtpParameters;
         this._planB = planB;
-        this._sdpObject =
-            {
-                version: 0,
-                origin: {
-                    address: '0.0.0.0',
-                    ipVer: 4,
-                    netType: 'IN',
-                    sessionId: 10000,
-                    sessionVersion: 0,
-                    username: 'mediasoup-client'
-                },
-                name: '-',
-                timing: { start: 0, stop: 0 },
-                media: []
-            };
+        this._sdpObject = {
+            version: 0,
+            origin: {
+                address: '0.0.0.0',
+                ipVer: 4,
+                netType: 'IN',
+                sessionId: 10000,
+                sessionVersion: 0,
+                username: 'mediasoup-client',
+            },
+            name: '-',
+            timing: { start: 0, stop: 0 },
+            media: [],
+        };
         // If ICE parameters are given, add ICE-Lite indicator.
         if (iceParameters && iceParameters.iceLite) {
             this._sdpObject.icelite = 'ice-lite';
@@ -12082,11 +12063,10 @@ class RemoteSdp {
             this._sdpObject.msidSemantic = { semantic: 'WMS', token: '*' };
             // NOTE: We take the latest fingerprint.
             const numFingerprints = this._dtlsParameters.fingerprints.length;
-            this._sdpObject.fingerprint =
-                {
-                    type: dtlsParameters.fingerprints[numFingerprints - 1].algorithm,
-                    hash: dtlsParameters.fingerprints[numFingerprints - 1].value
-                };
+            this._sdpObject.fingerprint = {
+                type: dtlsParameters.fingerprints[numFingerprints - 1].algorithm,
+                hash: dtlsParameters.fingerprints[numFingerprints - 1].value,
+            };
             this._sdpObject.groups = [{ type: 'BUNDLE', mids: '' }];
         }
         // If there are plain RPT parameters, override SDP origin.
@@ -12121,7 +12101,7 @@ class RemoteSdp {
         // If no closed media section is found, return next one.
         return { idx: this._mediaSections.length };
     }
-    send({ offerMediaObject, reuseMid, offerRtpParameters, answerRtpParameters, codecOptions, extmapAllowMixed = false }) {
+    send({ offerMediaObject, reuseMid, offerRtpParameters, answerRtpParameters, codecOptions, extmapAllowMixed = false, }) {
         const mediaSection = new MediaSection_1.AnswerMediaSection({
             iceParameters: this._iceParameters,
             iceCandidates: this._iceCandidates,
@@ -12132,7 +12112,7 @@ class RemoteSdp {
             offerRtpParameters,
             answerRtpParameters,
             codecOptions,
-            extmapAllowMixed
+            extmapAllowMixed,
         });
         // Unified-Plan with closed media section replacement.
         if (reuseMid) {
@@ -12147,7 +12127,7 @@ class RemoteSdp {
             this._replaceMediaSection(mediaSection);
         }
     }
-    receive({ mid, kind, offerRtpParameters, streamId, trackId }) {
+    receive({ mid, kind, offerRtpParameters, streamId, trackId, }) {
         const idx = this._midToIndex.get(mid);
         let mediaSection;
         if (idx !== undefined) {
@@ -12165,11 +12145,11 @@ class RemoteSdp {
                 kind,
                 offerRtpParameters,
                 streamId,
-                trackId
+                trackId,
             });
             // Let's try to recycle a closed media section (if any).
             // NOTE: Yes, we can recycle a closed m=audio section with a new m=video.
-            const oldMediaSection = this._mediaSections.find((m) => (m.closed));
+            const oldMediaSection = this._mediaSections.find(m => m.closed);
             if (oldMediaSection) {
                 this._replaceMediaSection(mediaSection, oldMediaSection.mid);
             }
@@ -12225,7 +12205,7 @@ class RemoteSdp {
         mediaSection.muxSimulcastStreams(encodings);
         this._replaceMediaSection(mediaSection);
     }
-    planBStopReceiving({ mid, offerRtpParameters }) {
+    planBStopReceiving({ mid, offerRtpParameters, }) {
         const mediaSection = this._findMediaSection(mid);
         mediaSection.planBStopReceiving({ offerRtpParameters });
         this._replaceMediaSection(mediaSection);
@@ -12237,11 +12217,11 @@ class RemoteSdp {
             dtlsParameters: this._dtlsParameters,
             sctpParameters: this._sctpParameters,
             plainRtpParameters: this._plainRtpParameters,
-            offerMediaObject
+            offerMediaObject,
         });
         this._addMediaSection(mediaSection);
     }
-    receiveSctpAssociation({ oldDataChannelSpec = false } = {}) {
+    receiveSctpAssociation({ oldDataChannelSpec = false, } = {}) {
         const mediaSection = new MediaSection_1.OfferMediaSection({
             iceParameters: this._iceParameters,
             iceCandidates: this._iceCandidates,
@@ -12250,7 +12230,7 @@ class RemoteSdp {
             plainRtpParameters: this._plainRtpParameters,
             mid: 'datachannel',
             kind: 'application',
-            oldDataChannelSpec
+            oldDataChannelSpec,
         });
         this._addMediaSection(mediaSection);
     }
@@ -12346,13 +12326,16 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.applyCodecParameters = exports.getCname = exports.extractDtlsParameters = exports.extractRtpCapabilities = void 0;
+exports.extractRtpCapabilities = extractRtpCapabilities;
+exports.extractDtlsParameters = extractDtlsParameters;
+exports.getCname = getCname;
+exports.applyCodecParameters = applyCodecParameters;
 const sdpTransform = __importStar(require("sdp-transform"));
 /**
  * This function must be called with an SDP with 1 m=audio and 1 m=video
  * sections.
  */
-function extractRtpCapabilities({ sdpObject }) {
+function extractRtpCapabilities({ sdpObject, }) {
     // Map of RtpCodecParameters indexed by payload type.
     const codecsMap = new Map();
     // Array of RtpHeaderExtensions.
@@ -12363,26 +12346,23 @@ function extractRtpCapabilities({ sdpObject }) {
     for (const m of sdpObject.media) {
         const kind = m.type;
         switch (kind) {
-            case 'audio':
-                {
-                    if (gotAudio) {
-                        continue;
-                    }
-                    gotAudio = true;
-                    break;
-                }
-            case 'video':
-                {
-                    if (gotVideo) {
-                        continue;
-                    }
-                    gotVideo = true;
-                    break;
-                }
-            default:
-                {
+            case 'audio': {
+                if (gotAudio) {
                     continue;
                 }
+                gotAudio = true;
+                break;
+            }
+            case 'video': {
+                if (gotVideo) {
+                    continue;
+                }
+                gotVideo = true;
+                break;
+            }
+            default: {
+                continue;
+            }
         }
         // Get codecs.
         for (const rtp of m.rtp) {
@@ -12393,7 +12373,7 @@ function extractRtpCapabilities({ sdpObject }) {
                 clockRate: rtp.rate,
                 channels: rtp.encoding,
                 parameters: {},
-                rtcpFeedback: []
+                rtcpFeedback: [],
             };
             codecsMap.set(codec.preferredPayloadType, codec);
         }
@@ -12414,7 +12394,7 @@ function extractRtpCapabilities({ sdpObject }) {
         for (const fb of m.rtcpFb || []) {
             const feedback = {
                 type: fb.type,
-                parameter: fb.subtype
+                parameter: fb.subtype,
             };
             if (!feedback.parameter) {
                 delete feedback.parameter;
@@ -12447,24 +12427,22 @@ function extractRtpCapabilities({ sdpObject }) {
             const headerExtension = {
                 kind: kind,
                 uri: ext.uri,
-                preferredId: ext.value
+                preferredId: ext.value,
             };
             headerExtensions.push(headerExtension);
         }
     }
     const rtpCapabilities = {
         codecs: Array.from(codecsMap.values()),
-        headerExtensions: headerExtensions
+        headerExtensions: headerExtensions,
     };
     return rtpCapabilities;
 }
-exports.extractRtpCapabilities = extractRtpCapabilities;
-function extractDtlsParameters({ sdpObject }) {
+function extractDtlsParameters({ sdpObject, }) {
     let setup = sdpObject.setup;
     let fingerprint = sdpObject.fingerprint;
     if (!setup || !fingerprint) {
-        const mediaObject = (sdpObject.media || [])
-            .find((m) => (m.port !== 0));
+        const mediaObject = (sdpObject.media || []).find((m) => m.port !== 0);
         if (mediaObject) {
             setup ?? (setup = mediaObject.setup);
             fingerprint ?? (fingerprint = mediaObject.fingerprint);
@@ -12478,71 +12456,68 @@ function extractDtlsParameters({ sdpObject }) {
     }
     let role;
     switch (setup) {
-        case 'active':
+        case 'active': {
             role = 'client';
             break;
-        case 'passive':
+        }
+        case 'passive': {
             role = 'server';
             break;
-        case 'actpass':
+        }
+        case 'actpass': {
             role = 'auto';
             break;
+        }
     }
     const dtlsParameters = {
         role,
         fingerprints: [
             {
                 algorithm: fingerprint.type,
-                value: fingerprint.hash
-            }
-        ]
+                value: fingerprint.hash,
+            },
+        ],
     };
     return dtlsParameters;
 }
-exports.extractDtlsParameters = extractDtlsParameters;
-function getCname({ offerMediaObject }) {
-    const ssrcCnameLine = (offerMediaObject.ssrcs || [])
-        .find((line) => line.attribute === 'cname');
+function getCname({ offerMediaObject, }) {
+    const ssrcCnameLine = (offerMediaObject.ssrcs || []).find((line) => line.attribute === 'cname');
     if (!ssrcCnameLine) {
         return '';
     }
     return ssrcCnameLine.value;
 }
-exports.getCname = getCname;
 /**
  * Apply codec parameters in the given SDP m= section answer based on the
  * given RTP parameters of an offer.
  */
-function applyCodecParameters({ offerRtpParameters, answerMediaObject }) {
+function applyCodecParameters({ offerRtpParameters, answerMediaObject, }) {
     for (const codec of offerRtpParameters.codecs) {
         const mimeType = codec.mimeType.toLowerCase();
         // Avoid parsing codec parameters for unhandled codecs.
         if (mimeType !== 'audio/opus') {
             continue;
         }
-        const rtp = (answerMediaObject.rtp || [])
-            .find((r) => r.payload === codec.payloadType);
+        const rtp = (answerMediaObject.rtp || []).find((r) => r.payload === codec.payloadType);
         if (!rtp) {
             continue;
         }
         // Just in case.
         answerMediaObject.fmtp = answerMediaObject.fmtp || [];
-        let fmtp = answerMediaObject.fmtp
-            .find((f) => f.payload === codec.payloadType);
+        let fmtp = answerMediaObject.fmtp.find((f) => f.payload === codec.payloadType);
         if (!fmtp) {
             fmtp = { payload: codec.payloadType, config: '' };
             answerMediaObject.fmtp.push(fmtp);
         }
         const parameters = sdpTransform.parseParams(fmtp.config);
         switch (mimeType) {
-            case 'audio/opus':
-                {
-                    const spropStereo = codec.parameters['sprop-stereo'];
-                    if (spropStereo !== undefined) {
-                        parameters.stereo = spropStereo ? 1 : 0;
-                    }
-                    break;
+            case 'audio/opus': {
+                const spropStereo = codec.parameters['sprop-stereo'];
+                if (spropStereo !== undefined) {
+                    parameters.stereo = spropStereo ? 1 : 0;
                 }
+                break;
+            }
         }
         // Write the codec fmtp.config back.
         fmtp.config = '';
@@ -12554,13 +12529,13 @@ function applyCodecParameters({ offerRtpParameters, answerMediaObject }) {
         }
     }
 }
-exports.applyCodecParameters = applyCodecParameters;
 
 },{"sdp-transform":53}],40:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.addLegacySimulcast = exports.getRtpEncodings = void 0;
-function getRtpEncodings({ offerMediaObject, track }) {
+exports.getRtpEncodings = getRtpEncodings;
+exports.addLegacySimulcast = addLegacySimulcast;
+function getRtpEncodings({ offerMediaObject, track, }) {
     // First media SSRC (or the only one).
     let firstSsrc;
     const ssrcs = new Set();
@@ -12614,11 +12589,10 @@ function getRtpEncodings({ offerMediaObject, track }) {
     }
     return encodings;
 }
-exports.getRtpEncodings = getRtpEncodings;
 /**
  * Adds multi-ssrc based simulcast into the given SDP media section offer.
  */
-function addLegacySimulcast({ offerMediaObject, track, numStreams }) {
+function addLegacySimulcast({ offerMediaObject, track, numStreams, }) {
     if (numStreams <= 1) {
         throw new TypeError('numStreams must be greater than 1');
     }
@@ -12626,8 +12600,7 @@ function addLegacySimulcast({ offerMediaObject, track, numStreams }) {
     let firstRtxSsrc;
     let streamId;
     // Get the SSRC.
-    const ssrcMsidLine = (offerMediaObject.ssrcs || [])
-        .find((line) => {
+    const ssrcMsidLine = (offerMediaObject.ssrcs || []).find((line) => {
         if (line.attribute !== 'msid') {
             return false;
         }
@@ -12645,8 +12618,7 @@ function addLegacySimulcast({ offerMediaObject, track, numStreams }) {
         throw new Error(`a=ssrc line with msid information not found [track.id:${track.id}]`);
     }
     // Get the SSRC for RTX.
-    (offerMediaObject.ssrcGroups || [])
-        .some((line) => {
+    (offerMediaObject.ssrcGroups || []).some((line) => {
         if (line.semantics !== 'FID') {
             return false;
         }
@@ -12659,8 +12631,7 @@ function addLegacySimulcast({ offerMediaObject, track, numStreams }) {
             return false;
         }
     });
-    const ssrcCnameLine = offerMediaObject.ssrcs
-        .find((line) => (line.attribute === 'cname' && line.id === firstSsrc));
+    const ssrcCnameLine = offerMediaObject.ssrcs.find((line) => line.attribute === 'cname' && line.id === firstSsrc);
     if (!ssrcCnameLine) {
         throw new Error(`a=ssrc line with cname information not found [track.id:${track.id}]`);
     }
@@ -12677,19 +12648,19 @@ function addLegacySimulcast({ offerMediaObject, track, numStreams }) {
     offerMediaObject.ssrcs = offerMediaObject.ssrcs || [];
     offerMediaObject.ssrcGroups.push({
         semantics: 'SIM',
-        ssrcs: ssrcs.join(' ')
+        ssrcs: ssrcs.join(' '),
     });
     for (let i = 0; i < ssrcs.length; ++i) {
         const ssrc = ssrcs[i];
         offerMediaObject.ssrcs.push({
             id: ssrc,
             attribute: 'cname',
-            value: cname
+            value: cname,
         });
         offerMediaObject.ssrcs.push({
             id: ssrc,
             attribute: 'msid',
-            value: `${streamId} ${track.id}`
+            value: `${streamId} ${track.id}`,
         });
     }
     for (let i = 0; i < rtxSsrcs.length; ++i) {
@@ -12698,26 +12669,26 @@ function addLegacySimulcast({ offerMediaObject, track, numStreams }) {
         offerMediaObject.ssrcs.push({
             id: rtxSsrc,
             attribute: 'cname',
-            value: cname
+            value: cname,
         });
         offerMediaObject.ssrcs.push({
             id: rtxSsrc,
             attribute: 'msid',
-            value: `${streamId} ${track.id}`
+            value: `${streamId} ${track.id}`,
         });
         offerMediaObject.ssrcGroups.push({
             semantics: 'FID',
-            ssrcs: `${ssrc} ${rtxSsrc}`
+            ssrcs: `${ssrc} ${rtxSsrc}`,
         });
     }
 }
-exports.addLegacySimulcast = addLegacySimulcast;
 
 },{}],41:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.addLegacySimulcast = exports.getRtpEncodings = void 0;
-function getRtpEncodings({ offerMediaObject }) {
+exports.getRtpEncodings = getRtpEncodings;
+exports.addLegacySimulcast = addLegacySimulcast;
+function getRtpEncodings({ offerMediaObject, }) {
     const ssrcs = new Set();
     for (const line of offerMediaObject.ssrcs || []) {
         const ssrc = line.id;
@@ -12760,17 +12731,15 @@ function getRtpEncodings({ offerMediaObject }) {
     }
     return encodings;
 }
-exports.getRtpEncodings = getRtpEncodings;
 /**
  * Adds multi-ssrc based simulcast into the given SDP media section offer.
  */
-function addLegacySimulcast({ offerMediaObject, numStreams }) {
+function addLegacySimulcast({ offerMediaObject, numStreams, }) {
     if (numStreams <= 1) {
         throw new TypeError('numStreams must be greater than 1');
     }
     // Get the SSRC.
-    const ssrcMsidLine = (offerMediaObject.ssrcs || [])
-        .find((line) => line.attribute === 'msid');
+    const ssrcMsidLine = (offerMediaObject.ssrcs || []).find((line) => line.attribute === 'msid');
     if (!ssrcMsidLine) {
         throw new Error('a=ssrc line with msid information not found');
     }
@@ -12778,8 +12747,7 @@ function addLegacySimulcast({ offerMediaObject, numStreams }) {
     const firstSsrc = ssrcMsidLine.id;
     let firstRtxSsrc;
     // Get the SSRC for RTX.
-    (offerMediaObject.ssrcGroups || [])
-        .some((line) => {
+    (offerMediaObject.ssrcGroups || []).some((line) => {
         if (line.semantics !== 'FID') {
             return false;
         }
@@ -12792,8 +12760,7 @@ function addLegacySimulcast({ offerMediaObject, numStreams }) {
             return false;
         }
     });
-    const ssrcCnameLine = offerMediaObject.ssrcs
-        .find((line) => line.attribute === 'cname');
+    const ssrcCnameLine = offerMediaObject.ssrcs.find((line) => line.attribute === 'cname');
     if (!ssrcCnameLine) {
         throw new Error('a=ssrc line with cname information not found');
     }
@@ -12810,19 +12777,19 @@ function addLegacySimulcast({ offerMediaObject, numStreams }) {
     offerMediaObject.ssrcs = [];
     offerMediaObject.ssrcGroups.push({
         semantics: 'SIM',
-        ssrcs: ssrcs.join(' ')
+        ssrcs: ssrcs.join(' '),
     });
     for (let i = 0; i < ssrcs.length; ++i) {
         const ssrc = ssrcs[i];
         offerMediaObject.ssrcs.push({
             id: ssrc,
             attribute: 'cname',
-            value: cname
+            value: cname,
         });
         offerMediaObject.ssrcs.push({
             id: ssrc,
             attribute: 'msid',
-            value: `${streamId} ${trackId}`
+            value: `${streamId} ${trackId}`,
         });
     }
     for (let i = 0; i < rtxSsrcs.length; ++i) {
@@ -12831,20 +12798,19 @@ function addLegacySimulcast({ offerMediaObject, numStreams }) {
         offerMediaObject.ssrcs.push({
             id: rtxSsrc,
             attribute: 'cname',
-            value: cname
+            value: cname,
         });
         offerMediaObject.ssrcs.push({
             id: rtxSsrc,
             attribute: 'msid',
-            value: `${streamId} ${trackId}`
+            value: `${streamId} ${trackId}`,
         });
         offerMediaObject.ssrcGroups.push({
             semantics: 'FID',
-            ssrcs: `${ssrc} ${rtxSsrc}`
+            ssrcs: `${ssrc} ${rtxSsrc}`,
         });
     }
 }
-exports.addLegacySimulcast = addLegacySimulcast;
 
 },{}],42:[function(require,module,exports){
 "use strict";
@@ -20906,7 +20872,7 @@ module.exports = function (session, opts) {
 
 },{"./grammar":52}],56:[function(require,module,exports){
 /////////////////////////////////////////////////////////////////////////////////
-/* UAParser.js v1.0.37
+/* UAParser.js v1.0.38
    Copyright © 2012-2021 Faisal Salman <f@faisalman.com>
    MIT License *//*
    Detect Browser, Engine, OS, CPU, and Device type/model from User-Agent data.
@@ -20924,7 +20890,7 @@ module.exports = function (session, opts) {
     /////////////
 
 
-    var LIBVERSION  = '1.0.37',
+    var LIBVERSION  = '1.0.38',
         EMPTY       = '',
         UNKNOWN     = '?',
         FUNC_TYPE   = 'function',
@@ -21130,6 +21096,8 @@ module.exports = function (session, opts) {
             ], [NAME, VERSION], [
             /opios[\/ ]+([\w\.]+)/i                                             // Opera mini on iphone >= 8.0
             ], [VERSION, [NAME, OPERA+' Mini']], [
+            /\bop(?:rg)?x\/([\w\.]+)/i                                          // Opera GX
+            ], [VERSION, [NAME, OPERA+' GX']], [
             /\bopr\/([\w\.]+)/i                                                 // Opera Webkit
             ], [VERSION, [NAME, OPERA]], [
 
@@ -21148,6 +21116,8 @@ module.exports = function (session, opts) {
             /(heytap|ovi)browser\/([\d\.]+)/i,                                  // Heytap/Ovi
             /(weibo)__([\d\.]+)/i                                               // Weibo
             ], [NAME, VERSION], [
+            /\bddg\/([\w\.]+)/i                                                 // DuckDuckGo
+            ], [VERSION, [NAME, 'DuckDuckGo']], [
             /(?:\buc? ?browser|(?:juc.+)ucweb)[\/ ]?([\w\.]+)/i                 // UCBrowser
             ], [VERSION, [NAME, 'UC'+BROWSER]], [
             /microm.+\bqbcore\/([\w\.]+)/i,                                     // WeChat Desktop for Windows Built-in Browser
@@ -21207,6 +21177,7 @@ module.exports = function (session, opts) {
             /safari (line)\/([\w\.]+)/i,                                        // Line App for iOS
             /\b(line)\/([\w\.]+)\/iab/i,                                        // Line App for Android
             /(alipay)client\/([\w\.]+)/i,                                       // Alipay
+            /(twitter)(?:and| f.+e\/([\w\.]+))/i,                               // Twitter
             /(chromium|instagram|snapchat)[\/ ]([-\w\.]+)/i                     // Chromium/Instagram/Snapchat
             ], [NAME, VERSION], [
             /\bgsa\/([\w\.]+) .*safari\//i                                      // Google Search Appliance on iOS
@@ -21344,6 +21315,8 @@ module.exports = function (session, opts) {
             /; (\w+) bui.+ oppo/i,
             /\b(cph[12]\d{3}|p(?:af|c[al]|d\w|e[ar])[mt]\d0|x9007|a101op)\b/i
             ], [MODEL, [VENDOR, 'OPPO'], [TYPE, MOBILE]], [
+            /\b(opd2\d{3}a?) bui/i
+            ], [MODEL, [VENDOR, 'OPPO'], [TYPE, TABLET]], [
 
             // Vivo
             /vivo (\w+)(?: bui|\))/i,
@@ -21580,7 +21553,7 @@ module.exports = function (session, opts) {
             ], [MODEL, [VENDOR, GOOGLE], [TYPE, WEARABLE]], [
             /droid.+; (wt63?0{2,3})\)/i
             ], [MODEL, [VENDOR, ZEBRA], [TYPE, WEARABLE]], [
-            /(quest( 2| pro)?)/i                                                // Oculus Quest
+            /(quest( \d| pro)?)/i                                               // Oculus Quest
             ], [MODEL, [VENDOR, FACEBOOK], [TYPE, WEARABLE]], [
 
             ///////////////////
@@ -21772,7 +21745,7 @@ module.exports = function (session, opts) {
             _os[NAME] = undefined;
             _os[VERSION] = undefined;
             rgxMapper.call(_os, _ua, _rgxmap.os);
-            if (_isSelfNav && !_os[NAME] && _uach && _uach.platform != 'Unknown') {
+            if (_isSelfNav && !_os[NAME] && _uach && _uach.platform && _uach.platform != 'Unknown') {
                 _os[NAME] = _uach.platform  
                                     .replace(/chrome os/i, CHROMIUM_OS)
                                     .replace(/macos/i, MAC_OS);           // backward compatibility
@@ -25101,6 +25074,7 @@ sendMessageButton.addEventListener("submit", (e) => {
 				ae.className = ae.className.replace("show", "")
 				ae.innerHTML = ``
 			}, 3000)
+			return
 		}
 
 		const messageDate = new Date()

@@ -822,6 +822,7 @@ sendMessageButton.addEventListener("submit", (e) => {
 				ae.className = ae.className.replace("show", "")
 				ae.innerHTML = ``
 			}, 3000)
+			return
 		}
 
 		const messageDate = new Date()
